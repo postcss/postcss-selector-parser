@@ -1,0 +1,32 @@
+{
+  "name": "postcss-selector-parser",
+  "version": "0.0.0",
+  "devDependencies": {
+    "babel": "^5.4.3",
+    "babel-tape-runner": "^1.1.0",
+    "faucet": "0.0.1",
+    "tape": "^4.0.0"
+  },
+  "main": "dist/index.js",
+  "files": [
+    "LICENSE-MIT",
+    "dist"
+  ],
+  "scripts": {
+    "prepublish": "babel src --out-dir dist",
+    "test": "babel-tape-runner \"src/**/__tests__/*.js\" | faucet"
+  },
+  "dependencies": {
+    "flatten": "0.0.1",
+    "indexes-of": "^1.0.1",
+    "uniq": "^1.0.1"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/postcss/postcss-selector-parser",
+  "author": {
+    "name": "Ben Briggs",
+    "email": "beneb.info@gmail.com",
+    "url": "http://beneb.info"
+  },
+  "repository": "postcss/postcss-selector-parser"
+}

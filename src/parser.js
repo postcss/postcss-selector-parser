@@ -34,6 +34,7 @@ export default class Parser {
 
     attribute () {
         let attribute = '';
+        let attr;
         this.position ++;
         while (this.position < this.tokens.length && this.tokens[this.position][0] !== ']') {
             attribute += this.tokens[this.position][1];
@@ -43,11 +44,23 @@ export default class Parser {
             this.error('Expected a closing square bracket.');
         }
         let parts = attribute.split(/((?:[*~^$|]?)=)/);
-        let attr = new Attribute({
-            attribute: parts[0],
-            operator: parts[1],
-            value: parts[2]
-        });
+        let namespace = parts[0].split(/(\|)/g);
+        if (namespace.length > 1) {
+            if (namespace[0] === '') { namespace[0] = true; }
+            attr = new Attribute({
+                attribute: namespace[2],
+                namespace: namespace[0],
+                operator: parts[1],
+                value: parts[2]
+            });
+        } else {
+            attr = new Attribute({
+                attribute: parts[0],
+                operator: parts[1],
+                value: parts[2]
+            });
+        }
+
         if (parts[2]) {
             let insensitive = parts[2].split(/(\s+i\s*?)$/);
             attr.value = insensitive[0];
@@ -61,6 +74,9 @@ export default class Parser {
     }
 
     combinator () {
+        if (this.tokens[this.position][1] === '|') {
+            return this.namespace();
+        }
         let combinator = '';
         let tokens = this.tokens;
         while ( this.position < tokens.length &&
@@ -103,6 +119,17 @@ export default class Parser {
 
     error (message) {
         throw new this.input.error(message);
+    }
+
+    namespace () {
+        let before = this.tokens[this.position - 1] && this.tokens[this.position - 1][1] || true;
+        if (this.tokens[this.position + 1][0] === 'word') {
+            this.position ++;
+            return this.word(before);
+        } else if (this.tokens[this.position + 1][0] === '*') {
+            this.position ++;
+            return this.universal(before);
+        }
     }
 
     pseudo () {
@@ -188,12 +215,24 @@ export default class Parser {
         }
     }
 
-    universal () {
-        this.current.append(new Universal({value: this.tokens[this.position][1]}));
+    universal (namespace) {
+        if (this.tokens[this.position + 1] && this.tokens[this.position + 1][1] === '|') {
+            this.position ++;
+            return this.namespace();
+        }
+        let universal = new Universal({value: this.tokens[this.position][1]});
+        if (namespace) {
+            universal.namespace = namespace;
+        }
+        this.current.append(universal);
         this.position ++;
     }
 
-    word () {
+    word (namespace) {
+        if (this.tokens[this.position + 1] && this.tokens[this.position + 1][1] === '|') {
+            this.position ++;
+            return this.namespace();
+        }
         let word = this.tokens[this.position][1];
         let hasClass = indexesOf(word, '.');
         let hasId = indexesOf(word, '#');
@@ -204,13 +243,19 @@ export default class Parser {
         indices.forEach((ind, i) => {
             let index = indices[i + 1] || word.length;
             let value = word.slice(ind, index);
+            let node;
             if (~hasClass.indexOf(ind)) {
-                this.current.append(new ClassName({value: value.slice(1)}));
+                node = new ClassName({value: value.slice(1)});
             } else if (~hasId.indexOf(ind)) {
-                this.current.append(new ID({value: value.slice(1)}));
+                node = new ID({value: value.slice(1)});
             } else {
-                this.current.append(new Tag({value: value}));
+                node = new Tag({value: value});
             }
+
+            if (namespace) {
+                node.namespace = namespace;
+            }
+            this.current.append(node);
         });
         this.position ++;
     }

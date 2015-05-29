@@ -8,14 +8,18 @@ export default class Attribute extends Selector {
         this.insensitive = opts.insensitive;
         this.attribute = opts.attribute;
         this.operator = opts.operator;
+        this.namespace = opts.namespace;
         this.type = 'attribute';
         this.raw = {};
     }
 
     toString () {
+        let namespace = this.namespace ? (typeof this.namespace === 'string' ? this.namespace : '') + '|' : '';
         let selector = [
             this.spaces.before,
-            '[' + this.attribute,
+            '[',
+            namespace,
+            this.attribute,
         ];
 
         if (this.operator) { selector.push(this.operator); }

@@ -4,12 +4,14 @@ import parser from '../../index';
 import tape from 'tape';
 import util from 'util';
 
+export let parse = (input, transform) => {
+    return parser(transform).process(input).result;
+};
+
 export let test = (spec, input, callback) => {
     var tree;
 
-    let result = parser((selectors) => {
-        tree = selectors
-    }).process(input).result;
+    let result = parse(input, (selectors) => {tree = selectors});
 
     if (callback) {
         tape(`${spec} (tree)`, (t) => {

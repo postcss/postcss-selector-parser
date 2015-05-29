@@ -14,7 +14,8 @@
   ],
   "scripts": {
     "prepublish": "babel src --out-dir dist",
-    "test": "babel-tape-runner \"src/**/__tests__/*.js\" | faucet"
+    "test-unformatted": "babel-tape-runner \"src/**/__tests__/*.js\"",
+    "test": "npm run test-unformatted | faucet"
   },
   "dependencies": {
     "flatten": "0.0.1",

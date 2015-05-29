@@ -1,3 +1,5 @@
+'use strict';
+
 import {test} from './util/helpers';
 
 test('pseudo element (single colon)', 'h1:after', (t, tree) => {

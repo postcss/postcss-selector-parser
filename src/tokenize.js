@@ -1,3 +1,5 @@
+'use strict';
+
 let singleQuote  = "'".charCodeAt(0),
     doubleQuote  = '"'.charCodeAt(0),
     backslash    = '\\'.charCodeAt(0),

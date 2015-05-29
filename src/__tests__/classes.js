@@ -20,3 +20,9 @@ test('qualified class', 'button.btn-primary', (t, tree) => {
     t.equal(tree.selectors[0].rules[0].type, 'tag');
     t.equal(tree.selectors[0].rules[1].type, 'class');
 });
+
+test('escaped numbers in class name', '.\\31\\ 0', (t, tree, d) => {
+    t.plan(2);
+    t.equal(tree.selectors[0].rules[0].type, 'class');
+    t.equal(tree.selectors[0].rules[0].value, '\\31\\ 0');
+});

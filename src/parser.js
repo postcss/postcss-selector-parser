@@ -234,6 +234,18 @@ export default class Parser {
             return this.namespace();
         }
         let word = this.tokens[this.position][1];
+        while (this.tokens[this.position + 1] && this.tokens[this.position + 1][0] === 'word') {
+            this.position ++;
+            let current = this.tokens[this.position][1];
+            word += current;
+            if (current.lastIndexOf('\\') === current.length - 1) {
+                let next = this.tokens[this.position + 1];
+                if (next[0] === 'space') {
+                    word += next[1];
+                    this.position ++;
+                }
+            }
+        }
         let hasClass = indexesOf(word, '.');
         let hasId = indexesOf(word, '#');
         if (hasId.length > 1) {

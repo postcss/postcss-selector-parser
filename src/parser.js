@@ -36,7 +36,7 @@ export default class Parser {
         let attribute = '';
         let attr;
         this.position ++;
-        while (this.position < this.tokens.length && this.tokens[this.position][0] !== ']') {
+        while (this.position < this.tokens.length && this.currToken[0] !== ']') {
             attribute += this.tokens[this.position][1];
             this.position ++;
         }
@@ -74,17 +74,16 @@ export default class Parser {
     }
 
     combinator () {
-        if (this.tokens[this.position][1] === '|') {
+        if (this.currToken[1] === '|') {
             return this.namespace();
         }
         let combinator = '';
-        let tokens = this.tokens;
-        while ( this.position < tokens.length &&
-                tokens[this.position][0] === 'space' ||
-                tokens[this.position][0] === 'combinator') {
-            combinator += this.tokens[this.position][1];
+        while ( this.position < this.tokens.length &&
+                this.currToken[0] === 'space' ||
+                this.currToken[0] === 'combinator') {
+            combinator += this.currToken[1];
             this.position ++;
-            if (this.position === tokens.length) {
+            if (this.position === this.tokens.length) {
                 this.error('Unexpected right hand side combinator.');
             }
         }
@@ -112,7 +111,7 @@ export default class Parser {
     }
 
     comment () {
-        let comment = new Comment({value: this.tokens[this.position][1]});
+        let comment = new Comment({value: this.currToken[1]});
         this.current.append(comment);
         this.position++;
     }
@@ -122,11 +121,11 @@ export default class Parser {
     }
 
     namespace () {
-        let before = this.tokens[this.position - 1] && this.tokens[this.position - 1][1] || true;
-        if (this.tokens[this.position + 1][0] === 'word') {
+        let before = this.prevToken && this.prevToken[1] || true;
+        if (this.nextToken[0] === 'word') {
             this.position ++;
             return this.word(before);
-        } else if (this.tokens[this.position + 1][0] === '*') {
+        } else if (this.nextToken[0] === '*') {
             this.position ++;
             return this.universal(before);
         }
@@ -134,23 +133,23 @@ export default class Parser {
 
     pseudo () {
         let pseudoStr = '';
-        while (this.tokens[this.position][0] === ':') {
-            pseudoStr += this.tokens[this.position][1];
+        while (this.currToken[0] === ':') {
+            pseudoStr += this.currToken[1];
             this.position ++;
         }
-        if (this.tokens[this.position][0] === 'word') {
-            pseudoStr += this.tokens[this.position][1];
+        if (this.currToken[0] === 'word') {
+            pseudoStr += this.currToken[1];
             this.position ++;
             let pseudo = new Pseudo({value: pseudoStr});
-            if (this.tokens[this.position] && this.tokens[this.position][0] === '(') {
+            if (this.currToken && this.currToken[0] === '(') {
                 let balanced = 1;
                 let inside = [];
                 this.position ++;
                 while (this.position < this.tokens.length && balanced) {
-                    if (this.tokens[this.position][0] === '(') balanced++;
-                    if (this.tokens[this.position][0] === ')') balanced--;
+                    if (this.currToken[0] === '(') balanced++;
+                    if (this.currToken[0] === ')') balanced--;
                     if (balanced) {
-                        inside.push(this.tokens[this.position]);
+                        inside.push(this.currToken);
                     }
                     this.position ++;
                 }
@@ -166,7 +165,7 @@ export default class Parser {
                 this.tokens = inside;
                 this.current = pseudo.parameters;
                 while (this.position < this.tokens.length) {
-                    switch (this.tokens[this.position][0]) {
+                    switch (this.currToken[0]) {
                         case 'space':
                             this.space();
                             break;
@@ -197,14 +196,14 @@ export default class Parser {
             }
             this.current.append(pseudo);
         } else {
-            this.error('Unexpected "' + this.tokens[this.position][0] + '" found.');
+            this.error('Unexpected "' + this.currToken[0] + '" found.');
         }
     }
 
     space () {
-        let token = this.tokens[this.position];
+        let token = this.currToken;
         // Handle space before and after the selector
-        if (this.position === 0 || this.tokens[this.position - 1][0] === ',') {
+        if (this.position === 0 || this.prevToken[0] === ',') {
             this.current.spaces.before = token[1];
             this.position ++;
         } else if (this.position === (this.tokens.length - 1)) {
@@ -216,11 +215,12 @@ export default class Parser {
     }
 
     universal (namespace) {
-        if (this.tokens[this.position + 1] && this.tokens[this.position + 1][1] === '|') {
+        let nextToken = this.nextToken;
+        if (nextToken && nextToken[1] === '|') {
             this.position ++;
             return this.namespace();
         }
-        let universal = new Universal({value: this.tokens[this.position][1]});
+        let universal = new Universal({value: this.currToken[1]});
         if (namespace) {
             universal.namespace = namespace;
         }
@@ -229,22 +229,24 @@ export default class Parser {
     }
 
     word (namespace) {
-        if (this.tokens[this.position + 1] && this.tokens[this.position + 1][1] === '|') {
+        let nextToken = this.nextToken;
+        if (nextToken && nextToken[1] === '|') {
             this.position ++;
             return this.namespace();
         }
-        let word = this.tokens[this.position][1];
-        while (this.tokens[this.position + 1] && this.tokens[this.position + 1][0] === 'word') {
+        let word = this.currToken[1];
+        while (nextToken && nextToken[0] === 'word') {
             this.position ++;
-            let current = this.tokens[this.position][1];
+            let current = this.currToken[1];
             word += current;
             if (current.lastIndexOf('\\') === current.length - 1) {
-                let next = this.tokens[this.position + 1];
+                let next = this.nextToken;
                 if (next[0] === 'space') {
                     word += next[1];
                     this.position ++;
                 }
             }
+            nextToken = this.nextToken;
         }
         let hasClass = indexesOf(word, '.');
         let hasId = indexesOf(word, '#');
@@ -274,7 +276,7 @@ export default class Parser {
 
     parse () {
         while (this.position < this.tokens.length) {
-            switch (this.tokens[this.position][0]) {
+            switch (this.currToken[0]) {
                 case 'space':
                     this.space();
                     break;
@@ -302,5 +304,21 @@ export default class Parser {
             }
         }
         return this.root;
+    }
+
+    /**
+     * Helpers
+     */
+
+    get currToken () {
+        return this.tokens[this.position];
+    }
+
+    get nextToken () {
+        return this.tokens[this.position + 1];
+    }
+
+    get prevToken () {
+        return this.tokens[this.position - 1];
     }
 }

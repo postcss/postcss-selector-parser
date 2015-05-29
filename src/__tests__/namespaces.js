@@ -1,7 +1,6 @@
 'use strict';
 
 import {test, parse} from './util/helpers';
-import tape from 'tape';
 
 test('match tags in the postcss namespace', 'postcss|button', (t, tree) => {
     t.plan(2);

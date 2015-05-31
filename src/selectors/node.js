@@ -18,9 +18,7 @@ export default class {
     }
 
     toString () {
-        let ns = this.ns || '';
         return [
-            ns,
             String(this.value),
             String(this.combinator || '')
         ].join('');

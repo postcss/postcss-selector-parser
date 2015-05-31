@@ -18,9 +18,9 @@ export default class {
     }
 
     toString () {
-        let namespace = this.namespace ? (typeof this.namespace === 'string' ? this.namespace : '') + '|' : '';
+        let ns = this.ns || '';
         return [
-            namespace,
+            ns,
             String(this.value),
             String(this.combinator || '')
         ].join('');

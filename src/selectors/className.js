@@ -1,18 +1,17 @@
 'use strict';
 
-import Node from './node';
+import Namespace from './namespace';
 
-export default class ClassName extends Node {
+export default class ClassName extends Namespace {
     constructor (opts) {
         super(opts);
         this.type = 'class';
     }
 
     toString () {
-        let namespace = this.namespace ? (typeof this.namespace === 'string' ? this.namespace : '') + '|' : '';
         return [
             this.spaces.before,
-            namespace,
+            this.ns,
             String('.' + this.value),
             this.combinator,
             this.spaces.after

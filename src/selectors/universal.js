@@ -1,8 +1,8 @@
 'use strict';
 
-import Node from './node';
+import Namespace from './namespace';
 
-export default class Universal extends Node {
+export default class Universal extends Namespace {
     constructor (opts) {
         super(opts);
         this.type = 'universal';

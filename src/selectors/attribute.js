@@ -1,8 +1,8 @@
 'use strict';
 
-import Node from './node';
+import Namespace from './namespace';
 
-export default class Attribute extends Node {
+export default class Attribute extends Namespace {
     constructor (opts) {
         super(opts);
         this.type = 'attribute';
@@ -10,12 +10,11 @@ export default class Attribute extends Node {
     }
 
     toString () {
-        let namespace = this.namespace ? (typeof this.namespace === 'string' ? this.namespace : '') + '|' : '';
         let selector = [
             this.spaces.before,
             '[',
-            namespace,
-            this.attribute,
+            this.ns,
+            this.attribute
         ];
 
         if (this.operator) { selector.push(this.operator); }

@@ -1,8 +1,8 @@
 'use strict';
 
-import Selector from './selector';
+import Node from './node';
 
-export default class ClassName extends Selector {
+export default class ClassName extends Node {
     constructor (opts) {
         super(opts);
         this.type = 'class';
@@ -15,7 +15,6 @@ export default class ClassName extends Selector {
             namespace,
             String('.' + this.value),
             this.combinator,
-            this.rules.map(String).join(''),
             this.spaces.after
         ].join('');
     }

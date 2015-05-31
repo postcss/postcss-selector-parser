@@ -1,8 +1,8 @@
 'use strict';
 
-import Tag from './tag';
+import Node from './node';
 
-export default class Universal extends Tag {
+export default class Universal extends Node {
     constructor (opts) {
         super(opts);
         this.type = 'universal';

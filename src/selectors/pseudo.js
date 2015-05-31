@@ -1,22 +1,20 @@
 'use strict';
 
-import Selector from './selector';
-import Parentheses from './parentheses';
+import Container from './container';
 
-export default class Pseudo extends Selector {
+export default class Pseudo extends Container {
     constructor (opts) {
         super(opts);
-        this.parameters = new Parentheses();
         this.type = 'pseudo';
     }
 
     toString () {
+        let params = this.nodes.length ? '(' + this.nodes.map(String).join(',') + ')' : '';
         return [
             this.spaces.before,
             String(this.value),
-            String(this.parameters),
+            params,
             this.combinator,
-            this.rules.map(String).join(''),
             this.spaces.after
         ].join('');
     }

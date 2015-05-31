@@ -1,7 +1,7 @@
 'use strict';
 
 import Root from './selectors/root';
-import Selectors from './selectors/selectors';
+import Selector from './selectors/selector';
 import ClassName from './selectors/className';
 import Comment from './selectors/comment';
 import ID from './selectors/id';
@@ -23,7 +23,7 @@ export default class Parser {
         this.position = 0;
         this.root = new Root();
 
-        let selectors = new Selectors();
+        let selectors = new Selector();
         this.root.append(selectors);
 
         this.current = selectors;
@@ -87,24 +87,18 @@ export default class Parser {
                 this.error('Unexpected right hand side combinator.');
             }
         }
-        let last = this.current.rules[this.current.rules.length - 1];
+        let last = this.current.nodes[this.current.nodes.length - 1];
         if (!last) {
             this.error('Unexpected left hand side combinator.');
         }
         last.combinator = combinator;
-        this.current = last;
     }
 
     comma () {
         if (this.position === this.tokens.length - 1) {
             this.error('Unexpected trailing comma.');
         }
-        let selectors = new Selectors();
-        if (!this.inParens) {
-            while (!this.current.parent.selectors) {
-                this.current = this.current.parent;
-            }
-        }
+        let selectors = new Selector();
         this.current.parent.append(selectors);
         this.current = selectors;
         this.position ++;
@@ -141,6 +135,7 @@ export default class Parser {
             pseudoStr += this.currToken[1];
             this.position ++;
             let pseudo = new Pseudo({value: pseudoStr});
+            this.current.append(pseudo);
             if (this.currToken && this.currToken[0] === '(') {
                 let balanced = 1;
                 let inside = [];
@@ -163,7 +158,7 @@ export default class Parser {
                 };
                 this.position = 0;
                 this.tokens = inside;
-                this.current = pseudo.parameters;
+                this.current = pseudo;
                 while (this.position < this.tokens.length) {
                     switch (this.currToken[0]) {
                         case 'space':
@@ -182,7 +177,10 @@ export default class Parser {
                             this.pseudo();
                             break;
                         case ',':
-                            this.comma();
+                            if (this.position === this.tokens.length - 1) {
+                                this.error('Unexpected trailing comma.');
+                            }
+                            this.position ++;
                             break;
                         case 'combinator':
                             this.combinator();
@@ -194,7 +192,6 @@ export default class Parser {
                 this.tokens = cache.tokens;
                 this.position = cache.position;
             }
-            this.current.append(pseudo);
         } else {
             this.error('Unexpected "' + this.currToken[0] + '" found.');
         }

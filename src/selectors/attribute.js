@@ -1,14 +1,10 @@
 'use strict';
 
-import Selector from './selector';
+import Node from './node';
 
-export default class Attribute extends Selector {
+export default class Attribute extends Node {
     constructor (opts) {
         super(opts);
-        this.insensitive = opts.insensitive;
-        this.attribute = opts.attribute;
-        this.operator = opts.operator;
-        this.namespace = opts.namespace;
         this.type = 'attribute';
         this.raw = {};
     }
@@ -30,7 +26,6 @@ export default class Attribute extends Selector {
             selector.push(' i');
         }
         selector.push(']' + this.combinator);
-        selector.push(this.rules.map(String).join(''));
         return selector.concat(this.spaces.after).join('');
     }
 }

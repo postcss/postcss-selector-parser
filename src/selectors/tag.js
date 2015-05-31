@@ -1,8 +1,8 @@
 'use strict';
 
-import Selector from './selector';
+import Node from './node';
 
-export default class Tag extends Selector {
+export default class Tag extends Node {
     constructor (opts) {
         super(opts);
         this.type = 'tag';

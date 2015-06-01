@@ -57,9 +57,21 @@ export default class Container extends Node {
         return this;
     }
 
+    empty () {
+        return this.removeAll();
+    }
+
     each (callback) {
         this.nodes.forEach(callback);
         return this;
+    }
+
+    every (callback) {
+        return this.nodes.every(callback);
+    }
+
+    some (callback) {
+        return this.nodes.some(callback);
     }
 
     toString () {

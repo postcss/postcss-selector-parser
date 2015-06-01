@@ -1,5 +1,6 @@
 # *current*
 
+* Adds `next` and `prev` to the node class.
 * Adds `first` and `last` getters to the container class.
 * Adds `every` and `some` iterators to the container class.
 * Add `empty` alias for `removeAll`.

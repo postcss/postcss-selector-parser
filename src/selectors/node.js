@@ -17,6 +17,14 @@ export default class {
         return this;
     }
 
+    next () {
+        return this.parent.at(this.parent.index(this) + 1);
+    }
+
+    prev () {
+        return this.parent.at(this.parent.index(this) - 1);
+    }
+
     toString () {
         return [
             String(this.value),

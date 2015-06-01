@@ -69,7 +69,7 @@ export default class Parser {
                 attr.raw.insensitive = insensitive[1];
             }
         }
-        this.current.append(attr);
+        this.newNode(attr);
         this.position++;
     }
 
@@ -106,7 +106,7 @@ export default class Parser {
 
     comment () {
         let comment = new Comment({value: this.currToken[1]});
-        this.current.append(comment);
+        this.newNode(comment);
         this.position++;
     }
 
@@ -135,7 +135,7 @@ export default class Parser {
             pseudoStr += this.currToken[1];
             this.position ++;
             let pseudo = new Pseudo({value: pseudoStr});
-            this.current.append(pseudo);
+            this.newNode(pseudo);
             if (this.currToken && this.currToken[0] === '(') {
                 let balanced = 1;
                 let inside = [];
@@ -221,7 +221,7 @@ export default class Parser {
         if (namespace) {
             universal.namespace = namespace;
         }
-        this.current.append(universal);
+        this.newNode(universal);
         this.position ++;
     }
 
@@ -266,7 +266,7 @@ export default class Parser {
             if (namespace) {
                 node.namespace = namespace;
             }
-            this.current.append(node);
+            this.newNode(node);
         });
         this.position ++;
     }
@@ -306,6 +306,10 @@ export default class Parser {
     /**
      * Helpers
      */
+
+    newNode (node) {
+        return this.current.append(node);
+    }
 
     get currToken () {
         return this.tokens[this.position];

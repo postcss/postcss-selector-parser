@@ -217,11 +217,7 @@ export default class Parser {
             this.position ++;
             return this.namespace();
         }
-        let universal = new Universal({value: this.currToken[1]});
-        if (namespace) {
-            universal.namespace = namespace;
-        }
-        this.newNode(universal);
+        this.newNode(new Universal({value: this.currToken[1]}), namespace);
         this.position ++;
     }
 
@@ -262,11 +258,7 @@ export default class Parser {
             } else {
                 node = new Tag({value: value});
             }
-
-            if (namespace) {
-                node.namespace = namespace;
-            }
-            this.newNode(node);
+            this.newNode(node, namespace);
         });
         this.position ++;
     }
@@ -307,7 +299,10 @@ export default class Parser {
      * Helpers
      */
 
-    newNode (node) {
+    newNode (node, namespace) {
+        if (namespace) {
+            node.namespace = namespace;
+        }
         return this.current.append(node);
     }
 

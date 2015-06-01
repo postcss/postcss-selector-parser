@@ -22,19 +22,27 @@ export default class Container extends Node {
         return this;
     }
 
-    at (child) {
+    at (index) {
+        return this.nodes[index];
+    }
+
+    index (child) {
         if (typeof child === 'number') {
             return child;
         }
         return this.nodes.indexOf(child);
     }
 
-    index (child) {
-        return at(child);
+    get first () {
+        return this.at(0);
+    }
+
+    get last () {
+        return this.at(this.nodes.length - 1);
     }
 
     remove (child) {
-        child = this.at(child);
+        child = this.index(child);
         this.nodes[child].parent = undefined;
         this.nodes.splice(child, 1);
 
@@ -43,7 +51,7 @@ export default class Container extends Node {
 
     removeAll () {
         let child;
-        while (child = this.at(0)) {
+        while (child = this.index(0)) {
             child.removeSelf();
         }
         return this;

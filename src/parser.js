@@ -87,7 +87,7 @@ export default class Parser {
                 this.error('Unexpected right hand side combinator.');
             }
         }
-        let last = this.current.nodes[this.current.nodes.length - 1];
+        let last = this.current.last;
         if (!last) {
             this.error('Unexpected left hand side combinator.');
         }

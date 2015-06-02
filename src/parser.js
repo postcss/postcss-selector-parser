@@ -9,6 +9,7 @@ import Tag from './selectors/tag';
 import Pseudo from './selectors/pseudo';
 import Attribute from './selectors/attribute';
 import Universal from './selectors/universal';
+import Combinator from './selectors/combinator';
 
 import sortAsc from './sortAscending';
 import tokenize from './tokenize';
@@ -77,21 +78,26 @@ export default class Parser {
         if (this.currToken[1] === '|') {
             return this.namespace();
         }
-        let combinator = '';
+        let combinator = new Combinator({value: ''});
         while ( this.position < this.tokens.length &&
                 this.currToken[0] === 'space' ||
                 this.currToken[0] === 'combinator') {
-            combinator += this.currToken[1];
+            if (this.nextToken[0] === 'combinator') {
+                combinator.spaces.before = this.currToken[1];
+            } else if (this.prevToken[0] === 'combinator') {
+                combinator.spaces.after = this.currToken[1];
+            } else if (this.currToken[0] === 'space' || this.currToken[0] === 'combinator') {
+                combinator.value = this.currToken[1];
+            }
             this.position ++;
             if (this.position === this.tokens.length) {
                 this.error('Unexpected right hand side combinator.');
             }
         }
-        let last = this.current.last;
-        if (!last) {
+        if (!this.current.last) {
             this.error('Unexpected left hand side combinator.');
         }
-        last.combinator = combinator;
+        return this.newNode(combinator);
     }
 
     comma () {

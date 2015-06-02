@@ -9,7 +9,8 @@ test('universal selector', '*', (t, tree) => {
 });
 
 test('lobotomized owl', '* + *', (t, tree) => {
-    t.plan(2);
+    t.plan(3);
     t.equal(tree.nodes[0].nodes[0].type, 'universal');
-    t.equal(tree.nodes[0].nodes[1].type, 'universal');
+    t.equal(tree.nodes[0].nodes[1].type, 'combinator');
+    t.equal(tree.nodes[0].nodes[2].type, 'universal');
 });

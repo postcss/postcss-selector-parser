@@ -5,7 +5,6 @@ export default class {
         for (let key in opts) {
             this[key] = opts[key];
         }
-        this.combinator = '';
         this.spaces = {before: '', after: ''};
     }
 
@@ -27,8 +26,9 @@ export default class {
 
     toString () {
         return [
+            this.spaces.before,
             String(this.value),
-            String(this.combinator || '')
+            this.spaces.after
         ].join('');
     }
 }

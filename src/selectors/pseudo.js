@@ -14,7 +14,6 @@ export default class Pseudo extends Container {
             this.spaces.before,
             String(this.value),
             params,
-            this.combinator,
             this.spaces.after
         ].join('');
     }

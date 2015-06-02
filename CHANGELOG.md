@@ -4,6 +4,7 @@
 * Adds `first` and `last` getters to the container class.
 * Adds `every` and `some` iterators to the container class.
 * Add `empty` alias for `removeAll`.
+* Combinators are now types of node.
 * Fixes the at method so that it is not an alias for `index`.
 * Tidy up creation of new nodes in the parser.
 * Refactors how namespaces are handled for consistency & less redundant code.

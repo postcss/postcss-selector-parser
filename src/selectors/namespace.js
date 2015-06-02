@@ -11,8 +11,7 @@ export default class Namespace extends Node {
     toString () {
         return [
             this.ns,
-            String(this.value),
-            String(this.combinator || '')
+            String(this.value)
         ].join('');
     }
 };

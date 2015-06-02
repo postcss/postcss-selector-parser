@@ -24,7 +24,7 @@ export default class Attribute extends Namespace {
         } else if (this.insensitive) {
             selector.push(' i');
         }
-        selector.push(']' + this.combinator);
+        selector.push(']');
         return selector.concat(this.spaces.after).join('');
     }
 }

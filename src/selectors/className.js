@@ -13,7 +13,6 @@ export default class ClassName extends Namespace {
             this.spaces.before,
             this.ns,
             String('.' + this.value),
-            this.combinator,
             this.spaces.after
         ].join('');
     }

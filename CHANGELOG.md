@@ -1,5 +1,7 @@
 # *current*
 
+* Tidy up redundant duplication.
+
 ---
 
 # 0.0.3

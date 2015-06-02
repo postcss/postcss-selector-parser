@@ -30,7 +30,7 @@ export default class Parser {
         this.current = selectors;
         this.tokens = tokenize(input);
 
-        return this.parse();
+        return this.loop();
     }
 
     attribute () {
@@ -153,29 +153,7 @@ export default class Parser {
                     if (this.currToken[0] === '(') balanced++;
                     if (this.currToken[0] === ')') balanced--;
                     if (balanced) {
-                        switch (this.currToken[0]) {
-                            case 'space':
-                                this.space();
-                                break;
-                            case 'comment':
-                                this.comment();
-                                break;
-                            case '[':
-                                this.attribute();
-                                break;
-                            case 'word':
-                                this.word();
-                                break;
-                            case ':':
-                                this.pseudo();
-                                break;
-                            case ',':
-                                this.comma();
-                                break;
-                            case 'combinator':
-                                this.combinator();
-                                break;
-                        }
+                        this.parse();
                     } else {
                         this.position ++;
                     }
@@ -256,36 +234,40 @@ export default class Parser {
         this.position ++;
     }
 
-    parse () {
+    loop () {
         while (this.position < this.tokens.length) {
-            switch (this.currToken[0]) {
-                case 'space':
-                    this.space();
-                    break;
-                case 'comment':
-                    this.comment();
-                    break;
-                case '[':
-                    this.attribute();
-                    break;
-                case 'word':
-                    this.word();
-                    break;
-                case ':':
-                    this.pseudo();
-                    break;
-                case ',':
-                    this.comma();
-                    break;
-                case '*':
-                    this.universal();
-                    break;
-                case 'combinator':
-                    this.combinator();
-                    break;
-            }
+            this.parse();
         }
         return this.root;
+    }
+
+    parse () {
+        switch (this.currToken[0]) {
+            case 'space':
+                this.space();
+                break;
+            case 'comment':
+                this.comment();
+                break;
+            case '[':
+                this.attribute();
+                break;
+            case 'word':
+                this.word();
+                break;
+            case ':':
+                this.pseudo();
+                break;
+            case ',':
+                this.comma();
+                break;
+            case '*':
+                this.universal();
+                break;
+            case 'combinator':
+                this.combinator();
+                break;
+        }
     }
 
     /**

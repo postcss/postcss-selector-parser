@@ -1,5 +1,9 @@
 # *current*
 
+---
+
+# 0.0.3
+
 * Adds `next` and `prev` to the node class.
 * Adds `first` and `last` getters to the container class.
 * Adds `every` and `some` iterators to the container class.
@@ -11,8 +15,6 @@
 * Refactors AST to use `nodes` exclusively, and eliminates excessive nesting.
 * Fixes nested pseudo parsing.
 * Fixes whitespace parsing.
-
----
 
 # 0.0.2
 

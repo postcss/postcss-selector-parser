@@ -143,60 +143,47 @@ export default class Parser {
             let pseudo = new Pseudo({value: pseudoStr});
             this.newNode(pseudo);
             if (this.currToken && this.currToken[0] === '(') {
+                let selector = new Selector();
+                let cache = this.current;
+                pseudo.append(selector);
+                this.current = selector;
                 let balanced = 1;
-                let inside = [];
                 this.position ++;
                 while (this.position < this.tokens.length && balanced) {
                     if (this.currToken[0] === '(') balanced++;
                     if (this.currToken[0] === ')') balanced--;
                     if (balanced) {
-                        inside.push(this.currToken);
+                        switch (this.currToken[0]) {
+                            case 'space':
+                                this.space();
+                                break;
+                            case 'comment':
+                                this.comment();
+                                break;
+                            case '[':
+                                this.attribute();
+                                break;
+                            case 'word':
+                                this.word();
+                                break;
+                            case ':':
+                                this.pseudo();
+                                break;
+                            case ',':
+                                this.comma();
+                                break;
+                            case 'combinator':
+                                this.combinator();
+                                break;
+                        }
+                    } else {
+                        this.position ++;
                     }
-                    this.position ++;
                 }
                 if (balanced) {
                     this.error('Expected closing parenthesis.');
                 }
-                let cache = {
-                    current: this.current,
-                    tokens: this.tokens,
-                    position: this.position
-                };
-                this.position = 0;
-                this.tokens = inside;
-                this.current = pseudo;
-                while (this.position < this.tokens.length) {
-                    switch (this.currToken[0]) {
-                        case 'space':
-                            this.space();
-                            break;
-                        case 'comment':
-                            this.comment();
-                            break;
-                        case '[':
-                            this.attribute();
-                            break;
-                        case 'word':
-                            this.word();
-                            break;
-                        case ':':
-                            this.pseudo();
-                            break;
-                        case ',':
-                            if (this.position === this.tokens.length - 1) {
-                                this.error('Unexpected trailing comma.');
-                            }
-                            this.position ++;
-                            break;
-                        case 'combinator':
-                            this.combinator();
-                            break;
-                    }
-                    this.position ++;
-                }
-                this.current = cache.current;
-                this.tokens = cache.tokens;
-                this.position = cache.position;
+                this.current = cache;
             }
         } else {
             this.error('Unexpected "' + this.currToken[0] + '" found.');
@@ -207,10 +194,10 @@ export default class Parser {
         let token = this.currToken;
         // Handle space before and after the selector
         if (this.position === 0 || this.prevToken[0] === ',') {
-            this.current.spaces.before = token[1];
+            this.spaces = token[1];
             this.position ++;
-        } else if (this.position === (this.tokens.length - 1)) {
-            this.current.spaces.after = token[1];
+        } else if (this.position === (this.tokens.length - 1) || this.nextToken[0] === ',') {
+            this.current.last.spaces.after = token[1];
             this.position ++;
         } else {
             this.combinator();
@@ -308,6 +295,10 @@ export default class Parser {
     newNode (node, namespace) {
         if (namespace) {
             node.namespace = namespace;
+        }
+        if (this.spaces) {
+            node.spaces.before = this.spaces;
+            this.spaces = '';
         }
         return this.current.append(node);
     }

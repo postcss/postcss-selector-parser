@@ -10,8 +10,10 @@ export default class Namespace extends Node {
 
     toString () {
         return [
+            this.spaces.before,
             this.ns,
-            String(this.value)
+            String(this.value),
+            this.spaces.after
         ].join('');
     }
 };

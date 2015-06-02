@@ -31,3 +31,13 @@ test('qualified id & class name', 'h1#one.two', (t, tree) => {
     t.equal(tree.nodes[0].nodes[1].type, 'id');
     t.equal(tree.nodes[0].nodes[2].type, 'class');
 });
+
+test('extraneous non-combinating whitespace', '  #h1   ,  #h2   ', (t, tree) => {
+    t.plan(6);
+    t.equal(tree.nodes[0].nodes[0].value, 'h1');
+    t.equal(tree.nodes[0].nodes[0].spaces.before, '  ');
+    t.equal(tree.nodes[0].nodes[0].spaces.after, '   ');
+    t.equal(tree.nodes[1].nodes[0].value, 'h2');
+    t.equal(tree.nodes[1].nodes[0].spaces.before, '  ');
+    t.equal(tree.nodes[1].nodes[0].spaces.after, '   ');
+});

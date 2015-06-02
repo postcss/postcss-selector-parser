@@ -93,3 +93,13 @@ test('insensitive attribute selector 2', '[href=TEsT i  ]', (t, tree) => {
     t.equal(tree.nodes[0].nodes[0].value, 'TEsT');
     t.equal(tree.nodes[0].nodes[0].raw.insensitive, ' i  ');
 });
+
+test('extraneous non-combinating whitespace', '  [href]   ,  [class]   ', (t, tree) => {
+    t.plan(6);
+    t.equal(tree.nodes[0].nodes[0].attribute, 'href');
+    t.equal(tree.nodes[0].nodes[0].spaces.before, '  ');
+    t.equal(tree.nodes[0].nodes[0].spaces.after, '   ');
+    t.equal(tree.nodes[1].nodes[0].attribute, 'class');
+    t.equal(tree.nodes[1].nodes[0].spaces.before, '  ');
+    t.equal(tree.nodes[1].nodes[0].spaces.after, '   ');
+});

@@ -14,3 +14,13 @@ test('lobotomized owl', '* + *', (t, tree) => {
     t.equal(tree.nodes[0].nodes[1].type, 'combinator');
     t.equal(tree.nodes[0].nodes[2].type, 'universal');
 });
+
+test('extraneous non-combinating whitespace', '  *   ,  *   ', (t, tree) => {
+    t.plan(6);
+    t.equal(tree.nodes[0].nodes[0].value, '*');
+    t.equal(tree.nodes[0].nodes[0].spaces.before, '  ');
+    t.equal(tree.nodes[0].nodes[0].spaces.after, '   ');
+    t.equal(tree.nodes[1].nodes[0].value, '*');
+    t.equal(tree.nodes[1].nodes[0].spaces.before, '  ');
+    t.equal(tree.nodes[1].nodes[0].spaces.after, '   ');
+});

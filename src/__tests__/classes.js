@@ -26,3 +26,13 @@ test('escaped numbers in class name', '.\\31\\ 0', (t, tree, d) => {
     t.equal(tree.nodes[0].nodes[0].type, 'class');
     t.equal(tree.nodes[0].nodes[0].value, '\\31\\ 0');
 });
+
+test('extraneous non-combinating whitespace', '  .h1   ,  .h2   ', (t, tree) => {
+    t.plan(6);
+    t.equal(tree.nodes[0].nodes[0].value, 'h1');
+    t.equal(tree.nodes[0].nodes[0].spaces.before, '  ');
+    t.equal(tree.nodes[0].nodes[0].spaces.after, '   ');
+    t.equal(tree.nodes[1].nodes[0].value, 'h2');
+    t.equal(tree.nodes[1].nodes[0].spaces.before, '  ');
+    t.equal(tree.nodes[1].nodes[0].spaces.after, '   ');
+});

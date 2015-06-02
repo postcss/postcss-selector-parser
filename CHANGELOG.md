@@ -9,6 +9,8 @@
 * Tidy up creation of new nodes in the parser.
 * Refactors how namespaces are handled for consistency & less redundant code.
 * Refactors AST to use `nodes` exclusively, and eliminates excessive nesting.
+* Fixes nested pseudo parsing.
+* Fixes whitespace parsing.
 
 ---
 

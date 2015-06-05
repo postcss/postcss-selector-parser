@@ -1,6 +1,12 @@
 # *current*
 
 * Tidy up redundant duplication.
+* Fixes a bug where the parser would loop infinitely on universal selectors
+  inside pseudo selectors.
+* Adds `length` getter and `eachInside`, `map`, `reduce` to the container class.
+* When a selector has been removed from the tree, the root node will no longer
+  cast it to a string.
+
 
 ---
 

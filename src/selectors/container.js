@@ -38,22 +38,24 @@ export default class Container extends Node {
     }
 
     get last () {
-        return this.at(this.nodes.length - 1);
+        return this.at(this.length - 1);
+    }
+
+    get length () {
+        return this.nodes.length;
     }
 
     remove (child) {
         child = this.index(child);
-        this.nodes[child].parent = undefined;
+        this.at(child).parent = undefined;
         this.nodes.splice(child, 1);
 
         return this;
     }
 
     removeAll () {
-        let child;
-        while (child = this.index(0)) {
-            child.removeSelf();
-        }
+        for (let node of this.nodes) node.parent = undefined;
+        this.nodes = [];
         return this;
     }
 
@@ -66,6 +68,23 @@ export default class Container extends Node {
         return this;
     }
 
+    eachInside (callback) {
+        this.nodes.forEach((node) => {
+            callback(node);
+            if (node.length) {
+                return node.eachInside(callback);
+            }
+        });
+    }
+
+    map (callback) {
+        return this.nodes.map(callback);
+    }
+
+    reduce (callback, memo) {
+        return this.nodes.reduce(callback, memo);
+    }
+
     every (callback) {
         return this.nodes.every(callback);
     }
@@ -75,10 +94,6 @@ export default class Container extends Node {
     }
 
     toString () {
-        return [
-            this.spaces.before,
-            this.nodes.map(String).join(''),
-            this.spaces.after
-        ].join('');
+        return this.map(String).join('');
     }
 }

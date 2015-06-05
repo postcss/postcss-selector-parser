@@ -9,10 +9,9 @@ export default class Root extends Container {
     }
 
     toString () {
-        return [
-            this.spaces.before,
-            this.nodes.map(String).join(','),
-            this.spaces.after
-        ].join('');
+        return this.reduce((memo, selector) => {
+            let str = String(selector);
+            return str ? memo + str + ',' : '';
+        }, '').slice(0, -1);
     }
 }

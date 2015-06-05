@@ -9,7 +9,7 @@ export default class Pseudo extends Container {
     }
 
     toString () {
-        let params = this.nodes.length ? '(' + this.nodes.map(String).join(',') + ')' : '';
+        let params = this.length ? '(' + this.map(String).join(',') + ')' : '';
         return [
             this.spaces.before,
             String(this.value),

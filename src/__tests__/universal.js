@@ -24,3 +24,10 @@ test('extraneous non-combinating whitespace', '  *   ,  *   ', (t, tree) => {
     t.equal(tree.nodes[1].nodes[0].spaces.before, '  ');
     t.equal(tree.nodes[1].nodes[0].spaces.after, '   ');
 });
+
+test('qualified universal selector', '*[href] *:not(*.green)', (t, tree) => {
+    t.plan(3);
+    t.equal(tree.nodes[0].nodes[0].value, '*');
+    t.equal(tree.nodes[0].nodes[3].value, '*');
+    t.equal(tree.nodes[0].nodes[4].nodes[0].nodes[0].value, '*');
+});

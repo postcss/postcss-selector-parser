@@ -6,7 +6,7 @@
 * Adds `length` getter and `eachInside`, `map`, `reduce` to the container class.
 * When a selector has been removed from the tree, the root node will no longer
   cast it to a string.
-
+* Adds node type iterators to the container class (e.g. `eachComment`).
 
 ---
 

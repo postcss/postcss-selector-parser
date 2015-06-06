@@ -75,6 +75,63 @@ export default class Container extends Node {
                 return node.eachInside(callback);
             }
         });
+        return this;
+    }
+
+    eachAttribute (callback) {
+        return this.eachInside((selector) => {
+            if (selector.type === 'attribute') {
+                return callback.call(this, selector);
+            }
+        });
+    }
+
+    eachClass (callback) {
+        return this.eachInside((selector) => {
+            if (selector.type === 'class') {
+                return callback.call(this, selector);
+            }
+        });
+    }
+
+    eachComment (callback) {
+        return this.eachInside((selector) => {
+            if (selector.type === 'comment') {
+                return callback.call(this, selector);
+            }
+        });
+    }
+
+    eachId (callback) {
+        return this.eachInside((selector) => {
+            if (selector.type === 'id') {
+                return callback.call(this, selector);
+            }
+        });
+    }
+
+    eachPseudo (callback) {
+        return this.eachInside((selector) => {
+            if (selector.type === 'pseudo') {
+                return callback.call(this, selector);
+            }
+        });
+    }
+
+    eachTag (callback) {
+        return this.eachInside((selector) => {
+            if (selector.type === 'tag') {
+                return callback.call(this, selector);
+            }
+        });
+    }
+
+    eachUniversal (callback) {
+        return this.eachInside((selector) => {
+            if (selector.type === 'universal') {
+                return callback.call(this, selector);
+            }
+        });
     }
 
     map (callback) {

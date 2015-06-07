@@ -94,6 +94,14 @@ export default class Container extends Node {
         });
     }
 
+    eachCombinator (callback) {
+        return this.eachInside((selector) => {
+            if (selector.type === 'combinator') {
+                return callback.call(this, selector);
+            }
+        });
+    }
+
     eachComment (callback) {
         return this.eachInside((selector) => {
             if (selector.type === 'comment') {

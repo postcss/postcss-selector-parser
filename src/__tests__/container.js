@@ -49,6 +49,16 @@ test('container#eachClass', (t) => {
     t.equal(out, '.o, .t, .t:not(.f, .f)');
 });
 
+test('container#eachCombinator', (t) => {
+    t.plan(1);
+    let out = parse('h1 h2 h3 h4', (selectors) => {
+        selectors.eachCombinator((comment) => {
+            comment.removeSelf();
+        });
+    });
+    t.equal(out, 'h1h2h3h4');
+});
+
 test('container#eachComment', (t) => {
     t.plan(1);
     let out = parse('.one/*test*/.two', (selectors) => {

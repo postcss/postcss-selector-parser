@@ -9,6 +9,7 @@
 * Adds node type iterators to the container class (e.g. `eachComment`).
 * Adds filter function to the container class.
 * Adds split function to the container class.
+* Create new node types by doing `parser.id(opts)` etc.
 
 ---
 

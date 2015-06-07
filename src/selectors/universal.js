@@ -6,5 +6,6 @@ export default class Universal extends Namespace {
     constructor (opts) {
         super(opts);
         this.type = 'universal';
+        this.value = '*';
     }
 }

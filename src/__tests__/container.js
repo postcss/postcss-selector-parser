@@ -178,6 +178,16 @@ test('container#split', (t) => {
     });
 });
 
+test('container#sort', (t) => {
+    t.plan(1);
+    let out = parse('h2,h3,h1,h4', (selectors) => {
+        selectors.sort((a, b) => {
+            return a.first.value.slice(-1) - b.first.value.slice(-1);
+        });
+    });
+    t.equal(out, 'h1,h2,h3,h4');
+});
+
 test('container#at', (t) => {
     t.plan(1);
     parse('h1, h2, h3', (selectors) => {

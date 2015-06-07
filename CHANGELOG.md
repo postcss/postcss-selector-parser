@@ -1,6 +1,7 @@
 # *current*
 
 * Fixes crash on extra whitespace inside a pseudo selector's parentheses.
+* Adds sort function to the container class.
 
 ---
 

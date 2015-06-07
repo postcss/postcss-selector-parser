@@ -177,6 +177,10 @@ export default class Container extends Node {
         return this.nodes.filter(callback);
     }
 
+    sort (callback) {
+        return this.nodes.sort(callback);
+    }
+
     toString () {
         return this.map(String).join('');
     }

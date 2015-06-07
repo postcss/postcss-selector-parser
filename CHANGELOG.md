@@ -1,5 +1,9 @@
 # *current*
 
+---
+
+# 0.0.4
+
 * Tidy up redundant duplication.
 * Fixes a bug where the parser would loop infinitely on universal selectors
   inside pseudo selectors.
@@ -11,8 +15,6 @@
 * Adds split function to the container class.
 * Create new node types by doing `parser.id(opts)` etc.
 * Adds support for pseudo classes anywhere in the selector.
-
----
 
 # 0.0.3
 

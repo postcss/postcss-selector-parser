@@ -7,6 +7,7 @@
 * When a selector has been removed from the tree, the root node will no longer
   cast it to a string.
 * Adds node type iterators to the container class (e.g. `eachComment`).
+* Adds filter function to the container class.
 
 ---
 

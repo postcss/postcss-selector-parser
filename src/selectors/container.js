@@ -150,6 +150,10 @@ export default class Container extends Node {
         return this.nodes.some(callback);
     }
 
+    filter (callback) {
+        return this.nodes.filter(callback);
+    }
+
     toString () {
         return this.map(String).join('');
     }

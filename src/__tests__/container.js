@@ -145,6 +145,16 @@ test('container#reduce', (t) => {
     });
 });
 
+test('container#filter', (t) => {
+    t.plan(1);
+    parse('h1, h2, c1, c2', (selectors) => {
+        let ast = selectors.filter((selector) => {
+            return ~selector.first.value.indexOf('h');
+        });
+        t.equal(String(ast), 'h1, h2');
+    });
+});
+
 test('container#at', (t) => {
     t.plan(1);
     parse('h1, h2, h3', (selectors) => {

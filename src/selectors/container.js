@@ -134,6 +134,21 @@ export default class Container extends Node {
         });
     }
 
+    split (callback) {
+        let current = [];
+        return this.reduce((memo, node, index) => {
+            let split = callback.call(this, node);
+            current.push(node);
+            if (split) {
+                memo.push(current);
+                current = [];
+            } else if (index === this.length - 1) {
+                memo.push(current);
+            }
+            return memo;
+        }, []);
+    }
+
     map (callback) {
         return this.nodes.map(callback);
     }

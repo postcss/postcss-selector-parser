@@ -155,6 +155,19 @@ test('container#filter', (t) => {
     });
 });
 
+test('container#split', (t) => {
+    t.plan(2);
+    parse('h1 h2 >> h3', (selectors) => {
+        let list = selectors.first.split((selector) => {
+            return selector.value === '>>';
+        }).map((group) => {
+            return group.map(String);
+        });
+        t.deepEqual(list, [['h1', ' ', 'h2', ' >> '], ['h3']]);
+        t.equal(list.length, 2);
+    });
+});
+
 test('container#at', (t) => {
     t.plan(1);
     parse('h1, h2, h3', (selectors) => {

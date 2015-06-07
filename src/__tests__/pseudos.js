@@ -53,6 +53,23 @@ test('negation pseudo element (4)', 'h1:not(h2:not(h3))', (t, tree) => {
     t.equal(tree.nodes[0].nodes[1].nodes[0].nodes[1].nodes[0].nodes[0].parent.type, 'selector');
 });
 
+test('pseudo class in the middle of a selector', 'a:link.external', (t, tree) => {
+    t.plan(6);
+    t.equal(tree.nodes[0].nodes[0].type, 'tag');
+    t.equal(tree.nodes[0].nodes[0].value, 'a');
+    t.equal(tree.nodes[0].nodes[1].type, 'pseudo');
+    t.equal(tree.nodes[0].nodes[1].value, ':link');
+    t.equal(tree.nodes[0].nodes[2].type, 'class');
+    t.equal(tree.nodes[0].nodes[2].value, 'external');
+});
+
+test('escaped numbers in class name with pseudo', 'a:before.\\31\\ 0', (t, tree, d) => {
+    t.plan(2);
+    t.equal(tree.nodes[0].nodes[2].type, 'class');
+    t.equal(tree.nodes[0].nodes[2].value, '\\31\\ 0');
+});
+
+
 test('extraneous non-combinating whitespace', '  h1:after   ,  h2:after   ', (t, tree) => {
     t.plan(6);
     t.equal(tree.nodes[0].nodes[0].spaces.before, '  ');

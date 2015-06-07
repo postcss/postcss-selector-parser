@@ -138,10 +138,15 @@ export default class Parser {
             this.position ++;
         }
         if (this.currToken[0] === 'word') {
-            pseudoStr += this.currToken[1];
-            this.position ++;
-            let pseudo = new Pseudo({value: pseudoStr});
-            this.newNode(pseudo);
+            let pseudo;
+            this.splitWord(false, (first, length) => {
+                pseudoStr += first;
+                pseudo = new Pseudo({value: pseudoStr});
+                this.newNode(pseudo);
+                if (length > 1 && this.nextToken && this.nextToken[0] === '(') {
+                    this.error('Misplaced parenthesis.');
+                }
+            });
             if (this.currToken && this.currToken[0] === '(') {
                 let selector = new Selector();
                 let cache = this.current;
@@ -192,12 +197,8 @@ export default class Parser {
         this.position ++;
     }
 
-    word (namespace) {
+    splitWord (namespace, firstCallback) {
         let nextToken = this.nextToken;
-        if (nextToken && nextToken[1] === '|') {
-            this.position ++;
-            return this.namespace();
-        }
         let word = this.currToken[1];
         while (nextToken && nextToken[0] === 'word') {
             this.position ++;
@@ -221,6 +222,9 @@ export default class Parser {
         indices.forEach((ind, i) => {
             let index = indices[i + 1] || word.length;
             let value = word.slice(ind, index);
+            if (i === 0 && firstCallback) {
+                return firstCallback.call(this, value, indices.length);
+            }
             let node;
             if (~hasClass.indexOf(ind)) {
                 node = new ClassName({value: value.slice(1)});
@@ -232,6 +236,15 @@ export default class Parser {
             this.newNode(node, namespace);
         });
         this.position ++;
+    }
+
+    word (namespace) {
+        let nextToken = this.nextToken;
+        if (nextToken && nextToken[1] === '|') {
+            this.position ++;
+            return this.namespace();
+        }
+        return this.splitWord(namespace);
     }
 
     loop () {

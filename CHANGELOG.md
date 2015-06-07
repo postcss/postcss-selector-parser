@@ -10,6 +10,7 @@
 * Adds filter function to the container class.
 * Adds split function to the container class.
 * Create new node types by doing `parser.id(opts)` etc.
+* Adds support for pseudo classes anywhere in the selector.
 
 ---
 

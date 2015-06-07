@@ -63,6 +63,13 @@ test('pseudo class in the middle of a selector', 'a:link.external', (t, tree) =>
     t.equal(tree.nodes[0].nodes[2].value, 'external');
 });
 
+test('extra whitespace inside parentheses', 'a:not(   h2   )', (t, tree) => {
+    t.plan(3);
+    t.equal(tree.nodes[0].nodes[1].nodes[0].nodes[0].value, 'h2');
+    t.equal(tree.nodes[0].nodes[1].nodes[0].nodes[0].spaces.after, '   ');
+    t.equal(tree.nodes[0].nodes[1].nodes[0].nodes[0].spaces.before, '   ');
+});
+
 test('escaped numbers in class name with pseudo', 'a:before.\\31\\ 0', (t, tree, d) => {
     t.plan(2);
     t.equal(tree.nodes[0].nodes[2].type, 'class');

@@ -176,10 +176,10 @@ export default class Parser {
     space () {
         let token = this.currToken;
         // Handle space before and after the selector
-        if (this.position === 0 || this.prevToken[0] === ',') {
+        if (this.position === 0 || this.prevToken[0] === ',' || this.prevToken[0] === '(') {
             this.spaces = token[1];
             this.position ++;
-        } else if (this.position === (this.tokens.length - 1) || this.nextToken[0] === ',') {
+        } else if (this.position === (this.tokens.length - 1) || this.nextToken[0] === ',' || this.nextToken[0] === ')') {
             this.current.last.spaces.after = token[1];
             this.position ++;
         } else {

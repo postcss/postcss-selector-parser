@@ -1,5 +1,7 @@
 # *current*
 
+* Fixes crash on extra whitespace inside a pseudo selector's parentheses.
+
 ---
 
 # 0.0.4

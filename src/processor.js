@@ -6,7 +6,7 @@ import Parser from './parser';
 
 export default class Processor {
     constructor (func) {
-        this.func = func;
+        this.func = func || function noop () {};
         return this;
     }
 

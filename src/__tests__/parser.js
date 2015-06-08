@@ -57,3 +57,10 @@ test('construct a whole tree', (t) => {
     t.plan(1);
     t.equal(String(root), '#tree');
 });
+
+test('no operation', (t) => {
+    t.plan(1);
+    t.doesNotThrow(() => {
+        return parser().process('h1 h2 h3').result;
+    });
+});

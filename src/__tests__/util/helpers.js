@@ -30,7 +30,7 @@ export let throws = (spec, input) => {
     tape(`${spec} (throws)`, (t) => {
         t.plan(1);
         t.throws(() => {
-            return parser(() => {}).process(input).result;
+            return parser().process(input).result;
         });
     });
 };

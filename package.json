@@ -9,6 +9,8 @@
   },
   "main": "dist/index.js",
   "files": [
+    "API.md",
+    "CHANGELOG.md",
     "LICENSE-MIT",
     "dist"
   ],

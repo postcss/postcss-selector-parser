@@ -70,12 +70,16 @@ test('extra whitespace inside parentheses', 'a:not(   h2   )', (t, tree) => {
     t.equal(tree.nodes[0].nodes[1].nodes[0].nodes[0].spaces.before, '   ');
 });
 
-test('escaped numbers in class name with pseudo', 'a:before.\\31\\ 0', (t, tree, d) => {
+test('escaped numbers in class name with pseudo', 'a:before.\\31\\ 0', (t, tree) => {
     t.plan(2);
     t.equal(tree.nodes[0].nodes[2].type, 'class');
     t.equal(tree.nodes[0].nodes[2].value, '\\31\\ 0');
 });
 
+test('nested pseudo', '.btn-group>.btn:last-child:not(:first-child)', (t, tree) => {
+    t.plan(1);
+    t.equal(tree.nodes[0].nodes[4].value, ':not');
+});
 
 test('extraneous non-combinating whitespace', '  h1:after   ,  h2:after   ', (t, tree) => {
     t.plan(6);

@@ -1,6 +1,6 @@
 {
   "name": "postcss-selector-parser",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "devDependencies": {
     "babel": "^5.4.3",
     "babel-tape-runner": "^1.1.0",

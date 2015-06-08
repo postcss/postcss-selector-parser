@@ -50,6 +50,14 @@ export default class Container extends Node {
         this.at(child).parent = undefined;
         this.nodes.splice(child, 1);
 
+        let index;
+        for ( let id in this.indexes ) {
+            index = this.indexes[id];
+            if ( index >= child ) {
+                this.indexes[id] = index - 1;
+            }
+        }
+
         return this;
     }
 
@@ -64,18 +72,39 @@ export default class Container extends Node {
     }
 
     each (callback) {
-        this.nodes.forEach(callback);
-        return this;
+        if (!this.lastEach) { this.lastEach = 0 }
+        if (!this.indexes) { this.indexes = {}; }
+
+        this.lastEach ++;
+        let id = this.lastEach;
+        this.indexes[id] = 0;
+
+        if (!this.length) return undefined;
+
+        let index, result;
+        while (this.indexes[id] < this.length) {
+            index = this.indexes[id];
+            result = callback(this.at(index), index);
+            if (result === false) { break; }
+
+            this.indexes[id] += 1
+        }
+
+        delete this.indexes[id];
+
+        if (result === false) { return false; }
     }
 
     eachInside (callback) {
-        this.nodes.forEach((node) => {
-            callback(node);
-            if (node.length) {
-                return node.eachInside(callback);
+        return this.each((node, i) => {
+            let result = callback(node, i);
+
+            if (result !== false && node.length) {
+                result = node.eachInside(callback);
             }
+
+            if (result === false) { return false; }
         });
-        return this;
     }
 
     eachAttribute (callback) {

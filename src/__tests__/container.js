@@ -27,6 +27,19 @@ test('container#eachInside', (t) => {
     t.equal(str, 'h1h2h3h4');
 });
 
+test('container#eachInside (safe iteration)', (t) => {
+    t.plan(1);
+    let out = parse('[class] + *[href] *:not(*.green)', (selectors) => {
+        selectors.eachUniversal((selector) => {
+            let next = selector.next();
+            if (next && next.type !== 'combinator') {
+                selector.removeSelf();
+            }
+        });
+    });
+    t.equal(out, '[class] + [href] :not(.green)');
+});
+
 test('container#eachAttribute', (t) => {
     t.plan(1);
     let out = parse('[href][class].class', (selectors) => {

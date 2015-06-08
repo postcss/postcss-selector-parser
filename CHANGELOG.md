@@ -3,6 +3,7 @@
 * Fixes crash on extra whitespace inside a pseudo selector's parentheses.
 * Adds sort function to the container class.
 * Enables the parser to pass its input through without transforming.
+* Iteration-safe `each` and `eachInside`.
 
 ---
 

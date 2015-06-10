@@ -169,6 +169,7 @@ A string representation of the selector type. It can be one of the following;
 ```js
 parser.attribute({attribute: 'href'}).type;
 // => 'attribute'
+```
 
 ### `node.parent`
 

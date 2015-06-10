@@ -210,6 +210,18 @@ if (node.type === 'id') {
 }
 ```
 
+### `node.clone()`
+
+Returns a copy of a node, detached from any parent containers that the
+original might have had.
+
+```js
+var cloned = parser.id({value: 'search'});
+String(cloned);
+
+// => #search
+```
+
 ### `node.spaces`
 
 Extra whitespaces around the node will be moved into `node.spaces.before` and

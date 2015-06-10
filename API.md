@@ -210,4 +210,191 @@ if (node.type === 'id') {
 }
 ```
 
+## Container types
+
+The `root`, `selector`, and `pseudo` nodes have some helper methods for working
+with their children.
+
+### `container.nodes`
+
+An array of the container's children.
+
+```js
+// Input: h1 h2
+selectors.at(0).nodes.length   // => 3
+selectors.at(0).nodes[0].value // => 'h1'
+selectors.at(0).nodes[1].value // => ' '
+```
+
+### `container.first` & `container.last`
+
+The first/last child of the container.
+
+```js
+selector.first === selector.nodes[0];
+selector.last === selector.nodes[selector.nodes.length - 1];
+```
+
+### `container.at(index)`
+
+Returns the node at position `index`.
+
+```js
+selector.at(0) === selector.first;
+selector.at(0) === selector.nodes[0];
+```
+
+Arguments:
+
+* `index`: The index of the node to return.
+
+### `container.index(node)`
+
+Return the index of the node within its container.
+
+```js
+selector.index(selector.nodes[2]) // => 2
+```
+
+Arguments:
+
+* `node`: A node within the current container.
+
+### `container.length`
+
+Proxy to the length of the container's nodes.
+
+```js
+container.length === container.nodes.length
+```
+
+### `container` Array iterators
+
+The container class provides proxies to certain Array methods; these are:
+
+* `container.map === container.nodes.map`
+* `container.reduce === container.nodes.reduce`
+* `container.every === container.nodes.every`
+* `container.some === container.nodes.some`
+* `container.filter === container.nodes.filter`
+* `container.sort === container.nodes.sort`
+
+Note that these methods only work on a container's immediate children; recursive
+iteration is provided by `container.eachInside`.
+
+### `container.each(callback)`
+
+Iterate the container's immediate children, calling `callback` for each child.
+You may return `false` within the callback to break the iteration.
+
+```js
+var className;
+selectors.each(function (selector, index) {
+    if (selector.type === 'class') {
+        className = selector.value;
+        return false;
+    }
+});
+```
+
+Note that unlike `Array#forEach()`, this iterator is safe to use whilst adding
+or removing nodes from the container.
+
+Arguments:
+
+* `callback (function)`: A function to call for each node, which receives `node`
+  and `index` arguments.
+
+### `container.eachInside(callback)`
+
+Like `container#each`, but will also iterate child nodes as long as they are
+`container` types.
+
+```js
+selectors.eachInside(function (selector, index) {
+    // all nodes
+});
+```
+
+Arguments:
+
+* `callback (function)`: A function to call for each node, which receives `node`
+  and `index` arguments.
+
+This iterator is safe to use whilst mutating `container.nodes`,
+like `container#each`.
+
+### `container.eachInside` proxies
+
+The container class provides proxy methods for iterating over types of nodes,
+so that it is easier to write modules that target specific selectors. Those
+methods are:
+
+* `container.eachAttribute`
+* `container.eachClass`
+* `container.eachCombinator`
+* `container.eachComment`
+* `container.eachId`
+* `container.eachPseudo`
+* `container.eachTag`
+* `container.eachUniversal`
+
+### `container.split(callback)`
+
+This method allows you to split a group of nodes by returning `true` from
+a callback. It returns an array of arrays, where each inner array corresponds
+to the groups that you created via the callback.
+
+```js
+// (input) => h1 h2>>h3
+var list = selectors.first.split((selector) => {
+    return selector.type === 'combinator';
+});
+
+// (node values) => [['h1', ' '], ['h2', '>>'], ['h3']]
+```
+
+Arguments:
+
+* `callback (function)`: A function to call for each node, which receives `node`
+  as an argument.
+
+### `container.prepend(node)` & `container.append(node)`
+
+Add a node to the start/end of the container. Note that doing so will set
+the parent property of the node to this container.
+
+```js
+var id = parser.id({value: 'search'});
+selector.append(id);
+```
+
+Arguments:
+
+* `node`: The node to add.
+
+### `container.remove(node)`
+
+Remove the node from the container. Note that you can also use
+`node.removeSelf()` if you would like to remove just a single node.
+
+```js
+selector.length // => 2
+selector.remove(id)
+selector.length // => 1;
+id.parent       // undefined
+```
+
+Arguments:
+
+* `node`: The node to remove.
+
+### `container.removeAll()` or `container.empty()`
+
+Remove all children from the container.
+
+```js
+selector.removeAll();
+selector.length // => 0
+```
 

@@ -210,6 +210,26 @@ if (node.type === 'id') {
 }
 ```
 
+### `node.spaces`
+
+Extra whitespaces around the node will be moved into `node.spaces.before` and
+`node.spaces.after`. So for example, these spaces will be moved as they have
+no semantic meaning:
+
+```css
+      h1     ,     h2   {}
+```
+
+However, *combinating* spaces will form a `combinator` node:
+
+```css
+h1        h2 {}
+```
+
+A `combinator` node may only have the `spaces` property set if the combinator
+value is a non-whitespace character, such as `+`, `~` or `>`. Otherwise, the
+combinator value will contain all of the spaces between selectors.
+
 ## Container types
 
 The `root`, `selector`, and `pseudo` nodes have some helper methods for working
@@ -398,3 +418,21 @@ selector.removeAll();
 selector.length // => 0
 ```
 
+## Root nodes
+
+A root node represents a comma separated list of selectors. Indeed, all
+a root's `toString()` method does is join its selector children with a ','.
+Other than this, it has no special functionality and acts like a container.
+
+## Selector nodes
+
+A selector node represents a single compound selector. For example, this
+selector string `h1 h2 h3, [href] > p`, is represented as two selector nodes.
+It has no special functionality of its own.
+
+## Pseudo nodes
+
+A pseudo selector extends a container node; if it has any parameters of its
+own (such as `h1:not(h2, h3)`), they will be its children. Note that the pseudo
+`value` will always contain the colons preceeding the pseudo identifier. This
+is so that both `:before` and `::before` are properly represented in the AST.

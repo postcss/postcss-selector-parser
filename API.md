@@ -1,5 +1,8 @@
 # API Documentation
 
+*Please use only this documented API when working with the parser. Methods
+not documented here are subject to change at any point.*
+
 ## `parser` function
 
 This is the module's main entry point.
@@ -154,3 +157,56 @@ parser.universal();
 Arguments:
 
 * `props (object)`: The new node's properties.
+
+## Node types
+
+### `node.type`
+
+A string representation of the selector type. It can be one of the following;
+`attribute`, `class`, `combinator`, `comment`, `id`, `pseudo`, `root`,
+`selector`, `tag`, or `universal`.
+
+```js
+parser.attribute({attribute: 'href'}).type;
+// => 'attribute'
+
+### `node.parent`
+
+Returns the parent node.
+
+```js
+root.nodes[0].parent === root;
+```
+
+### `node.toString()`, `String(node)`, or `'' + node`
+
+Returns a string representation of the node.
+
+```js
+var id = parser.id({value: 'search'});
+console.log(String(id));
+// => #search
+```
+
+### `node.next()` & `node.prev()`
+
+Returns the next/previous child of the parent node.
+
+```js
+var next = id.next();
+if (next && next.type !== 'combinator') {
+    throw new Error('Qualified IDs are not allowed!');
+}
+```
+
+### `node.removeSelf()`
+
+Removes the node from its parent node.
+
+```js
+if (node.type === 'id') {
+    node.removeSelf();
+}
+```
+
+

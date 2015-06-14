@@ -251,3 +251,23 @@ test('container#removeAll, container#empty', (t) => {
     t.equal(out1, '');
     t.equal(out2, '');
 });
+
+test('container#insertBefore', (t) => {
+    t.plan(1);
+    let out = parse('h2', (selectors) => {
+        let selector = selectors.first;
+        let clone = selector.first.clone({value: 'h1'});
+        selectors.insertBefore(selector, clone);
+    })
+    t.equal(out, 'h1,h2');
+});
+
+test('container#insertAfter', (t) => {
+    t.plan(1);
+    let out = parse('h1', (selectors) => {
+        let selector = selectors.first;
+        let clone = selector.first.clone({value: 'h2'});
+        selectors.insertAfter(selector, clone);
+    })
+    t.equal(out, 'h1,h2');
+});

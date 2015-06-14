@@ -71,6 +71,36 @@ export default class Container extends Node {
         return this.removeAll();
     }
 
+    insertAfter (oldNode, newNode) {
+        let oldIndex = this.index(oldNode);
+        this.nodes.splice(oldIndex + 1, 0, newNode);
+
+        let index;
+        for ( let id in this.indexes ) {
+            index = this.indexes[id];
+            if ( exist <= index ) {
+                this.indexes[id] = index + nodes.length;
+            }
+        }
+
+        return this;
+    }
+
+    insertBefore (oldNode, newNode) {
+        let oldIndex = this.index(oldNode);
+        this.nodes.splice(oldIndex, 0, newNode);
+
+        let index;
+        for ( let id in this.indexes ) {
+            index = this.indexes[id];
+            if ( exist <= index ) {
+                this.indexes[id] = index + nodes.length;
+            }
+        }
+
+        return this;
+    }
+
     each (callback) {
         if (!this.lastEach) { this.lastEach = 0 }
         if (!this.indexes) { this.indexes = {}; }

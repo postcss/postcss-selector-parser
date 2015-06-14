@@ -40,6 +40,12 @@ export default class {
         return this;
     }
 
+    replaceWith (node) {
+        this.parent.insertBefore(this, node);
+        this.removeSelf();
+        return this;
+    }
+
     next () {
         return this.parent.at(this.parent.index(this) + 1);
     }

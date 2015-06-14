@@ -200,6 +200,20 @@ if (next && next.type !== 'combinator') {
 }
 ```
 
+### `node.replaceWith(node)`
+
+Replace a node with another.
+
+```js
+var attr = selectors.first.first;
+var className = parser.className({value: 'test'});
+attr.replaceWith(className);
+```
+
+Arguments:
+
+* `node`: The node to substitute the original with.
+
 ### `node.removeSelf()`
 
 Removes the node from its parent node.
@@ -420,8 +434,8 @@ selectors.eachInside(function (selector) {
 
 Arguments:
 
-* `old` The existing node in the container.
-* `new` The new node to add before/after the existing node.
+* `old`: The existing node in the container.
+* `new`: The new node to add before/after the existing node.
 
 ### `container.remove(node)`
 

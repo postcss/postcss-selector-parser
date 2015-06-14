@@ -1,6 +1,8 @@
-# *current*
+# 1.0.0
 
----
+* Adds `clone` and `replaceWith` methods to nodes.
+* Adds `insertBefore` and `insertAfter` to containers.
+* Stabilises API.
 
 # 0.0.5
 

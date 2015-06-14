@@ -1,6 +1,32 @@
 # postcss-selector-parser [![Build Status](https://travis-ci.org/postcss/postcss-selector-parser.svg?branch=master)](https://travis-ci.org/postcss/postcss-selector-parser)
 
-Work in progress parser for PostCSS.
+> Selector parser with built in methods for working with selector strings.
+
+## Install
+
+With [npm](https://npmjs.com/package/postcss-selector-parser) do:
+
+```
+npm install postcss-selector-parser
+```
+
+## Quick Start
+
+```js
+var parser = require('postcss-selector-parser');
+var transform = function (selectors) {
+    selectors.eachInside(function (selector) {
+        // do something with the selector
+        console.log(String(selector))
+    });
+};
+
+var transformed = parser(transform).process('h1, h2, h3').result;
+```
+
+## API
+
+Please see [API.md](API.md).
 
 ## Credits
 

@@ -1,5 +1,6 @@
 import test from 'tape';
 import {parse} from './util/helpers';
+import parser from '../index';
 
 test('container#each', (t) => {
     t.plan(1);
@@ -270,4 +271,15 @@ test('container#insertAfter', (t) => {
         selectors.insertAfter(selector, clone);
     })
     t.equal(out, 'h1,h2');
+});
+
+test('container#insertAfter (during iteration)', (t) => {
+    t.plan(1);
+    let out = parse('h1, h2, h3', (selectors) => {
+        selectors.eachTag(function (selector) {
+            let attribute = parser.attribute({attribute: 'class'});
+            selector.parent.insertAfter(selector, attribute);
+        });
+    });
+    t.equal(out, 'h1[class], h2[class], h3[class]');
 });

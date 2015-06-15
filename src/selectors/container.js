@@ -78,8 +78,8 @@ export default class Container extends Node {
         let index;
         for ( let id in this.indexes ) {
             index = this.indexes[id];
-            if ( exist <= index ) {
-                this.indexes[id] = index + nodes.length;
+            if ( oldIndex <= index ) {
+                this.indexes[id] = index + this.nodes.length;
             }
         }
 
@@ -93,8 +93,8 @@ export default class Container extends Node {
         let index;
         for ( let id in this.indexes ) {
             index = this.indexes[id];
-            if ( exist <= index ) {
-                this.indexes[id] = index + nodes.length;
+            if ( oldIndex <= index ) {
+                this.indexes[id] = index + this.nodes.length;
             }
         }
 

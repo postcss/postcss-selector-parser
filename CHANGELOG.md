@@ -1,3 +1,7 @@
+# 1.0.1
+
+* Fixes using `insertAfter` and `insertBefore` during iteration.
+
 # 1.0.0
 
 * Adds `clone` and `replaceWith` methods to nodes.

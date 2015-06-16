@@ -64,3 +64,14 @@ test('no operation', (t) => {
         return parser().process('h1 h2 h3').result;
     });
 });
+
+test('empty selector string', (t) => {
+    t.plan(1);
+    t.doesNotThrow(() => {
+        return parser((selectors) => {
+            selectors.eachInside((selector) => {
+                selector.type = 'tag';
+            });
+        }).process('').result;
+    });
+});

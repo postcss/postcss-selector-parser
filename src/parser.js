@@ -102,7 +102,9 @@ export default class Parser {
 
     comma () {
         if (this.position === this.tokens.length - 1) {
-            this.error('Unexpected trailing comma.');
+            this.root.trailingComma = true;
+            this.position ++;
+            return;
         }
         let selectors = new Selector();
         this.current.parent.append(selectors);
@@ -215,9 +217,6 @@ export default class Parser {
         }
         let hasClass = indexesOf(word, '.');
         let hasId = indexesOf(word, '#');
-        if (hasId.length > 1) {
-            this.error('Unexpected "#" found.');
-        }
         let indices = sortAsc(uniq(flatten([[0], hasClass, hasId])));
         indices.forEach((ind, i) => {
             let index = indices[i + 1] || word.length;

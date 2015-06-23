@@ -9,9 +9,10 @@ export default class Root extends Container {
     }
 
     toString () {
-        return this.reduce((memo, selector) => {
+        let str = this.reduce((memo, selector) => {
             let str = String(selector);
             return str ? memo + str + ',' : '';
         }, '').slice(0, -1);
+        return this.trailingComma ? str + ',' : str;
     }
 }

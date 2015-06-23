@@ -8,6 +8,12 @@ test('id selector', '#one', (t, tree) => {
     t.equal(tree.nodes[0].nodes[0].type, 'id');
 });
 
+test('id hack', '#one#two', (t, tree) => {
+    t.plan(2);
+    t.equal(tree.nodes[0].nodes[0].type, 'id');
+    t.equal(tree.nodes[0].nodes[1].type, 'id');
+});
+
 test('id and class names mixed', '#one.two.three', (t, tree) => {
     t.plan(6);
     t.equal(tree.nodes[0].nodes[0].value, 'one');

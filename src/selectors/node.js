@@ -40,9 +40,13 @@ export default class {
         return this;
     }
 
-    replaceWith (node) {
-        this.parent.insertBefore(this, node);
-        this.removeSelf();
+    replaceWith () {
+        if (this.parent) {
+            for (let index in arguments) {
+                this.parent.insertBefore(this, arguments[index]);
+            }
+            this.removeSelf();
+        }
         return this;
     }
 

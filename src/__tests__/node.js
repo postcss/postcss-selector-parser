@@ -16,8 +16,9 @@ test('node#replaceWith', (t) => {
     t.plan(1);
     let out = parse('[href="test"]', (selectors) => {
         let attr = selectors.first.first;
+        let id = parser.id({value: 'test'});
         let className = parser.className({value: 'test'});
-        attr.replaceWith(className);
+        attr.replaceWith(id, className);
     });
-    t.equal(out, '.test');
+    t.equal(out, '#test.test');
 });

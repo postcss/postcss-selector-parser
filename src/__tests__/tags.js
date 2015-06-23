@@ -28,3 +28,8 @@ test('tag with trailing comma', 'h1,', (t, tree) => {
     t.plan(1);
     t.equal(tree.trailingComma, true);
 });
+
+test('tag with trailing slash', 'h1\\', (t, tree) => {
+    t.plan(1);
+    t.equal(tree.nodes[0].nodes[0].value, 'h1\\');
+});

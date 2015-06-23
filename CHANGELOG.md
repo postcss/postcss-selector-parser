@@ -1,3 +1,7 @@
+# 1.1.1
+
+* Fixes a crash when a backslash ended a selector string.
+
 # 1.1.0
 
 * Adds support for replacing multiple nodes at once with `replaceWith`

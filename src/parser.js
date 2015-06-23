@@ -208,7 +208,7 @@ export default class Parser {
             word += current;
             if (current.lastIndexOf('\\') === current.length - 1) {
                 let next = this.nextToken;
-                if (next[0] === 'space') {
+                if (next && next[0] === 'space') {
                     word += next[1];
                     this.position ++;
                 }

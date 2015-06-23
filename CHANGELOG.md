@@ -1,3 +1,10 @@
+# 1.1.0
+
+* Adds support for replacing multiple nodes at once with `replaceWith`
+  (thanks to @jonathantneal).
+* Parser no longer throws on sequential IDs and trailing commas, to support
+  parsing of selector hacks.
+
 # 1.0.1
 
 * Fixes using `insertAfter` and `insertBefore` during iteration.

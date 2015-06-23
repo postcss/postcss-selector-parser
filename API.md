@@ -468,6 +468,11 @@ A root node represents a comma separated list of selectors. Indeed, all
 a root's `toString()` method does is join its selector children with a ','.
 Other than this, it has no special functionality and acts like a container.
 
+### `root.trailingComma`
+
+This will be set to `true` if the input has a trailing comma, in order to
+support parsing of legacy CSS hacks.
+
 ## Selector nodes
 
 A selector node represents a single compound selector. For example, this

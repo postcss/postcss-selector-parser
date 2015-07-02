@@ -1,3 +1,8 @@
+# 1.1.2
+
+* Fixes an infinite loop caused by using parentheses in a non-pseudo element
+  context.
+
 # 1.1.1
 
 * Fixes a crash when a backslash ended a selector string.

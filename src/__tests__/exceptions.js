@@ -8,4 +8,3 @@ throws('incorrect combinator with no left hand side', '+ h1');
 throws('incorrect combinator with no right hand side', 'h1 +');
 throws('unclosed attribute selector', '[name="james"][href');
 throws('missing closing parenthesis in pseudo', ':not([attr="test"]:not([attr="test"])');
-throws('misplaced parentheses', 'h1:not.test(h2)');

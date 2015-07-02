@@ -133,6 +133,44 @@ export default class Parser {
         }
     }
 
+    parentheses () {
+        let last = this.current.last;
+        if (last && last.type === 'pseudo') {
+            let selector = new Selector();
+            let cache = this.current;
+            last.append(selector);
+            this.current = selector;
+            let balanced = 1;
+            this.position ++;
+            while (this.position < this.tokens.length && balanced) {
+                if (this.currToken[0] === '(') balanced++;
+                if (this.currToken[0] === ')') balanced--;
+                if (balanced) {
+                    this.parse();
+                } else {
+                    this.position ++;
+                }
+            }
+            if (balanced) {
+                this.error('Expected closing parenthesis.');
+            }
+            this.current = cache;
+        } else {
+            let balanced = 1;
+            this.position ++;
+            last.value += '(';
+            while (this.position < this.tokens.length && balanced) {
+                if (this.currToken[0] === '(') balanced++;
+                if (this.currToken[0] === ')') balanced--;
+                last.value += this.currToken[1];
+                this.position++;
+            }
+            if (balanced) {
+                this.error('Expected closing parenthesis.');
+            }
+        }
+    }
+
     pseudo () {
         let pseudoStr = '';
         while (this.currToken[0] === ':') {
@@ -149,27 +187,6 @@ export default class Parser {
                     this.error('Misplaced parenthesis.');
                 }
             });
-            if (this.currToken && this.currToken[0] === '(') {
-                let selector = new Selector();
-                let cache = this.current;
-                pseudo.append(selector);
-                this.current = selector;
-                let balanced = 1;
-                this.position ++;
-                while (this.position < this.tokens.length && balanced) {
-                    if (this.currToken[0] === '(') balanced++;
-                    if (this.currToken[0] === ')') balanced--;
-                    if (balanced) {
-                        this.parse();
-                    } else {
-                        this.position ++;
-                    }
-                }
-                if (balanced) {
-                    this.error('Expected closing parenthesis.');
-                }
-                this.current = cache;
-            }
         } else {
             this.error('Unexpected "' + this.currToken[0] + '" found.');
         }
@@ -260,6 +277,9 @@ export default class Parser {
                 break;
             case 'comment':
                 this.comment();
+                break;
+            case '(':
+                this.parentheses();
                 break;
             case '[':
                 this.attribute();

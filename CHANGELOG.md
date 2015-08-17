@@ -1,3 +1,7 @@
+# 1.1.3
+
+* Fixes a crash on `@` tokens.
+
 # 1.1.2
 
 * Fixes an infinite loop caused by using parentheses in a non-pseudo element

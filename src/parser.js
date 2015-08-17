@@ -284,6 +284,7 @@ export default class Parser {
             case '[':
                 this.attribute();
                 break;
+            case 'at-word':
             case 'word':
                 this.word();
                 break;

@@ -84,18 +84,12 @@ export default class Parser {
                 this.currToken[0] === 'combinator') {
             if (this.nextToken[0] === 'combinator') {
                 combinator.spaces.before = this.currToken[1];
-            } else if (this.prevToken[0] === 'combinator') {
+            } else if (this.prevToken && this.prevToken[0] === 'combinator') {
                 combinator.spaces.after = this.currToken[1];
             } else if (this.currToken[0] === 'space' || this.currToken[0] === 'combinator') {
                 combinator.value = this.currToken[1];
             }
             this.position ++;
-            if (this.position === this.tokens.length) {
-                this.error('Unexpected right hand side combinator.');
-            }
-        }
-        if (!this.current.last) {
-            this.error('Unexpected left hand side combinator.');
         }
         return this.newNode(combinator);
     }
@@ -143,8 +137,8 @@ export default class Parser {
             let balanced = 1;
             this.position ++;
             while (this.position < this.tokens.length && balanced) {
-                if (this.currToken[0] === '(') balanced++;
-                if (this.currToken[0] === ')') balanced--;
+                if (this.currToken[0] === '(') { balanced++; }
+                if (this.currToken[0] === ')') { balanced--; }
                 if (balanced) {
                     this.parse();
                 } else {
@@ -160,8 +154,8 @@ export default class Parser {
             this.position ++;
             last.value += '(';
             while (this.position < this.tokens.length && balanced) {
-                if (this.currToken[0] === '(') balanced++;
-                if (this.currToken[0] === ')') balanced--;
+                if (this.currToken[0] === '(') { balanced++; }
+                if (this.currToken[0] === ')') { balanced--; }
                 last.value += this.currToken[1];
                 this.position++;
             }

@@ -16,3 +16,9 @@ test('at word in selector', 'em@il.com', (t, tree) => {
     t.equal(tree.nodes[0].nodes[1].value, '@il');
     t.equal(tree.nodes[0].nodes[2].value, 'com');
 });
+
+test('leading combinator', '> *', (t, tree) => {
+    t.plan(2);
+    t.equal(tree.nodes[0].nodes[0].value, '>');
+    t.equal(tree.nodes[0].nodes[1].value, '*');
+});

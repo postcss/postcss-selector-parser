@@ -1,3 +1,8 @@
+# 1.1.4
+
+* Fixes a crash when a selector started with a `>` combinator. The module will
+  now no longer throw if a selector has a leading/trailing combinator node.
+
 # 1.1.3
 
 * Fixes a crash on `@` tokens.

@@ -42,7 +42,7 @@ export default function tokenize(input) {
             css += end;
             next = css.length - 1;
         } else {
-            throw input.error('Unclosed ' + what, line, pos  - offset);
+            throw input.error('Unclosed ' + what, line, pos - offset);
         }
     };
 
@@ -74,7 +74,7 @@ export default function tokenize(input) {
                           code === cr      ||
                           code === feed );
 
-                tokens.push(['space', css.slice(pos, next)]);
+                tokens.push(['space', css.slice(pos, next), line, pos - offset]);
                 pos = next - 1;
                 break;
 
@@ -90,7 +90,7 @@ export default function tokenize(input) {
                           code === gt    ||
                           code === tilde ||
                           code === pipe );
-                tokens.push(['combinator', css.slice(pos, next)]);
+                tokens.push(['combinator', css.slice(pos, next), line, pos - offset]);
                 pos = next - 1;
                 break;
 

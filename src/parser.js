@@ -78,7 +78,19 @@ export default class Parser {
         if (this.currToken[1] === '|') {
             return this.namespace();
         }
-        let combinator = new Combinator({value: ''});
+        let combinator = new Combinator({
+            value: '',
+            source: {
+                start: {
+                    line: this.currToken[2],
+                    column: this.currToken[3]
+                },
+                end: {
+                    line: this.currToken[2],
+                    column: this.currToken[3]
+                }
+            }
+        });
         while ( this.position < this.tokens.length &&
                 this.currToken[0] === 'space' ||
                 this.currToken[0] === 'combinator') {
@@ -89,6 +101,8 @@ export default class Parser {
             } else if (this.currToken[0] === 'space' || this.currToken[0] === 'combinator') {
                 combinator.value = this.currToken[1];
             }
+            combinator.source.end.column = this.currToken[3];
+            combinator.source.end.line = this.currToken[2];
             this.position ++;
         }
         return this.newNode(combinator);
@@ -107,7 +121,19 @@ export default class Parser {
     }
 
     comment () {
-        let comment = new Comment({value: this.currToken[1]});
+        let comment = new Comment({
+            value: this.currToken[1],
+            source: {
+                start: {
+                    line: this.currToken[2],
+                    column: this.currToken[3]
+                },
+                end: {
+                    line: this.currToken[4],
+                    column: this.currToken[5]
+                }
+            }
+        });
         this.newNode(comment);
         this.position++;
     }
@@ -206,7 +232,19 @@ export default class Parser {
             this.position ++;
             return this.namespace();
         }
-        this.newNode(new Universal({value: this.currToken[1]}), namespace);
+        this.newNode(new Universal({
+            value: this.currToken[1],
+            source: {
+                start: {
+                    line: this.currToken[2],
+                    column: this.currToken[3]
+                },
+                end: {
+                    line: this.currToken[2],
+                    column: this.currToken[3]
+                }
+            }
+        }), namespace);
         this.position ++;
     }
 
@@ -237,11 +275,47 @@ export default class Parser {
             }
             let node;
             if (~hasClass.indexOf(ind)) {
-                node = new ClassName({value: value.slice(1)});
+                node = new ClassName({
+                    value: value.slice(1),
+                    source: {
+                        start: {
+                            line: this.currToken[2],
+                            column: this.currToken[3] + ind
+                        },
+                        end: {
+                            line: this.currToken[4],
+                            column: this.currToken[3] + (index - 1)
+                        }
+                    }
+                });
             } else if (~hasId.indexOf(ind)) {
-                node = new ID({value: value.slice(1)});
+                node = new ID({
+                    value: value.slice(1),
+                    source: {
+                        start: {
+                            line: this.currToken[2],
+                            column: this.currToken[3] + ind
+                        },
+                        end: {
+                            line: this.currToken[4],
+                            column: this.currToken[3] + (index - 1)
+                        }
+                    }
+                });
             } else {
-                node = new Tag({value: value});
+                node = new Tag({
+                    value: value,
+                    source: {
+                        start: {
+                            line: this.currToken[2],
+                            column: this.currToken[3] + ind
+                        },
+                        end: {
+                            line: this.currToken[4],
+                            column: this.currToken[3] + (index - 1)
+                        }
+                    }
+                });
             }
             this.newNode(node, namespace);
         });

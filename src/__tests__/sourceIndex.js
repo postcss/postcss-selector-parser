@@ -110,3 +110,35 @@ test('multiple class selectors', '.one.two,.three.four', (t, tree) => {
     t.equal(tree.nodes[1].nodes[1].source.end.column, 20);
     t.equal(tree.nodes[1].nodes[1].sourceIndex, 15);
 });
+
+test('attribute selector', '[name="james"]', (t, tree) => {
+    t.plan(4);
+    t.equal(tree.nodes[0].nodes[0].source.start.line, 1);
+    t.equal(tree.nodes[0].nodes[0].source.start.column, 1);
+    t.equal(tree.nodes[0].nodes[0].source.end.column, 14);
+    t.equal(tree.nodes[0].nodes[0].sourceIndex, 0);
+});
+
+test('multiple attribute selectors', '[name="james"][name="ed"],[name="snakeman"][name="a"]', (t, tree) => {
+    t.plan(20);
+    t.equal(tree.nodes[0].nodes[0].source.start.line, 1);
+    t.equal(tree.nodes[0].nodes[0].source.start.column, 1);
+    t.equal(tree.nodes[0].nodes[0].source.end.line, 1);
+    t.equal(tree.nodes[0].nodes[0].source.end.column, 14);
+    t.equal(tree.nodes[0].nodes[0].sourceIndex, 0);
+    t.equal(tree.nodes[0].nodes[1].source.start.line, 1);
+    t.equal(tree.nodes[0].nodes[1].source.start.column, 15);
+    t.equal(tree.nodes[0].nodes[1].source.end.line, 1);
+    t.equal(tree.nodes[0].nodes[1].source.end.column, 25);
+    t.equal(tree.nodes[0].nodes[1].sourceIndex, 14);
+    t.equal(tree.nodes[1].nodes[0].source.start.line, 1);
+    t.equal(tree.nodes[1].nodes[0].source.start.column, 27);
+    t.equal(tree.nodes[1].nodes[0].source.end.line, 1);
+    t.equal(tree.nodes[1].nodes[0].source.end.column, 43);
+    t.equal(tree.nodes[1].nodes[0].sourceIndex, 26);
+    t.equal(tree.nodes[1].nodes[1].source.start.line, 1);
+    t.equal(tree.nodes[1].nodes[1].source.start.column, 44);
+    t.equal(tree.nodes[1].nodes[1].source.end.line, 1);
+    t.equal(tree.nodes[1].nodes[1].source.end.column, 53);
+    t.equal(tree.nodes[1].nodes[1].sourceIndex, 43);
+});

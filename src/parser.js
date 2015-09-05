@@ -36,6 +36,7 @@ export default class Parser {
     attribute () {
         let attribute = '';
         let attr;
+        let startingToken = this.currToken;
         this.position ++;
         while (this.position < this.tokens.length && this.currToken[0] !== ']') {
             attribute += this.tokens[this.position][1];
@@ -46,21 +47,28 @@ export default class Parser {
         }
         let parts = attribute.split(/((?:[*~^$|]?)=)/);
         let namespace = parts[0].split(/(\|)/g);
+        let attributeProps = {
+            operator: parts[1],
+            value: parts[2],
+            source: {
+                start: {
+                    line: startingToken[2],
+                    column: startingToken[3]
+                },
+                end: {
+                    line: this.currToken[2],
+                    column: this.currToken[3]
+                }
+            }
+        };
         if (namespace.length > 1) {
             if (namespace[0] === '') { namespace[0] = true; }
-            attr = new Attribute({
-                attribute: namespace[2],
-                namespace: namespace[0],
-                operator: parts[1],
-                value: parts[2]
-            });
+            attributeProps.attribute = namespace[2];
+            attributeProps.namespace = namespace[0];
         } else {
-            attr = new Attribute({
-                attribute: parts[0],
-                operator: parts[1],
-                value: parts[2]
-            });
+            attributeProps.attribute = parts[0];
         }
+        attr = new Attribute(attributeProps)
 
         if (parts[2]) {
             let insensitive = parts[2].split(/(\s+i\s*?)$/);

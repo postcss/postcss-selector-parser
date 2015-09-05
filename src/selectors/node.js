@@ -73,8 +73,4 @@ export default class {
             this.spaces.after
         ].join('');
     }
-
-    get sourceIndex () {
-        return this.source.start.column - 1;
-    }
 }

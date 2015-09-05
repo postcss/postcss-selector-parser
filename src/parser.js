@@ -59,7 +59,8 @@ export default class Parser {
                     line: this.currToken[2],
                     column: this.currToken[3]
                 }
-            }
+            },
+            sourceIndex: startingToken[4]
         };
         if (namespace.length > 1) {
             if (namespace[0] === '') { namespace[0] = true; }
@@ -97,7 +98,8 @@ export default class Parser {
                     line: this.currToken[2],
                     column: this.currToken[3]
                 }
-            }
+            },
+            sourceIndex: this.currToken[4]
         });
         while ( this.position < this.tokens.length &&
                 this.currToken[0] === 'space' ||
@@ -140,7 +142,8 @@ export default class Parser {
                     line: this.currToken[4],
                     column: this.currToken[5]
                 }
-            }
+            },
+            sourceIndex: this.currToken[6]
         });
         this.newNode(comment);
         this.position++;
@@ -223,7 +226,8 @@ export default class Parser {
                             line: this.currToken[4],
                             column: this.currToken[5]
                         }
-                    }
+                    },
+                    sourceIndex: startingToken[4]
                 });
                 this.newNode(pseudo);
                 if (length > 1 && this.nextToken && this.nextToken[0] === '(') {
@@ -266,7 +270,8 @@ export default class Parser {
                     line: this.currToken[2],
                     column: this.currToken[3]
                 }
-            }
+            },
+            sourceIndex: this.currToken[4]
         }), namespace);
         this.position ++;
     }
@@ -309,7 +314,8 @@ export default class Parser {
                             line: this.currToken[4],
                             column: this.currToken[3] + (index - 1)
                         }
-                    }
+                    },
+                    sourceIndex: this.currToken[6] + indices[i]
                 });
             } else if (~hasId.indexOf(ind)) {
                 node = new ID({
@@ -323,7 +329,8 @@ export default class Parser {
                             line: this.currToken[4],
                             column: this.currToken[3] + (index - 1)
                         }
-                    }
+                    },
+                    sourceIndex: this.currToken[6] + indices[i]
                 });
             } else {
                 node = new Tag({
@@ -337,7 +344,8 @@ export default class Parser {
                             line: this.currToken[4],
                             column: this.currToken[3] + (index - 1)
                         }
-                    }
+                    },
+                    sourceIndex: this.currToken[6] + indices[i]
                 });
             }
             this.newNode(node, namespace);

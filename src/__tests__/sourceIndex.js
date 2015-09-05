@@ -182,3 +182,82 @@ test('multiple pseudos', 'h1:not(.food)::before, a:first-child', (t, tree) => {
     t.equal(tree.nodes[1].nodes[1].source.end.column, 36);
     t.equal(tree.nodes[1].nodes[1].sourceIndex, 24);
 });
+
+test('multiple id selectors on different lines', '#one,\n#two', (t, tree) => {
+    t.plan(8);
+
+    t.equal(tree.nodes[0].nodes[0].source.start.line, 1);
+    t.equal(tree.nodes[0].nodes[0].source.start.column, 1);
+    t.equal(tree.nodes[0].nodes[0].source.end.column, 4);
+    t.equal(tree.nodes[0].nodes[0].sourceIndex, 0);
+
+    t.equal(tree.nodes[1].nodes[0].source.start.line, 2);
+    t.equal(tree.nodes[1].nodes[0].source.start.column, 1);
+    t.equal(tree.nodes[1].nodes[0].source.end.column, 4);
+    t.equal(tree.nodes[1].nodes[0].sourceIndex, 6);
+});
+
+test('multiple id selectors on different CRLF lines', '#one,\r\n#two,\r\n#three', (t, tree) => {
+    t.plan(12);
+
+    t.equal(tree.nodes[0].nodes[0].source.start.line, 1, '#one start line');
+    t.equal(tree.nodes[0].nodes[0].source.start.column, 1, '#one start column');
+    t.equal(tree.nodes[0].nodes[0].source.end.column, 4, '#one end column');
+    t.equal(tree.nodes[0].nodes[0].sourceIndex, 0, '#one sourceIndex');
+
+    t.equal(tree.nodes[1].nodes[0].source.start.line, 2, '#two start line');
+    t.equal(tree.nodes[1].nodes[0].source.start.column, 1, '#two start column');
+    t.equal(tree.nodes[1].nodes[0].source.end.column, 4, '#two end column');
+    t.equal(tree.nodes[1].nodes[0].sourceIndex, 7, '#two sourceIndex');
+
+    t.equal(tree.nodes[2].nodes[0].source.start.line, 3, '#three start line');
+    t.equal(tree.nodes[2].nodes[0].source.start.column, 1, '#three start column');
+    t.equal(tree.nodes[2].nodes[0].source.end.column, 6, '#three end column');
+    t.equal(tree.nodes[2].nodes[0].sourceIndex, 14, '#three sourceIndex');
+});
+
+test('id, tag, pseudo, and class selectors on different lines with indentation', '\t#one,\n\th1:after,\n\t\t.two', (t, tree) => {
+    t.plan(16);
+
+    t.equal(tree.nodes[0].nodes[0].source.start.line, 1, '#one start line');
+    t.equal(tree.nodes[0].nodes[0].source.start.column, 2, '#one start column');
+    t.equal(tree.nodes[0].nodes[0].source.end.column, 5, '#one end column');
+    t.equal(tree.nodes[0].nodes[0].sourceIndex, 1, '#one sourceIndex');
+
+    t.equal(tree.nodes[1].nodes[0].source.start.line, 2, 'h1 start line');
+    t.equal(tree.nodes[1].nodes[0].source.start.column, 2, 'h1 start column');
+    t.equal(tree.nodes[1].nodes[0].source.end.column, 3, 'h1 end column');
+    t.equal(tree.nodes[1].nodes[0].sourceIndex, 8, 'h1 sourceIndex');
+
+    t.equal(tree.nodes[1].nodes[1].source.start.line, 2, ':after start line');
+    t.equal(tree.nodes[1].nodes[1].source.start.column, 4, ':after start column');
+    t.equal(tree.nodes[1].nodes[1].source.end.column, 9, ':after end column');
+    t.equal(tree.nodes[1].nodes[1].sourceIndex, 10, ':after sourceIndex');
+
+    t.equal(tree.nodes[2].nodes[0].source.start.line, 3, '.two start line');
+    t.equal(tree.nodes[2].nodes[0].source.start.column, 3, '.two start column');
+    t.equal(tree.nodes[2].nodes[0].source.end.column, 6, '.two end column');
+    t.equal(tree.nodes[2].nodes[0].sourceIndex, 20, '.two sourceIndex');
+});
+
+test('pseudo with arguments spanning multiple lines', 'h1:not(\n\t.one,\n\t.two\n)', (t, tree) => {
+    t.plan(15);
+
+    t.equal(tree.nodes[0].nodes[1].source.start.line, 1, ':not start line');
+    t.equal(tree.nodes[0].nodes[1].source.start.column, 3, ':not start column');
+    t.equal(tree.nodes[0].nodes[1].source.end.line, 4, ':not end line');
+    t.equal(tree.nodes[0].nodes[1].source.end.column, 1, ':not end column');
+    t.equal(tree.nodes[0].nodes[1].sourceIndex, 2, ':not sourceIndex');
+
+    t.equal(tree.nodes[0].nodes[1].nodes[0].nodes[0].source.start.line, 2, '.one start line');
+    t.equal(tree.nodes[0].nodes[1].nodes[0].nodes[0].source.start.column, 2, '.one start column');
+    t.equal(tree.nodes[0].nodes[1].nodes[0].nodes[0].source.end.line, 2, '.one end line');
+    t.equal(tree.nodes[0].nodes[1].nodes[0].nodes[0].source.end.column, 5, '.one end column');
+    t.equal(tree.nodes[0].nodes[1].nodes[0].nodes[0].sourceIndex, 9, '.one sourceIndex');
+
+    t.equal(tree.nodes[0].nodes[1].nodes[1].nodes[0].source.start.line, 3, '.two start line');
+    t.equal(tree.nodes[0].nodes[1].nodes[1].nodes[0].source.start.column, 2, '.two start column');
+    t.equal(tree.nodes[0].nodes[1].nodes[1].nodes[0].source.end.line, 3, '.two end line');
+    t.equal(tree.nodes[0].nodes[1].nodes[1].nodes[0].source.end.column, 5, '.two end column');
+    t.equal(tree.nodes[0].nodes[1].nodes[1].nodes[0].sourceIndex, 16, '.two sourceIndex');
+});

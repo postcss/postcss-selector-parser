@@ -42,7 +42,7 @@ export default function tokenize(input) {
             css += end;
             next = css.length - 1;
         } else {
-            throw input.error('Unclosed ' + what, line, pos - offset);
+            throw input.error('Unclosed ' + what, line, pos - offset, pos);
         }
     };
 
@@ -74,7 +74,7 @@ export default function tokenize(input) {
                           code === cr      ||
                           code === feed );
 
-                tokens.push(['space', css.slice(pos, next), line, pos - offset]);
+                tokens.push(['space', css.slice(pos, next), line, pos - offset, pos]);
                 pos = next - 1;
                 break;
 
@@ -90,40 +90,40 @@ export default function tokenize(input) {
                           code === gt    ||
                           code === tilde ||
                           code === pipe );
-                tokens.push(['combinator', css.slice(pos, next), line, pos - offset]);
+                tokens.push(['combinator', css.slice(pos, next), line, pos - offset, pos]);
                 pos = next - 1;
                 break;
 
             case asterisk:
-                tokens.push(['*', '*', line, pos - offset]);
+                tokens.push(['*', '*', line, pos - offset, pos]);
                 break;
 
             case comma:
-                tokens.push([',', ',', line, pos - offset]);
+                tokens.push([',', ',', line, pos - offset, pos]);
                 break;
 
             case openSq:
-                tokens.push(['[', '[', line, pos - offset]);
+                tokens.push(['[', '[', line, pos - offset, pos]);
                 break;
 
             case closeSq:
-                tokens.push([']', ']', line, pos - offset]);
+                tokens.push([']', ']', line, pos - offset, pos]);
                 break;
 
             case colon:
-                tokens.push([':', ':', line, pos - offset]);
+                tokens.push([':', ':', line, pos - offset, pos]);
                 break;
 
             case semicolon:
-                tokens.push([';', ';', line, pos - offset]);
+                tokens.push([';', ';', line, pos - offset, pos]);
                 break;
 
             case openBracket:
-                tokens.push(['(', '(', line, pos - offset]);
+                tokens.push(['(', '(', line, pos - offset, pos]);
                 break;
 
             case closeBracket:
-                tokens.push([')', ')', line, pos - offset]);
+                tokens.push([')', ')', line, pos - offset, pos]);
                 break;
 
             case singleQuote:
@@ -143,7 +143,8 @@ export default function tokenize(input) {
 
                 tokens.push(['string', css.slice(pos, next + 1),
                     line, pos  - offset,
-                    line, next - offset
+                    line, next - offset,
+                    pos
                 ]);
                 pos = next;
                 break;
@@ -158,7 +159,8 @@ export default function tokenize(input) {
                 }
                 tokens.push(['at-word', css.slice(pos, next + 1),
                     line, pos  - offset,
-                    line, next - offset
+                    line, next - offset,
+                    pos
                 ]);
                 pos = next;
                 break;
@@ -181,7 +183,8 @@ export default function tokenize(input) {
                 }
                 tokens.push(['word', css.slice(pos, next + 1),
                     line, pos  - offset,
-                    line, next - offset
+                    line, next - offset,
+                    pos
                 ]);
                 pos = next;
                 break;
@@ -205,7 +208,8 @@ export default function tokenize(input) {
 
                     tokens.push(['comment', content,
                         line,     pos  - offset,
-                        nextLine, next - nextOffset
+                        nextLine, next - nextOffset,
+                        pos
                     ]);
 
                     offset = nextOffset;
@@ -223,7 +227,8 @@ export default function tokenize(input) {
 
                     tokens.push(['word', css.slice(pos, next + 1),
                         line, pos  - offset,
-                        line, next - offset
+                        line, next - offset,
+                        pos
                     ]);
                     pos = next;
                 }

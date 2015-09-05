@@ -167,9 +167,12 @@ export default class Parser {
 
     pseudo () {
         let pseudoStr = '';
-        while (this.currToken[0] === ':') {
+        while (this.currToken && this.currToken[0] === ':') {
             pseudoStr += this.currToken[1];
             this.position ++;
+        }
+        if (!this.currToken) {
+            return this.error('Expected pseudo-class or pseudo-element');
         }
         if (this.currToken[0] === 'word') {
             let pseudo;

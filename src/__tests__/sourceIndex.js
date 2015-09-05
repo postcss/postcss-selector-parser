@@ -142,3 +142,43 @@ test('multiple attribute selectors', '[name="james"][name="ed"],[name="snakeman"
     t.equal(tree.nodes[1].nodes[1].source.end.column, 53);
     t.equal(tree.nodes[1].nodes[1].sourceIndex, 43);
 });
+
+test('pseudo-class', 'h1:first-child', (t, tree) => {
+    t.plan(4);
+    t.equal(tree.nodes[0].nodes[1].source.start.line, 1);
+    t.equal(tree.nodes[0].nodes[1].source.start.column, 3);
+    t.equal(tree.nodes[0].nodes[1].source.end.column, 14);
+    t.equal(tree.nodes[0].nodes[1].sourceIndex, 2);
+});
+
+test('pseudo-class with argument', 'h1:not(.strudel, .food)', (t, tree) => {
+    t.plan(4);
+    t.equal(tree.nodes[0].nodes[1].source.start.line, 1);
+    t.equal(tree.nodes[0].nodes[1].source.start.column, 3);
+    t.equal(tree.nodes[0].nodes[1].source.end.column, 23);
+    t.equal(tree.nodes[0].nodes[1].sourceIndex, 2);
+});
+
+test('pseudo-element', 'h1::before', (t, tree) => {
+    t.plan(4);
+    t.equal(tree.nodes[0].nodes[1].source.start.line, 1);
+    t.equal(tree.nodes[0].nodes[1].source.start.column, 3);
+    t.equal(tree.nodes[0].nodes[1].source.end.column, 10);
+    t.equal(tree.nodes[0].nodes[1].sourceIndex, 2);
+});
+
+test('multiple pseudos', 'h1:not(.food)::before, a:first-child', (t, tree) => {
+    t.plan(12);
+    t.equal(tree.nodes[0].nodes[1].source.start.line, 1);
+    t.equal(tree.nodes[0].nodes[1].source.start.column, 3);
+    t.equal(tree.nodes[0].nodes[1].source.end.column, 13);
+    t.equal(tree.nodes[0].nodes[1].sourceIndex, 2);
+    t.equal(tree.nodes[0].nodes[2].source.start.line, 1);
+    t.equal(tree.nodes[0].nodes[2].source.start.column, 14);
+    t.equal(tree.nodes[0].nodes[2].source.end.column, 21);
+    t.equal(tree.nodes[0].nodes[2].sourceIndex, 13);
+    t.equal(tree.nodes[1].nodes[1].source.start.line, 1);
+    t.equal(tree.nodes[1].nodes[1].source.start.column, 25);
+    t.equal(tree.nodes[1].nodes[1].source.end.column, 36);
+    t.equal(tree.nodes[1].nodes[1].sourceIndex, 24);
+});

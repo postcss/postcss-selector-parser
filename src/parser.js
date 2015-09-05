@@ -176,6 +176,8 @@ export default class Parser {
                 if (balanced) {
                     this.parse();
                 } else {
+                    selector.parent.source.end.line = this.currToken[2];
+                    selector.parent.source.end.column = this.currToken[3];
                     this.position ++;
                 }
             }
@@ -201,6 +203,7 @@ export default class Parser {
 
     pseudo () {
         let pseudoStr = '';
+        let startingToken = this.currToken;
         while (this.currToken[0] === ':') {
             pseudoStr += this.currToken[1];
             this.position ++;
@@ -209,7 +212,19 @@ export default class Parser {
             let pseudo;
             this.splitWord(false, (first, length) => {
                 pseudoStr += first;
-                pseudo = new Pseudo({value: pseudoStr});
+                pseudo = new Pseudo({
+                    value: pseudoStr,
+                    source: {
+                        start: {
+                            line: startingToken[2],
+                            column: startingToken[3]
+                        },
+                        end: {
+                            line: this.currToken[4],
+                            column: this.currToken[5]
+                        }
+                    }
+                });
                 this.newNode(pseudo);
                 if (length > 1 && this.nextToken && this.nextToken[0] === '(') {
                     this.error('Misplaced parenthesis.');

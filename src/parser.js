@@ -36,6 +36,7 @@ export default class Parser {
     attribute () {
         let attribute = '';
         let attr;
+        let startingToken = this.currToken;
         this.position ++;
         while (this.position < this.tokens.length && this.currToken[0] !== ']') {
             attribute += this.tokens[this.position][1];
@@ -46,21 +47,29 @@ export default class Parser {
         }
         let parts = attribute.split(/((?:[*~^$|]?)=)/);
         let namespace = parts[0].split(/(\|)/g);
+        let attributeProps = {
+            operator: parts[1],
+            value: parts[2],
+            source: {
+                start: {
+                    line: startingToken[2],
+                    column: startingToken[3]
+                },
+                end: {
+                    line: this.currToken[2],
+                    column: this.currToken[3]
+                }
+            },
+            sourceIndex: startingToken[4]
+        };
         if (namespace.length > 1) {
             if (namespace[0] === '') { namespace[0] = true; }
-            attr = new Attribute({
-                attribute: namespace[2],
-                namespace: namespace[0],
-                operator: parts[1],
-                value: parts[2]
-            });
+            attributeProps.attribute = namespace[2];
+            attributeProps.namespace = namespace[0];
         } else {
-            attr = new Attribute({
-                attribute: parts[0],
-                operator: parts[1],
-                value: parts[2]
-            });
+            attributeProps.attribute = parts[0];
         }
+        attr = new Attribute(attributeProps)
 
         if (parts[2]) {
             let insensitive = parts[2].split(/(\s+i\s*?)$/);
@@ -78,12 +87,30 @@ export default class Parser {
         if (this.currToken[1] === '|') {
             return this.namespace();
         }
-        let combinator = new Combinator({value: ''});
+        let combinator = new Combinator({
+            value: '',
+            source: {
+                start: {
+                    line: this.currToken[2],
+                    column: this.currToken[3]
+                },
+                end: {
+                    line: this.currToken[2],
+                    column: this.currToken[3]
+                }
+            },
+            sourceIndex: this.currToken[4]
+        });
         while ( this.position < this.tokens.length &&
                 this.currToken[0] === 'space' ||
                 this.currToken[0] === 'combinator') {
             if (this.nextToken[0] === 'combinator') {
                 combinator.spaces.before = this.currToken[1];
+                combinator.source.start.line = this.nextToken[2];
+                combinator.source.start.column = this.nextToken[3];
+                combinator.source.end.column = this.nextToken[3];
+                combinator.source.end.line = this.nextToken[2];
+                combinator.sourceIndex = this.nextToken[4];
             } else if (this.prevToken && this.prevToken[0] === 'combinator') {
                 combinator.spaces.after = this.currToken[1];
             } else if (this.currToken[0] === 'space' || this.currToken[0] === 'combinator') {
@@ -107,7 +134,20 @@ export default class Parser {
     }
 
     comment () {
-        let comment = new Comment({value: this.currToken[1]});
+        let comment = new Comment({
+            value: this.currToken[1],
+            source: {
+                start: {
+                    line: this.currToken[2],
+                    column: this.currToken[3]
+                },
+                end: {
+                    line: this.currToken[4],
+                    column: this.currToken[5]
+                }
+            },
+            sourceIndex: this.currToken[6]
+        });
         this.newNode(comment);
         this.position++;
     }
@@ -142,6 +182,8 @@ export default class Parser {
                 if (balanced) {
                     this.parse();
                 } else {
+                    selector.parent.source.end.line = this.currToken[2];
+                    selector.parent.source.end.column = this.currToken[3];
                     this.position ++;
                 }
             }
@@ -167,6 +209,7 @@ export default class Parser {
 
     pseudo () {
         let pseudoStr = '';
+        let startingToken = this.currToken;
         while (this.currToken && this.currToken[0] === ':') {
             pseudoStr += this.currToken[1];
             this.position ++;
@@ -178,7 +221,20 @@ export default class Parser {
             let pseudo;
             this.splitWord(false, (first, length) => {
                 pseudoStr += first;
-                pseudo = new Pseudo({value: pseudoStr});
+                pseudo = new Pseudo({
+                    value: pseudoStr,
+                    source: {
+                        start: {
+                            line: startingToken[2],
+                            column: startingToken[3]
+                        },
+                        end: {
+                            line: this.currToken[4],
+                            column: this.currToken[5]
+                        }
+                    },
+                    sourceIndex: startingToken[4]
+                });
                 this.newNode(pseudo);
                 if (length > 1 && this.nextToken && this.nextToken[0] === '(') {
                     this.error('Misplaced parenthesis.');
@@ -209,7 +265,20 @@ export default class Parser {
             this.position ++;
             return this.namespace();
         }
-        this.newNode(new Universal({value: this.currToken[1]}), namespace);
+        this.newNode(new Universal({
+            value: this.currToken[1],
+            source: {
+                start: {
+                    line: this.currToken[2],
+                    column: this.currToken[3]
+                },
+                end: {
+                    line: this.currToken[2],
+                    column: this.currToken[3]
+                }
+            },
+            sourceIndex: this.currToken[4]
+        }), namespace);
         this.position ++;
     }
 
@@ -240,11 +309,50 @@ export default class Parser {
             }
             let node;
             if (~hasClass.indexOf(ind)) {
-                node = new ClassName({value: value.slice(1)});
+                node = new ClassName({
+                    value: value.slice(1),
+                    source: {
+                        start: {
+                            line: this.currToken[2],
+                            column: this.currToken[3] + ind
+                        },
+                        end: {
+                            line: this.currToken[4],
+                            column: this.currToken[3] + (index - 1)
+                        }
+                    },
+                    sourceIndex: this.currToken[6] + indices[i]
+                });
             } else if (~hasId.indexOf(ind)) {
-                node = new ID({value: value.slice(1)});
+                node = new ID({
+                    value: value.slice(1),
+                    source: {
+                        start: {
+                            line: this.currToken[2],
+                            column: this.currToken[3] + ind
+                        },
+                        end: {
+                            line: this.currToken[4],
+                            column: this.currToken[3] + (index - 1)
+                        }
+                    },
+                    sourceIndex: this.currToken[6] + indices[i]
+                });
             } else {
-                node = new Tag({value: value});
+                node = new Tag({
+                    value: value,
+                    source: {
+                        start: {
+                            line: this.currToken[2],
+                            column: this.currToken[3] + ind
+                        },
+                        end: {
+                            line: this.currToken[4],
+                            column: this.currToken[3] + (index - 1)
+                        }
+                    },
+                    sourceIndex: this.currToken[6] + indices[i]
+                });
             }
             this.newNode(node, namespace);
         });

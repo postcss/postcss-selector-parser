@@ -256,6 +256,40 @@ A `combinator` node may only have the `spaces` property set if the combinator
 value is a non-whitespace character, such as `+`, `~` or `>`. Otherwise, the
 combinator value will contain all of the spaces between selectors.
 
+### `node.source`
+
+An object describing the node's start/end, line/column source position.
+
+The following class node ...
+
+```css
+  .foo {}
+```
+
+... will contain the following `source` object.
+
+source: {
+    start: {
+        line: 1,
+        column: 3
+    },
+    end: {
+        line: 1,
+        column: 6
+    }
+}
+```
+
+### `node.sourceIndex`
+
+The zero-based index of the node within the original source string.
+
+Within the following CSS, the `.baz` class node will have a `sourceIndex` of `12`.
+
+```css
+.foo, .bar, .baz {}
+```
+
 ## Container types
 
 The `root`, `selector`, and `pseudo` nodes have some helper methods for working

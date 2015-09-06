@@ -106,13 +106,16 @@ export default class Parser {
                 this.currToken[0] === 'combinator') {
             if (this.nextToken[0] === 'combinator') {
                 combinator.spaces.before = this.currToken[1];
+                combinator.source.start.line = this.nextToken[2];
+                combinator.source.start.column = this.nextToken[3];
+                combinator.source.end.column = this.nextToken[3];
+                combinator.source.end.line = this.nextToken[2];
+                combinator.sourceIndex = this.nextToken[4];
             } else if (this.prevToken && this.prevToken[0] === 'combinator') {
                 combinator.spaces.after = this.currToken[1];
             } else if (this.currToken[0] === 'space' || this.currToken[0] === 'combinator') {
                 combinator.value = this.currToken[1];
             }
-            combinator.source.end.column = this.currToken[3];
-            combinator.source.end.line = this.currToken[2];
             this.position ++;
         }
         return this.newNode(combinator);

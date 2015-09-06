@@ -19,9 +19,9 @@ test('lobotomized owl selector', '* + *', (t, tree) => {
     t.equal(tree.nodes[0].nodes[0].source.start.column, 1);
     t.equal(tree.nodes[0].nodes[0].source.end.column, 1);
     t.equal(tree.nodes[0].nodes[0].sourceIndex, 0);
-    t.equal(tree.nodes[0].nodes[1].source.start.column, 2);
-    t.equal(tree.nodes[0].nodes[1].source.end.column, 4);
-    t.equal(tree.nodes[0].nodes[1].sourceIndex, 1);
+    t.equal(tree.nodes[0].nodes[1].source.start.column, 3);
+    t.equal(tree.nodes[0].nodes[1].source.end.column, 3);
+    t.equal(tree.nodes[0].nodes[1].sourceIndex, 2);
     t.equal(tree.nodes[0].nodes[2].source.start.column, 5);
     t.equal(tree.nodes[0].nodes[2].source.end.column, 5);
     t.equal(tree.nodes[0].nodes[2].sourceIndex, 4);
@@ -181,6 +181,39 @@ test('multiple pseudos', 'h1:not(.food)::before, a:first-child', (t, tree) => {
     t.equal(tree.nodes[1].nodes[1].source.start.column, 25);
     t.equal(tree.nodes[1].nodes[1].source.end.column, 36);
     t.equal(tree.nodes[1].nodes[1].sourceIndex, 24);
+});
+
+test('combinators', 'div > h1 span', (t, tree) => {
+    t.plan(8);
+
+    t.equal(tree.nodes[0].nodes[1].source.start.line, 1, "> start line");
+    t.equal(tree.nodes[0].nodes[1].source.start.column, 5, "> start column");
+    t.equal(tree.nodes[0].nodes[1].source.end.column, 5, "> end column");
+    t.equal(tree.nodes[0].nodes[1].sourceIndex, 4, "> sourceIndex");
+
+    t.equal(tree.nodes[0].nodes[3].source.start.line, 1, "' ' start line");
+    t.equal(tree.nodes[0].nodes[3].source.start.column, 9, "' ' start column");
+    t.equal(tree.nodes[0].nodes[3].source.end.column, 9, "' ' end column");
+    t.equal(tree.nodes[0].nodes[3].sourceIndex, 8, "' ' sourceIndex");
+});
+
+test('combinators surrounded by superfluous spaces', 'div   >  h1 ~   span   a', (t, tree) => {
+    t.plan(12);
+
+    t.equal(tree.nodes[0].nodes[1].source.start.line, 1, "> start line");
+    t.equal(tree.nodes[0].nodes[1].source.start.column, 7, "> start column");
+    t.equal(tree.nodes[0].nodes[1].source.end.column, 7, "> end column");
+    t.equal(tree.nodes[0].nodes[1].sourceIndex, 6, "> sourceIndex");
+
+    t.equal(tree.nodes[0].nodes[3].source.start.line, 1, "~ start line");
+    t.equal(tree.nodes[0].nodes[3].source.start.column, 13, "~ start column");
+    t.equal(tree.nodes[0].nodes[3].source.end.column, 13, "~ end column");
+    t.equal(tree.nodes[0].nodes[3].sourceIndex, 12, "~ sourceIndex");
+
+    t.equal(tree.nodes[0].nodes[5].source.start.line, 1, "' ' start line");
+    t.equal(tree.nodes[0].nodes[5].source.start.column, 21, "' ' start column");
+    t.equal(tree.nodes[0].nodes[5].source.end.column, 21, "' ' end column");
+    t.equal(tree.nodes[0].nodes[5].sourceIndex, 20, "' ' sourceIndex");
 });
 
 test('multiple id selectors on different lines', '#one,\n#two', (t, tree) => {

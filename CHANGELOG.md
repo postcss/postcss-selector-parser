@@ -1,3 +1,10 @@
+# 1.2.0
+
+* A more descriptive error is thrown when the parser expects to find a
+  pseudo-class/pseudo-element (thanks to @ashelley).
+* Adds support for line/column locations for selector nodes, as well as a
+  `Node#sourceIndex` method (thanks to @davidtheclark).
+
 # 1.1.4
 
 * Fixes a crash when a selector started with a `>` combinator. The module will

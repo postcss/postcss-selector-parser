@@ -260,21 +260,23 @@ combinator value will contain all of the spaces between selectors.
 
 An object describing the node's start/end, line/column source position.
 
-The following class node ...
+Within the following CSS, the `.bar` class node ...
 
 ```css
-  .foo {}
+.foo,
+  .bar {}
 ```
 
 ... will contain the following `source` object.
 
+```js
 source: {
     start: {
-        line: 1,
+        line: 2,
         column: 3
     },
     end: {
-        line: 1,
+        line: 2,
         column: 6
     }
 }

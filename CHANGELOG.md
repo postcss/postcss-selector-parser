@@ -1,3 +1,7 @@
+# 1.2.1
+
+* Fixes a crash when the parser encountered a trailing combinator.
+
 # 1.2.0
 
 * A more descriptive error is thrown when the parser expects to find a

@@ -97,3 +97,9 @@ test('multiple combinators with whitespaces', 'h1+ h2 >h3', (t, tree) => {
     t.equal(tree.nodes[0].nodes[1].value, '+', 'should have a combinator');
     t.equal(tree.nodes[0].nodes[3].value, '>', 'should have a combinator');
 });
+
+test('trailing combinator & spaces', 'p +        ', (t, tree) => {
+    t.plan(2);
+    t.equal(tree.nodes[0].nodes[0].value, 'p', 'should be a paragraph');
+    t.equal(tree.nodes[0].nodes[1].value, '+', 'should have a combinator');
+});

@@ -101,10 +101,10 @@ export default class Parser {
             },
             sourceIndex: this.currToken[4]
         });
-        while ( this.position < this.tokens.length &&
-                this.currToken[0] === 'space' ||
-                this.currToken[0] === 'combinator') {
-            if (this.nextToken[0] === 'combinator') {
+        while ( this.position < this.tokens.length && this.currToken &&
+                (this.currToken[0] === 'space' ||
+                this.currToken[0] === 'combinator')) {
+            if (this.nextToken && this.nextToken[0] === 'combinator') {
                 combinator.spaces.before = this.currToken[1];
                 combinator.source.start.line = this.nextToken[2];
                 combinator.source.start.column = this.nextToken[3];

@@ -96,3 +96,9 @@ test('negation pseudo element with quotes', 'h1:not(".heading")', (t, tree) => {
     t.equal(tree.nodes[0].nodes[1].value, ':not');
     t.equal(tree.nodes[0].nodes[1].nodes[0].nodes[0].value, '".heading"');
 });
+
+test('negation pseudo element with single quotes', "h1:not('.heading')", (t, tree) => {
+    t.plan(2);
+    t.equal(tree.nodes[0].nodes[1].value, ':not');
+    t.equal(tree.nodes[0].nodes[1].nodes[0].nodes[0].value, "'.heading'");
+});

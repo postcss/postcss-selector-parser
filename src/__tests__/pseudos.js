@@ -90,3 +90,9 @@ test('extraneous non-combinating whitespace', '  h1:after   ,  h2:after   ', (t,
     t.equal(tree.nodes[1].nodes[1].value, ':after');
     t.equal(tree.nodes[1].nodes[1].spaces.after, '   ');
 });
+
+test('negation pseudo element with quotes', 'h1:not(".heading")', (t, tree) => {
+    t.plan(2);
+    t.equal(tree.nodes[0].nodes[1].value, ':not');
+    t.equal(tree.nodes[0].nodes[1].nodes[0].nodes[0].value, '".heading"');
+});

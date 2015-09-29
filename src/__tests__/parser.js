@@ -1,3 +1,5 @@
+'use strict';
+
 import test from 'tape';
 import parser from '../index';
 
@@ -37,13 +39,19 @@ test('parser#pseudo', (t) => {
     t.equal(String(node), '::before');
 });
 
+test('parser#string', (t) => {
+    let node = parser.string({value: '"wow"'});
+    t.plan(1);
+    t.equal(String(node), '"wow"');
+});
+
 test('parser#tag', (t) => {
     let node = parser.tag({value: 'button'});
     t.plan(1);
     t.equal(String(node), 'button');
 });
 
-test('parser#tag', (t) => {
+test('parser#universal', (t) => {
     let node = parser.universal();
     t.plan(1);
     t.equal(String(node), '*');

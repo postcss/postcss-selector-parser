@@ -9,12 +9,13 @@ import Id         from './selectors/id';
 import Pseudo     from './selectors/pseudo';
 import Root       from './selectors/root';
 import Selector   from './selectors/selector';
+import Str        from './selectors/string';
 import Tag        from './selectors/tag';
 import Universal  from './selectors/universal';
 
 let parser = function (processor) {
     return new Processor(processor);
-}
+};
 
 parser.attribute = function (opts) {
     return new Attribute(opts);
@@ -30,7 +31,7 @@ parser.combinator = function (opts) {
 
 parser.comment = function (opts) {
     return new Comment(opts);
-}
+};
 
 parser.id = function (opts) {
     return new Id(opts);
@@ -46,6 +47,10 @@ parser.root = function (opts) {
 
 parser.selector = function (opts) {
     return new Selector(opts);
+};
+
+parser.string = function (opts) {
+    return new Str(opts);
 };
 
 parser.tag = function (opts) {

@@ -6,6 +6,7 @@ import ClassName from './selectors/className';
 import Comment from './selectors/comment';
 import ID from './selectors/id';
 import Tag from './selectors/tag';
+import Str from './selectors/string';
 import Pseudo from './selectors/pseudo';
 import Attribute from './selectors/attribute';
 import Universal from './selectors/universal';
@@ -69,7 +70,7 @@ export default class Parser {
         } else {
             attributeProps.attribute = parts[0];
         }
-        attr = new Attribute(attributeProps)
+        attr = new Attribute(attributeProps);
 
         if (parts[2]) {
             let insensitive = parts[2].split(/(\s+i\s*?)$/);
@@ -259,6 +260,25 @@ export default class Parser {
         }
     }
 
+    string () {
+        let token = this.currToken;
+        this.newNode(new Str({
+            value: this.currToken[1],
+            source: {
+                start: {
+                    line: token[2],
+                    column: token[3]
+                },
+                end: {
+                    line: token[4],
+                    column: token[5]
+                }
+            },
+            sourceIndex: token[6]
+        }));
+        this.position++;
+    }
+
     universal (namespace) {
         let nextToken = this.nextToken;
         if (nextToken && nextToken[1] === '|') {
@@ -404,6 +424,9 @@ export default class Parser {
                 break;
             case 'combinator':
                 this.combinator();
+                break;
+            case 'string':
+                this.string();
                 break;
         }
     }

@@ -1,3 +1,7 @@
+# 1.3.1
+
+* Update flatten to v1.x (thanks to @shinnn).
+
 # 1.3.0
 
 * Adds a new node type, `String`, to fix a crash on selectors such as

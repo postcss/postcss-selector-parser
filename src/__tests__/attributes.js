@@ -23,6 +23,10 @@ test('attribute selector with quoted value', '[name="james"]', (t, tree) => {
     t.same(tree.nodes[0].nodes[0].value, '"james"');
 });
 
+test('attribute selector with escaped quote', '[title="Something \\"weird\\""]', (t, tree) => {
+    t.same(tree.nodes[0].nodes[0].value, '"Something \\"weird\\""');
+});
+
 test('multiple attribute selectors + combinator', '[href][class][name] h1 > h2', (t, tree) => {
     t.same(tree.nodes[0].nodes[2].attribute, 'name');
     t.same(tree.nodes[0].nodes[3].value, ' ');

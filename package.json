@@ -28,7 +28,7 @@
     "test": "nyc ava src/__tests__/*.js"
   },
   "dependencies": {
-    "flatten": "0.0.1",
+    "flatten": "^1.0.2",
     "indexes-of": "^1.0.1",
     "uniq": "^1.0.1"
   },

@@ -1,5 +1,3 @@
-'use strict';
-
 import Processor  from './processor';
 import Attribute  from './selectors/attribute';
 import ClassName  from './selectors/className';

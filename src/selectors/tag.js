@@ -1,5 +1,3 @@
-'use strict';
-
 import Namespace from './namespace';
 
 export default class Tag extends Namespace {

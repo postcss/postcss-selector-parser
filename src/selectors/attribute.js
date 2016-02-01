@@ -1,5 +1,3 @@
-'use strict';
-
 import Namespace from './namespace';
 
 export default class Attribute extends Namespace {
@@ -17,8 +15,12 @@ export default class Attribute extends Namespace {
             this.attribute
         ];
 
-        if (this.operator) { selector.push(this.operator); }
-        if (this.value) { selector.push(this.value); }
+        if (this.operator) { 
+            selector.push(this.operator);
+        }
+        if (this.value) {
+            selector.push(this.value);
+        }
         if (this.raw.insensitive) {
             selector.push(this.raw.insensitive);
         } else if (this.insensitive) {

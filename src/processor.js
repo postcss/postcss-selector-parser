@@ -1,7 +1,3 @@
-'use strict';
-
-import tokenize from './tokenize';
-import Root from './selectors/root';
 import Parser from './parser';
 
 export default class Processor {
@@ -18,7 +14,7 @@ export default class Processor {
             }
         });
         this.res = input;
-        this.func.call(this, input);
+        this.func(input);
         return this;
     }
 

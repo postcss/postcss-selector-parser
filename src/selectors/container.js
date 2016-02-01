@@ -1,5 +1,3 @@
-'use strict';
-
 import Node from './node';
 
 export default class Container extends Node {
@@ -62,7 +60,9 @@ export default class Container extends Node {
     }
 
     removeAll () {
-        for (let node of this.nodes) node.parent = undefined;
+        for (let node of this.nodes) {
+            node.parent = undefined;
+        }
         this.nodes = [];
         return this;
     }
@@ -102,27 +102,37 @@ export default class Container extends Node {
     }
 
     each (callback) {
-        if (!this.lastEach) { this.lastEach = 0 }
-        if (!this.indexes) { this.indexes = {}; }
+        if (!this.lastEach) {
+            this.lastEach = 0;
+        }
+        if (!this.indexes) {
+            this.indexes = {};
+        }
 
         this.lastEach ++;
         let id = this.lastEach;
         this.indexes[id] = 0;
 
-        if (!this.length) return undefined;
+        if (!this.length) {
+            return undefined;
+        }
 
         let index, result;
         while (this.indexes[id] < this.length) {
             index = this.indexes[id];
             result = callback(this.at(index), index);
-            if (result === false) { break; }
+            if (result === false) {
+                break;
+            }
 
-            this.indexes[id] += 1
+            this.indexes[id] += 1;
         }
 
         delete this.indexes[id];
 
-        if (result === false) { return false; }
+        if (result === false) {
+            return false;
+        }
     }
 
     eachInside (callback) {
@@ -133,7 +143,9 @@ export default class Container extends Node {
                 result = node.eachInside(callback);
             }
 
-            if (result === false) { return false; }
+            if (result === false) {
+                return false;
+            }
         });
     }
 

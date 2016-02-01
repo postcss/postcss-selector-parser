@@ -1,5 +1,3 @@
-'use strict';
-
 let singleQuote  = "'".charCodeAt(0),
     doubleQuote  = '"'.charCodeAt(0),
     backslash    = '\\'.charCodeAt(0),
@@ -25,7 +23,7 @@ let singleQuote  = "'".charCodeAt(0),
     atEnd        = /[ \n\t\r\{\(\)'"\\;/]/g,
     wordEnd      = /[ \n\t\r\(\)\*:;@!'"\+\|~>,\[\]\\]|\/(?=\*)/g;
 
-export default function tokenize(input) {
+export default function tokenize (input) {
     let tokens = [];
     let css    = input.css.valueOf();
 
@@ -133,7 +131,9 @@ export default function tokenize(input) {
                 do {
                     escaped = false;
                     next    = css.indexOf(quote, next + 1);
-                    if ( next === -1 ) unclosed('quote', quote);
+                    if ( next === -1 ) {
+                        unclosed('quote', quote);
+                    }
                     escapePos = next;
                     while ( css.charCodeAt(escapePos - 1) === backslash ) {
                         escapePos -= 1;
@@ -192,7 +192,9 @@ export default function tokenize(input) {
             default:
                 if ( code === slash && css.charCodeAt(pos + 1) === asterisk ) {
                     next = css.indexOf('*/', pos + 2) + 1;
-                    if ( next === 0 ) unclosed('comment', '*/');
+                    if ( next === 0 ) {
+                        unclosed('comment', '*/');
+                    }
 
                     content = css.slice(pos, next + 1);
                     lines   = content.split('\n');

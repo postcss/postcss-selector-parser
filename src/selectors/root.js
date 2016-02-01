@@ -1,5 +1,3 @@
-'use strict';
-
 import Container from './container';
 
 export default class Root extends Container {
@@ -10,8 +8,8 @@ export default class Root extends Container {
 
     toString () {
         let str = this.reduce((memo, selector) => {
-            let str = String(selector);
-            return str ? memo + str + ',' : '';
+            let sel = String(selector);
+            return sel ? memo + sel + ',' : '';
         }, '').slice(0, -1);
         return this.trailingComma ? str + ',' : str;
     }

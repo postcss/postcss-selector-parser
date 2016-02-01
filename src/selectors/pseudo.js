@@ -1,5 +1,3 @@
-'use strict';
-
 import Container from './container';
 
 export default class Pseudo extends Container {

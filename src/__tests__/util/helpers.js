@@ -1,7 +1,5 @@
-'use strict';
-
 import parser from '../../index';
-import tape from 'tape';
+import ava from 'ava';
 import util from 'util';
 
 export let parse = (input, transform) => {
@@ -9,26 +7,24 @@ export let parse = (input, transform) => {
 };
 
 export let test = (spec, input, callback) => {
-    var tree;
+    let tree;
 
-    let result = parse(input, (selectors) => {tree = selectors});
+    let result = parse(input, (selectors) => tree = selectors);
 
     if (callback) {
-        tape(`${spec} (tree)`, (t) => {
+        ava(`${spec} (tree)`, t => {
             let debug = util.inspect(tree, false, null);
             callback.call(this, t, tree, debug);
         });
     }
 
-    tape(`${spec} (toString)`, (t) => {
-        t.plan(1);
-        t.equal(result, input);
+    ava(`${spec} (toString)`, t => {
+        t.same(result, input);
     });
 };
 
 export let throws = (spec, input) => {
-    tape(`${spec} (throws)`, (t) => {
-        t.plan(1);
+    ava(`${spec} (throws)`, t => {
         t.throws(() => {
             return parser().process(input).result;
         });

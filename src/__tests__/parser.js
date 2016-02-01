@@ -1,60 +1,49 @@
-'use strict';
-
-import test from 'tape';
+import test from 'ava';
 import parser from '../index';
 
 test('parser#attribute', (t) => {
     let node = parser.attribute({attribute: 'href'});
-    t.plan(1);
-    t.equal(String(node), '[href]');
+    t.same(String(node), '[href]');
 });
 
 test('parser#className', (t) => {
     let node = parser.className({value: 'classy'});
-    t.plan(1);
-    t.equal(String(node), '.classy');
+    t.same(String(node), '.classy');
 });
 
 test('parser#combinator', (t) => {
     let node = parser.combinator({value: '>>'});
-    t.plan(1);
-    t.equal(String(node), '>>');
+    t.same(String(node), '>>');
 });
 
 test('parser#comment', (t) => {
-    let node = parser.combinator({value: '/* comment */'});
-    t.plan(1);
-    t.equal(String(node), '/* comment */');
+    let node = parser.comment({value: '/* comment */'});
+    t.same(String(node), '/* comment */');
 });
 
 test('parser#id', (t) => {
     let node = parser.id({value: 'test'});
-    t.plan(1);
-    t.equal(String(node), '#test');
+    t.same(String(node), '#test');
 });
 
 test('parser#pseudo', (t) => {
     let node = parser.pseudo({value: '::before'});
-    t.plan(1);
-    t.equal(String(node), '::before');
+    t.same(String(node), '::before');
 });
 
 test('parser#string', (t) => {
     let node = parser.string({value: '"wow"'});
-    t.plan(1);
-    t.equal(String(node), '"wow"');
+    t.same(String(node), '"wow"');
 });
 
 test('parser#tag', (t) => {
     let node = parser.tag({value: 'button'});
-    t.plan(1);
-    t.equal(String(node), 'button');
+    t.same(String(node), 'button');
 });
 
 test('parser#universal', (t) => {
     let node = parser.universal();
-    t.plan(1);
-    t.equal(String(node), '*');
+    t.same(String(node), '*');
 });
 
 test('construct a whole tree', (t) => {
@@ -62,19 +51,14 @@ test('construct a whole tree', (t) => {
     let selector = parser.selector();
     selector.append(parser.id({value: 'tree'}));
     root.append(selector);
-    t.plan(1);
-    t.equal(String(root), '#tree');
+    t.same(String(root), '#tree');
 });
 
 test('no operation', (t) => {
-    t.plan(1);
-    t.doesNotThrow(() => {
-        return parser().process('h1 h2 h3').result;
-    });
+    t.doesNotThrow(() => parser().process('h1 h2 h3').result);
 });
 
 test('empty selector string', (t) => {
-    t.plan(1);
     t.doesNotThrow(() => {
         return parser((selectors) => {
             selectors.eachInside((selector) => {

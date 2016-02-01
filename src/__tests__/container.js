@@ -1,9 +1,8 @@
-import test from 'tape';
+import test from 'ava';
 import {parse} from './util/helpers';
 import parser from '../index';
 
 test('container#each', (t) => {
-    t.plan(1);
     let str = '';
     parse('h1, h2:not(h3, h4)', (selectors) => {
         selectors.each((selector) => {
@@ -12,11 +11,10 @@ test('container#each', (t) => {
             }
         });
     });
-    t.equal(str, 'h1h2');
+    t.same(str, 'h1h2');
 });
 
 test('container#eachInside', (t) => {
-    t.plan(1);
     let str = '';
     parse('h1, h2:not(h3, h4)', (selectors) => {
         selectors.eachInside((selector) => {
@@ -25,11 +23,10 @@ test('container#eachInside', (t) => {
             }
         });
     });
-    t.equal(str, 'h1h2h3h4');
+    t.same(str, 'h1h2h3h4');
 });
 
 test('container#eachInside (safe iteration)', (t) => {
-    t.plan(1);
     let out = parse('[class] + *[href] *:not(*.green)', (selectors) => {
         selectors.eachUniversal((selector) => {
             let next = selector.next();
@@ -38,11 +35,10 @@ test('container#eachInside (safe iteration)', (t) => {
             }
         });
     });
-    t.equal(out, '[class] + [href] :not(.green)');
+    t.same(out, '[class] + [href] :not(.green)');
 });
 
 test('container#eachAttribute', (t) => {
-    t.plan(1);
     let out = parse('[href][class].class', (selectors) => {
         selectors.eachAttribute((attr) => {
             if (attr.attribute === 'class') {
@@ -50,81 +46,73 @@ test('container#eachAttribute', (t) => {
             }
         });
     });
-    t.equal(out, '[href].class');
+    t.same(out, '[href].class');
 });
 
 test('container#eachClass', (t) => {
-    t.plan(1);
     let out = parse('.one, .two, .three:not(.four, .five)', (selectors) => {
         selectors.eachClass((className) => {
             className.value = className.value.slice(0, 1);
         });
     });
-    t.equal(out, '.o, .t, .t:not(.f, .f)');
+    t.same(out, '.o, .t, .t:not(.f, .f)');
 });
 
 test('container#eachCombinator', (t) => {
-    t.plan(1);
     let out = parse('h1 h2 h3 h4', (selectors) => {
         selectors.eachCombinator((comment) => {
             comment.removeSelf();
         });
     });
-    t.equal(out, 'h1h2h3h4');
+    t.same(out, 'h1h2h3h4');
 });
 
 test('container#eachComment', (t) => {
-    t.plan(1);
     let out = parse('.one/*test*/.two', (selectors) => {
         selectors.eachComment((comment) => {
             comment.removeSelf();
         });
     });
-    t.equal(out, '.one.two');
+    t.same(out, '.one.two');
 });
 
 test('container#eachId', (t) => {
-    t.plan(1);
     let out = parse('h1#one, h2#two', (selectors) => {
         selectors.eachId((id) => {
             id.value = id.value.slice(0, 1);
         });
     });
-    t.equal(out, 'h1#o, h2#t');
+    t.same(out, 'h1#o, h2#t');
 });
 
 test('container#eachPseudo', (t) => {
-    t.plan(1);
     let out = parse('a:before, a:after', (selectors) => {
         selectors.eachPseudo((pseudo) => {
             pseudo.value = pseudo.value.slice(0, 2);
         });
     });
-    t.equal(out, 'a:b, a:a');
+    t.same(out, 'a:b, a:a');
 });
 
 test('container#eachTag', (t) => {
-    t.plan(1);
     let out = parse('1 2 3', (selectors) => {
         selectors.eachTag((tag) => {
             tag.value = 'h' + tag.value;
         });
     });
-    t.equal(out, 'h1 h2 h3');
+    t.same(out, 'h1 h2 h3');
 });
 
 test('container#eachUniversal', (t) => {
-    t.plan(1);
     let out = parse('*.class,*.class,*.class', (selectors) => {
         selectors.eachUniversal((universal) => {
             universal.removeSelf();
         });
     });
-    t.equal(out, '.class,.class,.class');
+    t.same(out, '.class,.class,.class');
 });
 
 test('container#map', (t) => {
-    t.plan(1);
     parse('1 2 3', (selectors) => {
         let arr = selectors.first.map((selector) => {
             if (/[0-9]/.test(selector.value)) {
@@ -132,12 +120,11 @@ test('container#map', (t) => {
             }
             return selector.value;
         });
-        t.deepEqual(arr, ['h1', ' ', 'h2', ' ', 'h3']);
+        t.same(arr, ['h1', ' ', 'h2', ' ', 'h3']);
     });
 });
 
 test('container#every', (t) => {
-    t.plan(1);
     parse('.one.two.three', (selectors) => {
         let allClasses = selectors.first.every((selector) => {
             return selector.type = 'class';
@@ -147,7 +134,6 @@ test('container#every', (t) => {
 });
 
 test('container#some', (t) => {
-    t.plan(1);
     parse('one#two.three', (selectors) => {
         let someClasses = selectors.first.some((selector) => {
             return selector.type = 'class';
@@ -157,7 +143,6 @@ test('container#some', (t) => {
 });
 
 test('container#reduce', (t) => {
-    t.plan(1);
     parse('h1, h2, h3, h4', (selectors) => {
         let str = selectors.reduce((memo, selector) => {
             if (selector.first.type === 'tag') {
@@ -165,75 +150,67 @@ test('container#reduce', (t) => {
             }
             return memo;
         }, '');
-        t.equal(str, 'h1h2h3h4');
+        t.same(str, 'h1h2h3h4');
     });
 });
 
 test('container#filter', (t) => {
-    t.plan(1);
     parse('h1, h2, c1, c2', (selectors) => {
         let ast = selectors.filter((selector) => {
             return ~selector.first.value.indexOf('h');
         });
-        t.equal(String(ast), 'h1, h2');
+        t.same(String(ast), 'h1, h2');
     });
 });
 
 test('container#split', (t) => {
-    t.plan(2);
     parse('h1 h2 >> h3', (selectors) => {
         let list = selectors.first.split((selector) => {
             return selector.value === '>>';
         }).map((group) => {
             return group.map(String);
         });
-        t.deepEqual(list, [['h1', ' ', 'h2', ' >> '], ['h3']]);
-        t.equal(list.length, 2);
+        t.same(list, [['h1', ' ', 'h2', ' >> '], ['h3']]);
+        t.same(list.length, 2);
     });
 });
 
 test('container#sort', (t) => {
-    t.plan(1);
     let out = parse('h2,h3,h1,h4', (selectors) => {
         selectors.sort((a, b) => {
             return a.first.value.slice(-1) - b.first.value.slice(-1);
         });
     });
-    t.equal(out, 'h1,h2,h3,h4');
+    t.same(out, 'h1,h2,h3,h4');
 });
 
 test('container#at', (t) => {
-    t.plan(1);
     parse('h1, h2, h3', (selectors) => {
-        t.equal(selectors.at(1).first.value, 'h2');
+        t.same(selectors.at(1).first.value, 'h2');
     });
 });
 
 test('container#first, container#last', (t) => {
-    t.plan(2);
     parse('h1, h2, h3, h4', (selectors) => {
-        t.equal(selectors.first.first.value, 'h1');
-        t.equal(selectors.last.last.value, 'h4');
+        t.same(selectors.first.first.value, 'h1');
+        t.same(selectors.last.last.value, 'h4');
     });
 });
 
 test('container#index', (t) => {
-    t.plan(1);
     parse('h1 h2 h3', (selectors) => {
         let middle = selectors.first.at(1);
-        t.equal(selectors.first.index(middle), 1);
+        t.same(selectors.first.index(middle), 1);
     });
 });
 
 test('container#length', (t) => {
-    t.plan(1);
     parse('h1, h2, h3', (selectors) => {
-        t.equal(selectors.length, 3);
+        t.same(selectors.length, 3);
     });
 });
 
 test('container#remove', (t) => {
-    t.plan(1);
     let out = parse('h1.class h2.class h3.class', (selectors) => {
         selectors.eachInside((selector) => {
             if (selector.type === 'class') {
@@ -241,45 +218,43 @@ test('container#remove', (t) => {
             }
         });
     });
-    t.equal(out, 'h1 h2 h3');
+    t.same(out, 'h1 h2 h3');
 });
 
 test('container#removeAll, container#empty', (t) => {
-    t.plan(2);
-    let wipe = (method) => { return (selectors) => { selectors[method](); } };
+    let wipe = (method) => {
+        return (selectors) => selectors[method]();
+    };
     let out1 = parse('h1 h2, h2 h3, h3 h4', wipe('empty'));
     let out2 = parse('h1 h2, h2 h3, h3 h4', wipe('removeAll'));
-    t.equal(out1, '');
-    t.equal(out2, '');
+    t.same(out1, '');
+    t.same(out2, '');
 });
 
 test('container#insertBefore', (t) => {
-    t.plan(1);
     let out = parse('h2', (selectors) => {
         let selector = selectors.first;
         let clone = selector.first.clone({value: 'h1'});
         selectors.insertBefore(selector, clone);
-    })
-    t.equal(out, 'h1,h2');
+    });
+    t.same(out, 'h1,h2');
 });
 
 test('container#insertAfter', (t) => {
-    t.plan(1);
     let out = parse('h1', (selectors) => {
         let selector = selectors.first;
         let clone = selector.first.clone({value: 'h2'});
         selectors.insertAfter(selector, clone);
-    })
-    t.equal(out, 'h1,h2');
+    });
+    t.same(out, 'h1,h2');
 });
 
 test('container#insertAfter (during iteration)', (t) => {
-    t.plan(1);
     let out = parse('h1, h2, h3', (selectors) => {
         selectors.eachTag(function (selector) {
             let attribute = parser.attribute({attribute: 'class'});
             selector.parent.insertAfter(selector, attribute);
         });
     });
-    t.equal(out, 'h1[class], h2[class], h3[class]');
+    t.same(out, 'h1[class], h2[class], h3[class]');
 });

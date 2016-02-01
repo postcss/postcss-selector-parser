@@ -1,5 +1,3 @@
-'use strict';
-
 import Root from './selectors/root';
 import Selector from './selectors/selector';
 import ClassName from './selectors/className';
@@ -35,18 +33,18 @@ export default class Parser {
     }
 
     attribute () {
-        let attribute = '';
+        let str = '';
         let attr;
         let startingToken = this.currToken;
         this.position ++;
         while (this.position < this.tokens.length && this.currToken[0] !== ']') {
-            attribute += this.tokens[this.position][1];
+            str += this.tokens[this.position][1];
             this.position ++;
         }
-        if (this.position === this.tokens.length && !~attribute.indexOf(']')) {
+        if (this.position === this.tokens.length && !~str.indexOf(']')) {
             this.error('Expected a closing square bracket.');
         }
-        let parts = attribute.split(/((?:[*~^$|]?)=)/);
+        let parts = str.split(/((?:[*~^$|]?)=)/);
         let namespace = parts[0].split(/(\|)/g);
         let attributeProps = {
             operator: parts[1],
@@ -64,7 +62,9 @@ export default class Parser {
             sourceIndex: startingToken[4]
         };
         if (namespace.length > 1) {
-            if (namespace[0] === '') { namespace[0] = true; }
+            if (namespace[0] === '') {
+                namespace[0] = true;
+            }
             attributeProps.attribute = namespace[2];
             attributeProps.namespace = namespace[0];
         } else {
@@ -88,7 +88,7 @@ export default class Parser {
         if (this.currToken[1] === '|') {
             return this.namespace();
         }
-        let combinator = new Combinator({
+        let node = new Combinator({
             value: '',
             source: {
                 start: {
@@ -106,20 +106,20 @@ export default class Parser {
                 (this.currToken[0] === 'space' ||
                 this.currToken[0] === 'combinator')) {
             if (this.nextToken && this.nextToken[0] === 'combinator') {
-                combinator.spaces.before = this.currToken[1];
-                combinator.source.start.line = this.nextToken[2];
-                combinator.source.start.column = this.nextToken[3];
-                combinator.source.end.column = this.nextToken[3];
-                combinator.source.end.line = this.nextToken[2];
-                combinator.sourceIndex = this.nextToken[4];
+                node.spaces.before = this.currToken[1];
+                node.source.start.line = this.nextToken[2];
+                node.source.start.column = this.nextToken[3];
+                node.source.end.column = this.nextToken[3];
+                node.source.end.line = this.nextToken[2];
+                node.sourceIndex = this.nextToken[4];
             } else if (this.prevToken && this.prevToken[0] === 'combinator') {
-                combinator.spaces.after = this.currToken[1];
+                node.spaces.after = this.currToken[1];
             } else if (this.currToken[0] === 'space' || this.currToken[0] === 'combinator') {
-                combinator.value = this.currToken[1];
+                node.value = this.currToken[1];
             }
             this.position ++;
         }
-        return this.newNode(combinator);
+        return this.newNode(node);
     }
 
     comma () {
@@ -135,7 +135,7 @@ export default class Parser {
     }
 
     comment () {
-        let comment = new Comment({
+        let node = new Comment({
             value: this.currToken[1],
             source: {
                 start: {
@@ -149,12 +149,12 @@ export default class Parser {
             },
             sourceIndex: this.currToken[6]
         });
-        this.newNode(comment);
+        this.newNode(node);
         this.position++;
     }
 
     error (message) {
-        throw new this.input.error(message);
+        throw new this.input.error(message); // eslint-disable-line new-cap
     }
 
     namespace () {
@@ -178,8 +178,12 @@ export default class Parser {
             let balanced = 1;
             this.position ++;
             while (this.position < this.tokens.length && balanced) {
-                if (this.currToken[0] === '(') { balanced++; }
-                if (this.currToken[0] === ')') { balanced--; }
+                if (this.currToken[0] === '(') {
+                    balanced++;
+                }
+                if (this.currToken[0] === ')') {
+                    balanced--;
+                }
                 if (balanced) {
                     this.parse();
                 } else {
@@ -197,8 +201,12 @@ export default class Parser {
             this.position ++;
             last.value += '(';
             while (this.position < this.tokens.length && balanced) {
-                if (this.currToken[0] === '(') { balanced++; }
-                if (this.currToken[0] === ')') { balanced--; }
+                if (this.currToken[0] === '(') {
+                    balanced++;
+                }
+                if (this.currToken[0] === ')') {
+                    balanced--;
+                }
                 last.value += this.currToken[1];
                 this.position++;
             }

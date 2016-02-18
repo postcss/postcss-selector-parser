@@ -405,37 +405,37 @@ export default class Parser {
 
     parse () {
         switch (this.currToken[0]) {
-            case 'space':
-                this.space();
-                break;
-            case 'comment':
-                this.comment();
-                break;
-            case '(':
-                this.parentheses();
-                break;
-            case '[':
-                this.attribute();
-                break;
-            case 'at-word':
-            case 'word':
-                this.word();
-                break;
-            case ':':
-                this.pseudo();
-                break;
-            case ',':
-                this.comma();
-                break;
-            case '*':
-                this.universal();
-                break;
-            case 'combinator':
-                this.combinator();
-                break;
-            case 'string':
-                this.string();
-                break;
+        case 'space':
+            this.space();
+            break;
+        case 'comment':
+            this.comment();
+            break;
+        case '(':
+            this.parentheses();
+            break;
+        case '[':
+            this.attribute();
+            break;
+        case 'at-word':
+        case 'word':
+            this.word();
+            break;
+        case ':':
+            this.pseudo();
+            break;
+        case ',':
+            this.comma();
+            break;
+        case '*':
+            this.universal();
+            break;
+        case 'combinator':
+            this.combinator();
+            break;
+        case 'string':
+            this.string();
+            break;
         }
     }
 

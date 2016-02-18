@@ -251,7 +251,7 @@ test('container#insertAfter', (t) => {
 
 test('container#insertAfter (during iteration)', (t) => {
     let out = parse('h1, h2, h3', (selectors) => {
-        selectors.eachTag(function (selector) {
+        selectors.eachTag(selector => {
             let attribute = parser.attribute({attribute: 'class'});
             selector.parent.insertAfter(selector, attribute);
         });

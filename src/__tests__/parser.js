@@ -55,11 +55,11 @@ test('construct a whole tree', (t) => {
 });
 
 test('no operation', (t) => {
-    t.doesNotThrow(() => parser().process('h1 h2 h3').result);
+    t.notThrows(() => parser().process('h1 h2 h3').result);
 });
 
 test('empty selector string', (t) => {
-    t.doesNotThrow(() => {
+    t.notThrows(() => {
         return parser((selectors) => {
             selectors.eachInside((selector) => {
                 selector.type = 'tag';

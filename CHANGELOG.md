@@ -1,3 +1,7 @@
+# 1.3.2
+
+* Now uses plain integers rather than `str.charCodeAt(0)` for compiled builds.
+
 # 1.3.1
 
 * Update flatten to v1.x (thanks to @shinnn).

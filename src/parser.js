@@ -44,7 +44,7 @@ export default class Parser {
         if (this.position === this.tokens.length && !~str.indexOf(']')) {
             this.error('Expected a closing square bracket.');
         }
-        let parts = str.split(/((?:[*~^$|]?)=)/);
+        let parts = str.split(/((?:[*~^$|]?=))([^]*)/);
         let namespace = parts[0].split(/(\|)/g);
         let attributeProps = {
             operator: parts[1],

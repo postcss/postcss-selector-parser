@@ -43,7 +43,7 @@ export default class Container extends Node {
         return this.nodes.length;
     }
 
-    remove (child) {
+    removeChild (child) {
         child = this.index(child);
         this.at(child).parent = undefined;
         this.nodes.splice(child, 1);
@@ -135,12 +135,12 @@ export default class Container extends Node {
         }
     }
 
-    eachInside (callback) {
+    walk (callback) {
         return this.each((node, i) => {
             let result = callback(node, i);
 
             if (result !== false && node.length) {
-                result = node.eachInside(callback);
+                result = node.walk(callback);
             }
 
             if (result === false) {
@@ -149,64 +149,64 @@ export default class Container extends Node {
         });
     }
 
-    eachAttribute (callback) {
-        return this.eachInside((selector) => {
+    walkAttributes (callback) {
+        return this.walk((selector) => {
             if (selector.type === 'attribute') {
                 return callback.call(this, selector);
             }
         });
     }
 
-    eachClass (callback) {
-        return this.eachInside((selector) => {
+    walkClasses (callback) {
+        return this.walk((selector) => {
             if (selector.type === 'class') {
                 return callback.call(this, selector);
             }
         });
     }
 
-    eachCombinator (callback) {
-        return this.eachInside((selector) => {
+    walkCombinators (callback) {
+        return this.walk((selector) => {
             if (selector.type === 'combinator') {
                 return callback.call(this, selector);
             }
         });
     }
 
-    eachComment (callback) {
-        return this.eachInside((selector) => {
+    walkComments (callback) {
+        return this.walk((selector) => {
             if (selector.type === 'comment') {
                 return callback.call(this, selector);
             }
         });
     }
 
-    eachId (callback) {
-        return this.eachInside((selector) => {
+    walkIds (callback) {
+        return this.walk((selector) => {
             if (selector.type === 'id') {
                 return callback.call(this, selector);
             }
         });
     }
 
-    eachPseudo (callback) {
-        return this.eachInside((selector) => {
+    walkPseudos (callback) {
+        return this.walk((selector) => {
             if (selector.type === 'pseudo') {
                 return callback.call(this, selector);
             }
         });
     }
 
-    eachTag (callback) {
-        return this.eachInside((selector) => {
+    walkTags (callback) {
+        return this.walk((selector) => {
             if (selector.type === 'tag') {
                 return callback.call(this, selector);
             }
         });
     }
 
-    eachUniversal (callback) {
-        return this.eachInside((selector) => {
+    walkUniversals (callback) {
+        return this.walk((selector) => {
             if (selector.type === 'universal') {
                 return callback.call(this, selector);
             }

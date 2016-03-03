@@ -19,9 +19,10 @@ let singleQuote  = "'".charCodeAt(0),
     semicolon    = ';'.charCodeAt(0),
     asterisk     = '*'.charCodeAt(0),
     colon        = ':'.charCodeAt(0),
+    ampersand    = '&'.charCodeAt(0),
     at           = '@'.charCodeAt(0),
     atEnd        = /[ \n\t\r\{\(\)'"\\;/]/g,
-    wordEnd      = /[ \n\t\r\(\)\*:;@!'"\+\|~>,\[\]\\]|\/(?=\*)/g;
+    wordEnd      = /[ \n\t\r\(\)\*:;@!&'"\+\|~>,\[\]\\]|\/(?=\*)/g;
 
 export default function tokenize (input) {
     let tokens = [];
@@ -94,6 +95,10 @@ export default function tokenize (input) {
 
         case asterisk:
             tokens.push(['*', '*', line, pos - offset, pos]);
+            break;
+        
+        case ampersand:
+            tokens.push(['&', '&', line, pos - offset, pos]);
             break;
 
         case comma:

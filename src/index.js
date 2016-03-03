@@ -4,6 +4,7 @@ import ClassName  from './selectors/className';
 import Combinator from './selectors/combinator';
 import Comment    from './selectors/comment';
 import Id         from './selectors/id';
+import Nesting    from './selectors/nesting';
 import Pseudo     from './selectors/pseudo';
 import Root       from './selectors/root';
 import Selector   from './selectors/selector';
@@ -33,6 +34,10 @@ parser.comment = function (opts) {
 
 parser.id = function (opts) {
     return new Id(opts);
+};
+
+parser.nesting = function (opts) {
+    return new Nesting(opts);
 };
 
 parser.pseudo = function (opts) {

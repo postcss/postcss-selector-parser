@@ -9,6 +9,7 @@ import Pseudo from './selectors/pseudo';
 import Attribute from './selectors/attribute';
 import Universal from './selectors/universal';
 import Combinator from './selectors/combinator';
+import Nesting from './selectors/nesting';
 
 import sortAsc from './sortAscending';
 import tokenize from './tokenize';
@@ -166,6 +167,24 @@ export default class Parser {
             this.position ++;
             return this.universal(before);
         }
+    }
+    
+    nesting () {
+        this.newNode(new Nesting({
+            value: this.currToken[1],
+            source: {
+                start: {
+                    line: this.currToken[2],
+                    column: this.currToken[3]
+                },
+                end: {
+                    line: this.currToken[2],
+                    column: this.currToken[3]
+                }
+            },
+            sourceIndex: this.currToken[4]
+        }));
+        this.position ++;
     }
 
     parentheses () {
@@ -429,6 +448,9 @@ export default class Parser {
             break;
         case '*':
             this.universal();
+            break;
+        case '&':
+            this.nesting();
             break;
         case 'combinator':
             this.combinator();

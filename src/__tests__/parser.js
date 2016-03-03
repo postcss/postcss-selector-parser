@@ -26,6 +26,11 @@ test('parser#id', (t) => {
     t.same(String(node), '#test');
 });
 
+test('parser#nesting', (t) => {
+    let node = parser.nesting();
+    t.same(String(node), '&');
+});
+
 test('parser#pseudo', (t) => {
     let node = parser.pseudo({value: '::before'});
     t.same(String(node), '::before');

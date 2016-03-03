@@ -61,7 +61,7 @@ test('no operation', (t) => {
 test('empty selector string', (t) => {
     t.notThrows(() => {
         return parser((selectors) => {
-            selectors.eachInside((selector) => {
+            selectors.walk((selector) => {
                 selector.type = 'tag';
             });
         }).process('').result;

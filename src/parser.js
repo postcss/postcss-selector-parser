@@ -160,6 +160,10 @@ export default class Parser {
     missingParenthesis () {
         return this.error('Expected opening parenthesis.');
     }
+    
+    missingSquareBracket () {
+        return this.error('Expected opening square bracket.');
+    }
 
     namespace () {
         let before = this.prevToken && this.prevToken[1] || true;
@@ -425,6 +429,9 @@ export default class Parser {
             break;
         case '[':
             this.attribute();
+            break;
+        case ']':
+            this.missingSquareBracket();
             break;
         case 'at-word':
         case 'word':

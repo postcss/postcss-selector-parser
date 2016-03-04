@@ -1,3 +1,8 @@
+# 1.3.3
+
+* Fixes an infinite loop on `)` and `]` tokens when they had no opening pairs.
+  Now postcss-selector-parser will throw when it encounters these lone tokens.
+
 # 1.3.2
 
 * Now uses plain integers rather than `str.charCodeAt(0)` for compiled builds.

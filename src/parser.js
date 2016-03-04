@@ -156,6 +156,14 @@ export default class Parser {
     error (message) {
         throw new this.input.error(message); // eslint-disable-line new-cap
     }
+    
+    missingParenthesis () {
+        return this.error('Expected opening parenthesis.');
+    }
+    
+    missingSquareBracket () {
+        return this.error('Expected opening square bracket.');
+    }
 
     namespace () {
         let before = this.prevToken && this.prevToken[1] || true;
@@ -398,12 +406,12 @@ export default class Parser {
 
     loop () {
         while (this.position < this.tokens.length) {
-            this.parse();
+            this.parse(true);
         }
         return this.root;
     }
 
-    parse () {
+    parse (throwOnParenthesis) {
         switch (this.currToken[0]) {
         case 'space':
             this.space();
@@ -414,8 +422,16 @@ export default class Parser {
         case '(':
             this.parentheses();
             break;
+        case ')':
+            if (throwOnParenthesis) {
+                this.missingParenthesis();
+            }
+            break;
         case '[':
             this.attribute();
+            break;
+        case ']':
+            this.missingSquareBracket();
             break;
         case 'at-word':
         case 'word':

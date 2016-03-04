@@ -25,8 +25,6 @@ export let test = (spec, input, callback) => {
 
 export let throws = (spec, input) => {
     ava(`${spec} (throws)`, t => {
-        t.throws(() => {
-            return parser().process(input).result;
-        });
+        t.throws(() => parser().process(input).result);
     });
 };

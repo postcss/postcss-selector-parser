@@ -227,13 +227,13 @@ Arguments:
 
 * `node`: The node to substitute the original with.
 
-### `node.removeSelf()`
+### `node.remove()`
 
 Removes the node from its parent node.
 
 ```js
 if (node.type === 'id') {
-    node.removeSelf();
+    node.remove();
 }
 ```
 
@@ -400,13 +400,13 @@ Arguments:
 * `callback (function)`: A function to call for each node, which receives `node`
   and `index` arguments.
 
-### `container.eachInside(callback)`
+### `container.walk(callback)`
 
 Like `container#each`, but will also iterate child nodes as long as they are
 `container` types.
 
 ```js
-selectors.eachInside(function (selector, index) {
+selectors.walk(function (selector, index) {
     // all nodes
 });
 ```
@@ -419,20 +419,20 @@ Arguments:
 This iterator is safe to use whilst mutating `container.nodes`,
 like `container#each`.
 
-### `container.eachInside` proxies
+### `container.walk` proxies
 
 The container class provides proxy methods for iterating over types of nodes,
 so that it is easier to write modules that target specific selectors. Those
 methods are:
 
-* `container.eachAttribute`
-* `container.eachClass`
-* `container.eachCombinator`
-* `container.eachComment`
-* `container.eachId`
-* `container.eachPseudo`
-* `container.eachTag`
-* `container.eachUniversal`
+* `container.walkAttributes`
+* `container.walkClasses`
+* `container.walkCombinators`
+* `container.walkComments`
+* `container.walkIds`
+* `container.walkPseudos`
+* `container.walkTags`
+* `container.walkUniversals`
 
 ### `container.split(callback)`
 
@@ -486,10 +486,10 @@ Arguments:
 * `old`: The existing node in the container.
 * `new`: The new node to add before/after the existing node.
 
-### `container.remove(node)`
+### `container.removeChild(node)`
 
 Remove the node from the container. Note that you can also use
-`node.removeSelf()` if you would like to remove just a single node.
+`node.remove()` if you would like to remove just a single node.
 
 ```js
 selector.length // => 2
@@ -532,5 +532,5 @@ It has no special functionality of its own.
 
 A pseudo selector extends a container node; if it has any parameters of its
 own (such as `h1:not(h2, h3)`), they will be its children. Note that the pseudo
-`value` will always contain the colons preceeding the pseudo identifier. This
+`value` will always contain the colons preceding the pseudo identifier. This
 is so that both `:before` and `::before` are properly represented in the AST.

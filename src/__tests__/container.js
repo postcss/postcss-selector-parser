@@ -14,10 +14,10 @@ test('container#each', (t) => {
     t.same(str, 'h1h2');
 });
 
-test('container#eachInside', (t) => {
+test('container#walk', (t) => {
     let str = '';
     parse('h1, h2:not(h3, h4)', (selectors) => {
-        selectors.eachInside((selector) => {
+        selectors.walk((selector) => {
             if (selector.type === 'tag') {
                 str += selector.value;
             }
@@ -26,87 +26,87 @@ test('container#eachInside', (t) => {
     t.same(str, 'h1h2h3h4');
 });
 
-test('container#eachInside (safe iteration)', (t) => {
+test('container#walk (safe iteration)', (t) => {
     let out = parse('[class] + *[href] *:not(*.green)', (selectors) => {
-        selectors.eachUniversal((selector) => {
+        selectors.walkUniversals((selector) => {
             let next = selector.next();
             if (next && next.type !== 'combinator') {
-                selector.removeSelf();
+                selector.remove();
             }
         });
     });
     t.same(out, '[class] + [href] :not(.green)');
 });
 
-test('container#eachAttribute', (t) => {
+test('container#walkAttribute', (t) => {
     let out = parse('[href][class].class', (selectors) => {
-        selectors.eachAttribute((attr) => {
+        selectors.walkAttributes((attr) => {
             if (attr.attribute === 'class') {
-                attr.removeSelf();
+                attr.remove();
             }
         });
     });
     t.same(out, '[href].class');
 });
 
-test('container#eachClass', (t) => {
+test('container#walkClass', (t) => {
     let out = parse('.one, .two, .three:not(.four, .five)', (selectors) => {
-        selectors.eachClass((className) => {
+        selectors.walkClasses((className) => {
             className.value = className.value.slice(0, 1);
         });
     });
     t.same(out, '.o, .t, .t:not(.f, .f)');
 });
 
-test('container#eachCombinator', (t) => {
+test('container#walkCombinator', (t) => {
     let out = parse('h1 h2 h3 h4', (selectors) => {
-        selectors.eachCombinator((comment) => {
-            comment.removeSelf();
+        selectors.walkCombinators((comment) => {
+            comment.remove();
         });
     });
     t.same(out, 'h1h2h3h4');
 });
 
-test('container#eachComment', (t) => {
+test('container#walkComment', (t) => {
     let out = parse('.one/*test*/.two', (selectors) => {
-        selectors.eachComment((comment) => {
-            comment.removeSelf();
+        selectors.walkComments((comment) => {
+            comment.remove();
         });
     });
     t.same(out, '.one.two');
 });
 
-test('container#eachId', (t) => {
+test('container#walkId', (t) => {
     let out = parse('h1#one, h2#two', (selectors) => {
-        selectors.eachId((id) => {
+        selectors.walkIds((id) => {
             id.value = id.value.slice(0, 1);
         });
     });
     t.same(out, 'h1#o, h2#t');
 });
 
-test('container#eachPseudo', (t) => {
+test('container#walkPseudo', (t) => {
     let out = parse('a:before, a:after', (selectors) => {
-        selectors.eachPseudo((pseudo) => {
+        selectors.walkPseudos((pseudo) => {
             pseudo.value = pseudo.value.slice(0, 2);
         });
     });
     t.same(out, 'a:b, a:a');
 });
 
-test('container#eachTag', (t) => {
+test('container#walkTag', (t) => {
     let out = parse('1 2 3', (selectors) => {
-        selectors.eachTag((tag) => {
+        selectors.walkTags((tag) => {
             tag.value = 'h' + tag.value;
         });
     });
     t.same(out, 'h1 h2 h3');
 });
 
-test('container#eachUniversal', (t) => {
+test('container#walkUniversal', (t) => {
     let out = parse('*.class,*.class,*.class', (selectors) => {
-        selectors.eachUniversal((universal) => {
-            universal.removeSelf();
+        selectors.walkUniversals((universal) => {
+            universal.remove();
         });
     });
     t.same(out, '.class,.class,.class');
@@ -210,11 +210,11 @@ test('container#length', (t) => {
     });
 });
 
-test('container#remove', (t) => {
+test('container#removeChild', (t) => {
     let out = parse('h1.class h2.class h3.class', (selectors) => {
-        selectors.eachInside((selector) => {
+        selectors.walk((selector) => {
             if (selector.type === 'class') {
-                selector.parent.remove(selector);
+                selector.parent.removeChild(selector);
             }
         });
     });
@@ -251,7 +251,7 @@ test('container#insertAfter', (t) => {
 
 test('container#insertAfter (during iteration)', (t) => {
     let out = parse('h1, h2, h3', (selectors) => {
-        selectors.eachTag(selector => {
+        selectors.walkTags(selector => {
             let attribute = parser.attribute({attribute: 'class'});
             selector.parent.insertAfter(selector, attribute);
         });

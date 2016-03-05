@@ -34,9 +34,9 @@ export default class {
         this.spaces = {before: '', after: ''};
     }
 
-    removeSelf () {
+    remove () {
         if (this.parent) {
-            this.parent.remove(this);
+            this.parent.removeChild(this);
         }
         this.parent = undefined;
         return this;
@@ -47,7 +47,7 @@ export default class {
             for (let index in arguments) {
                 this.parent.insertBefore(this, arguments[index]);
             }
-            this.removeSelf();
+            this.remove();
         }
         return this;
     }

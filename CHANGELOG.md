@@ -8,6 +8,11 @@ This release contains the following breaking changes:
 * Renamed `Container#remove()` to `Container#removeChild()`.
 * Now parses `&` as the *nesting* selector, rather than a *tag* selector.
 
+and;
+
+* Fixes parsing of attribute selectors with equals signs in them
+  (e.g. `[data-attr="foo=bar"]`) (thanks to @montmanu).
+
 # 1.3.3
 
 * Fixes an infinite loop on `)` and `]` tokens when they had no opening pairs.

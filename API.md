@@ -16,7 +16,7 @@ var parser = require('postcss-selector-parser');
 ```js
 var transform = function (selectors) {
     selectors.eachUniversal(function (selector) {
-        selector.removeSelf();
+        selector.remove();
     });
 };
 
@@ -87,6 +87,19 @@ Creates a new id selector.
 ```js
 parser.id({value: 'search'});
 // => #search
+```
+
+Arguments:
+
+* `props (object)`: The new node's properties.
+
+### `parser.nesting([props])`
+
+Creates a new nesting selector.
+
+```js
+parser.nesting();
+// => &
 ```
 
 Arguments:
@@ -176,8 +189,8 @@ Arguments:
 ### `node.type`
 
 A string representation of the selector type. It can be one of the following;
-`attribute`, `class`, `combinator`, `comment`, `id`, `pseudo`, `root`,
-`selector`, `string`, `tag`, or `universal`.
+`attribute`, `class`, `combinator`, `comment`, `id`, `nesting`, `pseudo`,
+`root`, `selector`, `string`, `tag`, or `universal`.
 
 ```js
 parser.attribute({attribute: 'href'}).type;
@@ -375,7 +388,7 @@ The container class provides proxies to certain Array methods; these are:
 * `container.sort === container.nodes.sort`
 
 Note that these methods only work on a container's immediate children; recursive
-iteration is provided by `container.eachInside`.
+iteration is provided by `container.walk`.
 
 ### `container.each(callback)`
 
@@ -430,6 +443,7 @@ methods are:
 * `container.walkCombinators`
 * `container.walkComments`
 * `container.walkIds`
+* `container.walkNesting`
 * `container.walkPseudos`
 * `container.walkTags`
 * `container.walkUniversals`
@@ -473,7 +487,7 @@ Arguments:
 Add a node before or after an existing node in a container:
 
 ```js
-selectors.eachInside(function (selector) {
+selectors.walk(function (selector) {
     if (selector.type !== 'class') {
         var className = parser.className({value: 'theme-name'});
         selector.parent.insertAfter(selector, className);

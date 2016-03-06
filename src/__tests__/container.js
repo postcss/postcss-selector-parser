@@ -85,6 +85,15 @@ test('container#walkId', (t) => {
     t.same(out, 'h1#o, h2#t');
 });
 
+test('container#walkNesting', t => {
+    let out = parse('& h1', selectors => {
+        selectors.walkNesting(node => {
+            node.replaceWith(parser.tag({value: 'body'}));
+        });
+    });
+    t.same(out, 'body h1');
+});
+
 test('container#walkPseudo', (t) => {
     let out = parse('a:before, a:after', (selectors) => {
         selectors.walkPseudos((pseudo) => {

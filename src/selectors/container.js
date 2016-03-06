@@ -188,6 +188,14 @@ export default class Container extends Node {
             }
         });
     }
+    
+    walkNesting (callback) {
+        return this.walk(selector => {
+            if (selector.type === 'nesting') {
+                return callback.call(this, selector);
+            }
+        });
+    }
 
     walkPseudos (callback) {
         return this.walk((selector) => {

@@ -43,7 +43,8 @@
   },
   "repository": "postcss/postcss-selector-parser",
   "ava": {
-    "require": "babel-core/register"
+    "require": "babel-core/register",
+    "serial": true
   },
   "nyc": {
     "exclude": [

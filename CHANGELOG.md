@@ -1,3 +1,13 @@
+# 2.0.0
+
+This release contains the following breaking changes:
+
+* Renamed all `eachInside` iterators to `walk`. For example, `eachTag` is now
+  `walkTags`, and `eachInside` is now `walk`.
+* Renamed `Node#removeSelf()` to `Node#remove()`.
+* Renamed `Container#remove()` to `Container#removeChild()`.
+* Now parses `&` as the *nesting* selector, rather than a *tag* selector.
+
 # 1.3.3
 
 * Fixes an infinite loop on `)` and `]` tokens when they had no opening pairs.

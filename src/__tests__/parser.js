@@ -1,54 +1,25 @@
 import test from 'ava';
 import parser from '../index';
 
-test('parser#attribute', (t) => {
-    let node = parser.attribute({attribute: 'href'});
-    t.same(String(node), '[href]');
-});
+// Node creation
+const nodeTypes = [
+    ['attribute',  '[href]', {attribute: 'href'}],
+    ['className',  '.classy', {value: 'classy'}],
+    ['combinator', '>>', {value: '>>'}],
+    ['comment',    '/* comment */', {value: '/* comment */'}],
+    ['id',         '#test', {value: 'test'}],
+    ['nesting',    '&'],
+    ['pseudo',     '::before', {value: '::before'}],
+    ['string',     '"wow"', {value: '"wow"'}],
+    ['tag',        'button', {value: 'button'}],
+    ['universal',  '*']
+];
 
-test('parser#className', (t) => {
-    let node = parser.className({value: 'classy'});
-    t.same(String(node), '.classy');
-});
-
-test('parser#combinator', (t) => {
-    let node = parser.combinator({value: '>>'});
-    t.same(String(node), '>>');
-});
-
-test('parser#comment', (t) => {
-    let node = parser.comment({value: '/* comment */'});
-    t.same(String(node), '/* comment */');
-});
-
-test('parser#id', (t) => {
-    let node = parser.id({value: 'test'});
-    t.same(String(node), '#test');
-});
-
-test('parser#nesting', (t) => {
-    let node = parser.nesting();
-    t.same(String(node), '&');
-});
-
-test('parser#pseudo', (t) => {
-    let node = parser.pseudo({value: '::before'});
-    t.same(String(node), '::before');
-});
-
-test('parser#string', (t) => {
-    let node = parser.string({value: '"wow"'});
-    t.same(String(node), '"wow"');
-});
-
-test('parser#tag', (t) => {
-    let node = parser.tag({value: 'button'});
-    t.same(String(node), 'button');
-});
-
-test('parser#universal', (t) => {
-    let node = parser.universal();
-    t.same(String(node), '*');
+nodeTypes.forEach(type => {
+    test(`parser#${type[0]}`, t => {
+        let node = parser[type[0]](type[2] || {});
+        t.same(String(node), type[1]);
+    });
 });
 
 test('construct a whole tree', (t) => {

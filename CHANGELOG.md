@@ -1,3 +1,7 @@
+# Head
+
+* Fixes misinterpretation of Sass interpolation (e.g. `#{foo}`) as an id selector.
+
 # 2.0.0
 
 This release contains the following breaking changes:

@@ -39,3 +39,15 @@ test('extraneous non-combinating whitespace', '  #h1   ,  #h2   ', (t, tree) => 
     t.same(tree.nodes[1].nodes[0].spaces.before, '  ');
     t.same(tree.nodes[1].nodes[0].spaces.after, '   ');
 });
+
+test('Sass interpolation within a class', '.#{foo}', (t, tree) => {
+    t.same(tree.nodes[0].nodes.length, 1);
+    t.same(tree.nodes[0].nodes[0].type, 'class');
+    t.same(tree.nodes[0].nodes[0].value, '#{foo}');
+});
+
+test('Sass interpolation within an id', '#foo#{bar}', (t, tree) => {
+    t.same(tree.nodes[0].nodes.length, 1);
+    t.same(tree.nodes[0].nodes[0].type, 'id');
+    t.same(tree.nodes[0].nodes[0].value, 'foo#{bar}');
+});

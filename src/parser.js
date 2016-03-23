@@ -157,11 +157,11 @@ export default class Parser {
     error (message) {
         throw new this.input.error(message); // eslint-disable-line new-cap
     }
-    
+
     missingParenthesis () {
         return this.error('Expected opening parenthesis.');
     }
-    
+
     missingSquareBracket () {
         return this.error('Expected opening square bracket.');
     }
@@ -176,7 +176,7 @@ export default class Parser {
             return this.universal(before);
         }
     }
-    
+
     nesting () {
         this.newNode(new Nesting({
             value: this.currToken[1],
@@ -355,6 +355,11 @@ export default class Parser {
         }
         let hasClass = indexesOf(word, '.');
         let hasId = indexesOf(word, '#');
+        // Eliminate Sass interpolations from the list of id indexes
+        let interpolations = indexesOf(word, '#{');
+        if (interpolations.length) {
+            hasId = hasId.filter(hashIndex => !~interpolations.indexOf(hashIndex));
+        }
         let indices = sortAsc(uniq(flatten([[0], hasClass, hasId])));
         indices.forEach((ind, i) => {
             let index = indices[i + 1] || word.length;

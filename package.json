@@ -12,7 +12,7 @@
     "babel-preset-stage-0": "^6.3.13",
     "coveralls": "^2.11.6",
     "del-cli": "^0.2.0",
-    "eslint": "^2.1.0",
+    "eslint": "^2.5.0",
     "eslint-config-cssnano": "^2.0.0",
     "glob": "^7.0.3",
     "minimist": "^1.2.0",

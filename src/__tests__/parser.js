@@ -18,7 +18,7 @@ const nodeTypes = [
 nodeTypes.forEach(type => {
     test(`parser#${type[0]}`, t => {
         let node = parser[type[0]](type[2] || {});
-        t.same(String(node), type[1]);
+        t.deepEqual(String(node), type[1]);
     });
 });
 
@@ -27,7 +27,7 @@ test('construct a whole tree', (t) => {
     let selector = parser.selector();
     selector.append(parser.id({value: 'tree'}));
     root.append(selector);
-    t.same(String(root), '#tree');
+    t.deepEqual(String(root), '#tree');
 });
 
 test('no operation', (t) => {

@@ -11,7 +11,7 @@ test('container#each', (t) => {
             }
         });
     });
-    t.same(str, 'h1h2');
+    t.deepEqual(str, 'h1h2');
 });
 
 test('container#walk', (t) => {
@@ -23,7 +23,7 @@ test('container#walk', (t) => {
             }
         });
     });
-    t.same(str, 'h1h2h3h4');
+    t.deepEqual(str, 'h1h2h3h4');
 });
 
 test('container#walk (safe iteration)', (t) => {
@@ -35,7 +35,7 @@ test('container#walk (safe iteration)', (t) => {
             }
         });
     });
-    t.same(out, '[class] + [href] :not(.green)');
+    t.deepEqual(out, '[class] + [href] :not(.green)');
 });
 
 test('container#walkAttribute', (t) => {
@@ -46,7 +46,7 @@ test('container#walkAttribute', (t) => {
             }
         });
     });
-    t.same(out, '[href].class');
+    t.deepEqual(out, '[href].class');
 });
 
 test('container#walkClass', (t) => {
@@ -55,7 +55,7 @@ test('container#walkClass', (t) => {
             className.value = className.value.slice(0, 1);
         });
     });
-    t.same(out, '.o, .t, .t:not(.f, .f)');
+    t.deepEqual(out, '.o, .t, .t:not(.f, .f)');
 });
 
 test('container#walkCombinator', (t) => {
@@ -64,7 +64,7 @@ test('container#walkCombinator', (t) => {
             comment.remove();
         });
     });
-    t.same(out, 'h1h2h3h4');
+    t.deepEqual(out, 'h1h2h3h4');
 });
 
 test('container#walkComment', (t) => {
@@ -73,7 +73,7 @@ test('container#walkComment', (t) => {
             comment.remove();
         });
     });
-    t.same(out, '.one.two');
+    t.deepEqual(out, '.one.two');
 });
 
 test('container#walkId', (t) => {
@@ -82,7 +82,7 @@ test('container#walkId', (t) => {
             id.value = id.value.slice(0, 1);
         });
     });
-    t.same(out, 'h1#o, h2#t');
+    t.deepEqual(out, 'h1#o, h2#t');
 });
 
 test('container#walkNesting', t => {
@@ -91,7 +91,7 @@ test('container#walkNesting', t => {
             node.replaceWith(parser.tag({value: 'body'}));
         });
     });
-    t.same(out, 'body h1');
+    t.deepEqual(out, 'body h1');
 });
 
 test('container#walkPseudo', (t) => {
@@ -100,7 +100,7 @@ test('container#walkPseudo', (t) => {
             pseudo.value = pseudo.value.slice(0, 2);
         });
     });
-    t.same(out, 'a:b, a:a');
+    t.deepEqual(out, 'a:b, a:a');
 });
 
 test('container#walkTag', (t) => {
@@ -109,7 +109,7 @@ test('container#walkTag', (t) => {
             tag.value = 'h' + tag.value;
         });
     });
-    t.same(out, 'h1 h2 h3');
+    t.deepEqual(out, 'h1 h2 h3');
 });
 
 test('container#walkUniversal', (t) => {
@@ -118,7 +118,7 @@ test('container#walkUniversal', (t) => {
             universal.remove();
         });
     });
-    t.same(out, '.class,.class,.class');
+    t.deepEqual(out, '.class,.class,.class');
 });
 
 test('container#map', (t) => {
@@ -129,7 +129,7 @@ test('container#map', (t) => {
             }
             return selector.value;
         });
-        t.same(arr, ['h1', ' ', 'h2', ' ', 'h3']);
+        t.deepEqual(arr, ['h1', ' ', 'h2', ' ', 'h3']);
     });
 });
 
@@ -138,7 +138,7 @@ test('container#every', (t) => {
         let allClasses = selectors.first.every((selector) => {
             return selector.type = 'class';
         });
-        t.ok(allClasses);
+        t.truthy(allClasses);
     });
 });
 
@@ -147,7 +147,7 @@ test('container#some', (t) => {
         let someClasses = selectors.first.some((selector) => {
             return selector.type = 'class';
         });
-        t.ok(someClasses);
+        t.truthy(someClasses);
     });
 });
 
@@ -159,7 +159,7 @@ test('container#reduce', (t) => {
             }
             return memo;
         }, '');
-        t.same(str, 'h1h2h3h4');
+        t.deepEqual(str, 'h1h2h3h4');
     });
 });
 
@@ -168,7 +168,7 @@ test('container#filter', (t) => {
         let ast = selectors.filter((selector) => {
             return ~selector.first.value.indexOf('h');
         });
-        t.same(String(ast), 'h1, h2');
+        t.deepEqual(String(ast), 'h1, h2');
     });
 });
 
@@ -179,8 +179,8 @@ test('container#split', (t) => {
         }).map((group) => {
             return group.map(String);
         });
-        t.same(list, [['h1', ' ', 'h2', ' >> '], ['h3']]);
-        t.same(list.length, 2);
+        t.deepEqual(list, [['h1', ' ', 'h2', ' >> '], ['h3']]);
+        t.deepEqual(list.length, 2);
     });
 });
 
@@ -190,32 +190,32 @@ test('container#sort', (t) => {
             return a.first.value.slice(-1) - b.first.value.slice(-1);
         });
     });
-    t.same(out, 'h1,h2,h3,h4');
+    t.deepEqual(out, 'h1,h2,h3,h4');
 });
 
 test('container#at', (t) => {
     parse('h1, h2, h3', (selectors) => {
-        t.same(selectors.at(1).first.value, 'h2');
+        t.deepEqual(selectors.at(1).first.value, 'h2');
     });
 });
 
 test('container#first, container#last', (t) => {
     parse('h1, h2, h3, h4', (selectors) => {
-        t.same(selectors.first.first.value, 'h1');
-        t.same(selectors.last.last.value, 'h4');
+        t.deepEqual(selectors.first.first.value, 'h1');
+        t.deepEqual(selectors.last.last.value, 'h4');
     });
 });
 
 test('container#index', (t) => {
     parse('h1 h2 h3', (selectors) => {
         let middle = selectors.first.at(1);
-        t.same(selectors.first.index(middle), 1);
+        t.deepEqual(selectors.first.index(middle), 1);
     });
 });
 
 test('container#length', (t) => {
     parse('h1, h2, h3', (selectors) => {
-        t.same(selectors.length, 3);
+        t.deepEqual(selectors.length, 3);
     });
 });
 
@@ -227,7 +227,7 @@ test('container#removeChild', (t) => {
             }
         });
     });
-    t.same(out, 'h1 h2 h3');
+    t.deepEqual(out, 'h1 h2 h3');
 });
 
 test('container#removeAll, container#empty', (t) => {
@@ -236,8 +236,8 @@ test('container#removeAll, container#empty', (t) => {
     };
     let out1 = parse('h1 h2, h2 h3, h3 h4', wipe('empty'));
     let out2 = parse('h1 h2, h2 h3, h3 h4', wipe('removeAll'));
-    t.same(out1, '');
-    t.same(out2, '');
+    t.deepEqual(out1, '');
+    t.deepEqual(out2, '');
 });
 
 test('container#insertBefore', (t) => {
@@ -246,7 +246,7 @@ test('container#insertBefore', (t) => {
         let clone = selector.first.clone({value: 'h1'});
         selectors.insertBefore(selector, clone);
     });
-    t.same(out, 'h1,h2');
+    t.deepEqual(out, 'h1,h2');
 });
 
 test('container#insertAfter', (t) => {
@@ -255,7 +255,7 @@ test('container#insertAfter', (t) => {
         let clone = selector.first.clone({value: 'h2'});
         selectors.insertAfter(selector, clone);
     });
-    t.same(out, 'h1,h2');
+    t.deepEqual(out, 'h1,h2');
 });
 
 test('container#insertAfter (during iteration)', (t) => {
@@ -265,5 +265,5 @@ test('container#insertAfter (during iteration)', (t) => {
             selector.parent.insertAfter(selector, attribute);
         });
     });
-    t.same(out, 'h1[class], h2[class], h3[class]');
+    t.deepEqual(out, 'h1[class], h2[class], h3[class]');
 });

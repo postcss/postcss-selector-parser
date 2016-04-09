@@ -7,7 +7,7 @@ test('node#clone', (t) => {
         let selector = selectors.first.first;
         let clone = selector.clone();
         delete selector.parent;
-        t.same(clone, selectors.first.first);
+        t.deepEqual(clone, selectors.first.first);
     });
 });
 
@@ -18,5 +18,5 @@ test('node#replaceWith', (t) => {
         let className = parser.className({value: 'test'});
         attr.replaceWith(id, className);
     });
-    t.same(out, '#test.test');
+    t.deepEqual(out, '#test.test');
 });

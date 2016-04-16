@@ -3,6 +3,7 @@ import {test} from './util/helpers';
 test('attribute selector', '[href]', (t, tree) => {
     t.deepEqual(tree.nodes[0].nodes[0].attribute, 'href');
     t.deepEqual(tree.nodes[0].nodes[0].type, 'attribute');
+    t.falsy(tree.nodes[0].nodes[0].quoted);
 });
 
 test('multiple attribute selectors', '[href][class][name]', (t, tree) => {
@@ -15,16 +16,22 @@ test('attribute selector with a value', '[name=james]', (t, tree) => {
     t.deepEqual(tree.nodes[0].nodes[0].attribute, 'name');
     t.deepEqual(tree.nodes[0].nodes[0].operator, '=');
     t.deepEqual(tree.nodes[0].nodes[0].value, 'james');
+    t.falsy(tree.nodes[0].nodes[0].quoted);
+    t.deepEqual(tree.nodes[0].nodes[0].raw.unquoted, 'james');
 });
 
 test('attribute selector with quoted value', '[name="james"]', (t, tree) => {
     t.deepEqual(tree.nodes[0].nodes[0].attribute, 'name');
     t.deepEqual(tree.nodes[0].nodes[0].operator, '=');
     t.deepEqual(tree.nodes[0].nodes[0].value, '"james"');
+    t.truthy(tree.nodes[0].nodes[0].quoted);
+    t.deepEqual(tree.nodes[0].nodes[0].raw.unquoted, 'james');
 });
 
 test('attribute selector with escaped quote', '[title="Something \\"weird\\""]', (t, tree) => {
     t.deepEqual(tree.nodes[0].nodes[0].value, '"Something \\"weird\\""');
+    t.truthy(tree.nodes[0].nodes[0].quoted);
+    t.deepEqual(tree.nodes[0].nodes[0].raw.unquoted, 'Something \\"weird\\"');
 });
 
 test('multiple attribute selectors + combinator', '[href][class][name] h1 > h2', (t, tree) => {
@@ -50,12 +57,19 @@ test('attribute selector with quoted value & combinator', '[name="james"] > h1',
 test('multiple quoted attribute selectors', '[href*="test.com"][rel="external"][id][class~="test"] > [name]', (t, tree) => {
     t.deepEqual(tree.nodes[0].nodes[0].attribute, 'href');
     t.deepEqual(tree.nodes[0].nodes[0].value, '"test.com"');
+    t.truthy(tree.nodes[0].nodes[0].quoted);
+    t.deepEqual(tree.nodes[0].nodes[0].raw.unquoted, 'test.com');
     t.deepEqual(tree.nodes[0].nodes[1].attribute, 'rel');
     t.deepEqual(tree.nodes[0].nodes[1].value, '"external"');
+    t.truthy(tree.nodes[0].nodes[1].quoted);
+    t.deepEqual(tree.nodes[0].nodes[1].raw.unquoted, 'external');
     t.deepEqual(tree.nodes[0].nodes[2].attribute, 'id');
     t.falsy(tree.nodes[0].nodes[2].value, 'should not have a value');
+    t.falsy(tree.nodes[0].nodes[2].quoted);
     t.deepEqual(tree.nodes[0].nodes[3].attribute, 'class');
     t.deepEqual(tree.nodes[0].nodes[3].value, '"test"');
+    t.truthy(tree.nodes[0].nodes[3].quoted);
+    t.deepEqual(tree.nodes[0].nodes[3].raw.unquoted, 'test');
     t.deepEqual(tree.nodes[0].nodes[4].value, '>');
     t.deepEqual(tree.nodes[0].nodes[5].attribute, 'name');
     t.falsy(tree.nodes[0].nodes[5].value, 'should not have a value');
@@ -72,6 +86,8 @@ test('attribute selector with quoted value containing "="', '[data-weird-attr="S
     t.deepEqual(tree.nodes[0].nodes[0].attribute, 'data-weird-attr');
     t.deepEqual(tree.nodes[0].nodes[0].operator, '=');
     t.deepEqual(tree.nodes[0].nodes[0].value, '"Something=weird"');
+    t.truthy(tree.nodes[0].nodes[0].quoted);
+    t.deepEqual(tree.nodes[0].nodes[0].raw.unquoted, 'Something=weird');
 });
 
 let selector = '[data-weird-attr*="Something=weird"],' +

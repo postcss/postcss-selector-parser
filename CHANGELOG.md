@@ -16,6 +16,7 @@ and;
 
 * Fixes parsing of attribute selectors with equals signs in them
   (e.g. `[data-attr="foo=bar"]`) (thanks to @montmanu).
+* Adds `quoted` and `raw.unquoted` properties to attribute nodes.
 
 # 1.3.3
 

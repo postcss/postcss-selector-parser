@@ -10,6 +10,7 @@ This release contains the following breaking changes:
   `walkTags`, and `eachInside` is now `walk`.
 * Renamed `Node#removeSelf()` to `Node#remove()`.
 * Renamed `Container#remove()` to `Container#removeChild()`.
+* Renamed `Node#raw` to `Node#raws`.
 * Now parses `&` as the *nesting* selector, rather than a *tag* selector.
 
 and;

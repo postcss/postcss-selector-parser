@@ -4,7 +4,7 @@ export default class Attribute extends Namespace {
     constructor (opts) {
         super(opts);
         this.type = 'attribute';
-        this.raw = {};
+        this.raws = {};
     }
 
     toString () {
@@ -21,8 +21,8 @@ export default class Attribute extends Namespace {
         if (this.value) {
             selector.push(this.value);
         }
-        if (this.raw.insensitive) {
-            selector.push(this.raw.insensitive);
+        if (this.raws.insensitive) {
+            selector.push(this.raws.insensitive);
         } else if (this.insensitive) {
             selector.push(' i');
         }

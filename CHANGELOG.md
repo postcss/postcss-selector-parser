@@ -1,6 +1,7 @@
 # Head
 
-* Fixes misinterpretation of Sass interpolation (e.g. `#{foo}`) as an id selector.
+* Fixes misinterpretation of Sass interpolation (e.g. `#{foo}`) as an
+  id selector (thanks to @davidtheclark).
 
 # 2.0.0
 
@@ -10,14 +11,15 @@ This release contains the following breaking changes:
   `walkTags`, and `eachInside` is now `walk`.
 * Renamed `Node#removeSelf()` to `Node#remove()`.
 * Renamed `Container#remove()` to `Container#removeChild()`.
-* Renamed `Node#raw` to `Node#raws`.
+* Renamed `Node#raw` to `Node#raws` (thanks to @davidtheclark).
 * Now parses `&` as the *nesting* selector, rather than a *tag* selector.
 
 and;
 
 * Fixes parsing of attribute selectors with equals signs in them
   (e.g. `[data-attr="foo=bar"]`) (thanks to @montmanu).
-* Adds `quoted` and `raw.unquoted` properties to attribute nodes.
+* Adds `quoted` and `raw.unquoted` properties to attribute nodes
+  (thanks to @davidtheclark).
 
 # 1.3.3
 

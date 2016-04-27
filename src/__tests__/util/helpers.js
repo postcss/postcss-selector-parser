@@ -19,7 +19,7 @@ export let test = (spec, input, callback) => {
     }
 
     ava(`${spec} (toString)`, t => {
-        t.same(result, input);
+        t.deepEqual(result, input);
     });
 };
 

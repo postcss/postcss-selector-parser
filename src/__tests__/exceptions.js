@@ -17,3 +17,5 @@ throws('no opening square bracket (3)', '[global]]');
 
 throws('bad pseudo element', 'button::"after"');
 throws('missing closing parenthesis in pseudo', ':not([attr="test"]:not([attr="test"])');
+
+throws('bad syntax', '-moz-osx-font-smoothing: grayscale');

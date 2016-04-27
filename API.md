@@ -574,3 +574,13 @@ Remains `undefined` if there is no attribute value.
 [href="foo"] /* foo */
 [href] /* undefined */
 ```
+
+### `attribute.raws.insensitive`
+
+If there is an `i` specifying case insensitivity, returns that `i` along with the whitespace
+around it.
+
+```css
+[id=Bar i ] /* " i " */
+[id=Bar   i  ] /* "   i  " */
+```

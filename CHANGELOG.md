@@ -1,8 +1,3 @@
-# Head
-
-* Fixes misinterpretation of Sass interpolation (e.g. `#{foo}`) as an
-  id selector (thanks to @davidtheclark).
-
 # 2.0.0
 
 This release contains the following breaking changes:
@@ -13,6 +8,8 @@ This release contains the following breaking changes:
 * Renamed `Container#remove()` to `Container#removeChild()`.
 * Renamed `Node#raw` to `Node#raws` (thanks to @davidtheclark).
 * Now parses `&` as the *nesting* selector, rather than a *tag* selector.
+* Fixes misinterpretation of Sass interpolation (e.g. `#{foo}`) as an
+  id selector (thanks to @davidtheclark).
 
 and;
 

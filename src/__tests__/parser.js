@@ -58,3 +58,15 @@ test('empty selector string', (t) => {
         }).process('').result;
     });
 });
+
+test('async parser', (t) => {
+    t.plan(1);
+
+    t.notThrows(() => {
+        return parser(() => new Promise((res) => {
+            res();
+        })).process('').result.then(() => {
+            t.pass();
+        });
+    });
+});

@@ -1,4 +1,5 @@
 import Node from './node';
+import * as types from './types';
 
 export default class Container extends Node {
     constructor (opts) {
@@ -151,7 +152,7 @@ export default class Container extends Node {
 
     walkAttributes (callback) {
         return this.walk((selector) => {
-            if (selector.type === 'attribute') {
+            if (selector.type === types.ATTRIBUTE) {
                 return callback.call(this, selector);
             }
         });
@@ -159,7 +160,7 @@ export default class Container extends Node {
 
     walkClasses (callback) {
         return this.walk((selector) => {
-            if (selector.type === 'class') {
+            if (selector.type === types.CLASS) {
                 return callback.call(this, selector);
             }
         });
@@ -167,7 +168,7 @@ export default class Container extends Node {
 
     walkCombinators (callback) {
         return this.walk((selector) => {
-            if (selector.type === 'combinator') {
+            if (selector.type === types.COMBINATOR) {
                 return callback.call(this, selector);
             }
         });
@@ -175,7 +176,7 @@ export default class Container extends Node {
 
     walkComments (callback) {
         return this.walk((selector) => {
-            if (selector.type === 'comment') {
+            if (selector.type === types.COMMENT) {
                 return callback.call(this, selector);
             }
         });
@@ -183,15 +184,15 @@ export default class Container extends Node {
 
     walkIds (callback) {
         return this.walk((selector) => {
-            if (selector.type === 'id') {
+            if (selector.type === types.ID) {
                 return callback.call(this, selector);
             }
         });
     }
-    
+
     walkNesting (callback) {
         return this.walk(selector => {
-            if (selector.type === 'nesting') {
+            if (selector.type === types.NESTING) {
                 return callback.call(this, selector);
             }
         });
@@ -199,7 +200,7 @@ export default class Container extends Node {
 
     walkPseudos (callback) {
         return this.walk((selector) => {
-            if (selector.type === 'pseudo') {
+            if (selector.type === types.PSEUDO) {
                 return callback.call(this, selector);
             }
         });
@@ -207,7 +208,7 @@ export default class Container extends Node {
 
     walkTags (callback) {
         return this.walk((selector) => {
-            if (selector.type === 'tag') {
+            if (selector.type === types.TAG) {
                 return callback.call(this, selector);
             }
         });
@@ -215,7 +216,7 @@ export default class Container extends Node {
 
     walkUniversals (callback) {
         return this.walk((selector) => {
-            if (selector.type === 'universal') {
+            if (selector.type === types.UNIVERSAL) {
                 return callback.call(this, selector);
             }
         });

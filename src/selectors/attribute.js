@@ -1,9 +1,10 @@
 import Namespace from './namespace';
+import {ATTRIBUTE} from './types';
 
 export default class Attribute extends Namespace {
     constructor (opts) {
         super(opts);
-        this.type = 'attribute';
+        this.type = ATTRIBUTE;
         this.raws = {};
     }
 
@@ -15,7 +16,7 @@ export default class Attribute extends Namespace {
             this.attribute
         ];
 
-        if (this.operator) { 
+        if (this.operator) {
             selector.push(this.operator);
         }
         if (this.value) {

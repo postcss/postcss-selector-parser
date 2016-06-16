@@ -64,4 +64,19 @@ parser.universal = function (opts) {
     return new Universal(opts);
 };
 
+export {
+    TAG,
+    STRING,
+    SELECTOR,
+    ROOT,
+    PSEUDO,
+    NESTING,
+    ID,
+    COMMENT,
+    COMBINATOR,
+    CLASS,
+    ATTRIBUTE,
+    UNIVERSAL
+} from './selectors/types';
+
 export default parser;

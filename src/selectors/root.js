@@ -1,9 +1,10 @@
 import Container from './container';
+import {ROOT} from './types';
 
 export default class Root extends Container {
     constructor (opts) {
         super(opts);
-        this.type = 'root';
+        this.type = ROOT;
     }
 
     toString () {

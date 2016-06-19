@@ -1,9 +1,10 @@
 import Namespace from './namespace';
+import {CLASS} from './types';
 
 export default class ClassName extends Namespace {
     constructor (opts) {
         super(opts);
-        this.type = 'class';
+        this.type = CLASS;
     }
 
     toString () {

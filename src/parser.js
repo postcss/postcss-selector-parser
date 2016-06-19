@@ -18,6 +18,8 @@ import flatten from 'flatten';
 import indexesOf from 'indexes-of';
 import uniq from 'uniq';
 
+import * as types from './selectors/types';
+
 export default class Parser {
     constructor (input) {
         this.input = input;
@@ -199,7 +201,7 @@ export default class Parser {
 
     parentheses () {
         let last = this.current.last;
-        if (last && last.type === 'pseudo') {
+        if (last && last.type === types.PSEUDO) {
             let selector = new Selector();
             let cache = this.current;
             last.append(selector);

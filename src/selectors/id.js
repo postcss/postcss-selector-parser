@@ -1,9 +1,10 @@
 import Namespace from './namespace';
+import {ID as IDType} from './types';
 
 export default class ID extends Namespace {
     constructor (opts) {
         super(opts);
-        this.type = 'id';
+        this.type = IDType;
     }
 
     toString () {

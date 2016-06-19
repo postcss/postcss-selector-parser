@@ -22,6 +22,21 @@ nodeTypes.forEach(type => {
     });
 });
 
+test('string constants', t => {
+    t.truthy(parser.TAG);
+    t.truthy(parser.STRING);
+    t.truthy(parser.SELECTOR);
+    t.truthy(parser.ROOT);
+    t.truthy(parser.PSEUDO);
+    t.truthy(parser.NESTING);
+    t.truthy(parser.ID);
+    t.truthy(parser.COMMENT);
+    t.truthy(parser.COMBINATOR);
+    t.truthy(parser.CLASS);
+    t.truthy(parser.ATTRIBUTE);
+    t.truthy(parser.UNIVERSAL);
+});
+
 test('construct a whole tree', (t) => {
     let root = parser.root();
     let selector = parser.selector();

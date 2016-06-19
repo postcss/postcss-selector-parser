@@ -11,6 +11,7 @@ import Selector   from './selectors/selector';
 import Str        from './selectors/string';
 import Tag        from './selectors/tag';
 import Universal  from './selectors/universal';
+import * as types from './selectors/types';
 
 let parser = processor => new Processor(processor);
 
@@ -27,19 +28,11 @@ parser.string = opts => new Str(opts);
 parser.tag = opts => new Tag(opts);
 parser.universal = opts => new Universal(opts);
 
-export {
-    TAG,
-    STRING,
-    SELECTOR,
-    ROOT,
-    PSEUDO,
-    NESTING,
-    ID,
-    COMMENT,
-    COMBINATOR,
-    CLASS,
-    ATTRIBUTE,
-    UNIVERSAL
-} from './selectors/types';
+Object.keys(types).forEach(type => {
+    if (type === '__esModule') {
+        return;
+    }
+    parser[type] = types[type];
+});
 
 export default parser;

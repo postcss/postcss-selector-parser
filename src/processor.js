@@ -10,7 +10,7 @@ export default class Processor {
         let input = new Parser({
             css: selectors,
             error: (e) => {
-                throw new Error(e);
+                throw new Error(`${e} Current selectors: ${selectors}`);
             }
         });
         this.res = input;

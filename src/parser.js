@@ -82,8 +82,9 @@ export default class Parser {
                 attr.insensitive = true;
                 attr.raws.insensitive = insensitive[1];
             }
-            attr.quoted = attr.value[0] === '\'' || attr.value[0] === '"';
-            attr.raws.unquoted = (attr.quoted) ? attr.value.slice(1, -1) : attr.value;
+            let trimmedValue = attr.value.trim();
+            attr.quoted = trimmedValue[0] === '\'' || trimmedValue[0] === '"';
+            attr.raws.unquoted = (attr.quoted) ? trimmedValue.slice(1, -1) : trimmedValue;
         }
         this.newNode(attr);
         this.position++;

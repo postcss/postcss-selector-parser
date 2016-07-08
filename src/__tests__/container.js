@@ -1,6 +1,6 @@
 import test from 'ava';
+import parser from '..';
 import {parse} from './util/helpers';
-import parser from '../index';
 
 test('container#each', (t) => {
     let str = '';
@@ -136,7 +136,7 @@ test('container#map', (t) => {
 test('container#every', (t) => {
     parse('.one.two.three', (selectors) => {
         let allClasses = selectors.first.every((selector) => {
-            return selector.type = 'class';
+            return selector.type === 'class';
         });
         t.truthy(allClasses);
     });
@@ -145,7 +145,7 @@ test('container#every', (t) => {
 test('container#some', (t) => {
     parse('one#two.three', (selectors) => {
         let someClasses = selectors.first.some((selector) => {
-            return selector.type = 'class';
+            return selector.type === 'class';
         });
         t.truthy(someClasses);
     });

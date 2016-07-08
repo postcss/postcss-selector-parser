@@ -1,6 +1,6 @@
 import test from 'ava';
+import parser from '..';
 import {parse} from './util/helpers';
-import parser from '../index';
 
 test('node#clone', (t) => {
     parse('[href="test"]', (selectors) => {

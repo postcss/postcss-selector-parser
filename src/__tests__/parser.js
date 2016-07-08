@@ -12,7 +12,7 @@ const nodeTypes = [
     ['pseudo',     '::before', {value: '::before'}],
     ['string',     '"wow"', {value: '"wow"'}],
     ['tag',        'button', {value: 'button'}],
-    ['universal',  '*']
+    ['universal',  '*'],
 ];
 
 nodeTypes.forEach(type => {

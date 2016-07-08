@@ -11,7 +11,7 @@ export default class Processor {
             css: selectors,
             error: (e) => {
                 throw new Error(e);
-            }
+            },
         });
         this.res = input;
         this.func(input);

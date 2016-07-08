@@ -13,7 +13,7 @@ import Tag        from './selectors/tag';
 import Universal  from './selectors/universal';
 import * as types from './selectors/types';
 
-let parser = processor => new Processor(processor);
+const parser = processor => new Processor(processor);
 
 parser.attribute = opts => new Attribute(opts);
 parser.className = opts => new ClassName(opts);
@@ -32,7 +32,7 @@ Object.keys(types).forEach(type => {
     if (type === '__esModule') {
         return;
     }
-    parser[type] = types[type];
+    parser[type] = types[type]; // eslint-disable-line
 });
 
 export default parser;

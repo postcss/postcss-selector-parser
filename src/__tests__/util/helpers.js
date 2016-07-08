@@ -1,15 +1,15 @@
-import parser from '../../index';
-import ava from 'ava';
 import util from 'util';
+import ava from 'ava';
+import parser from '../../index';
 
-export let parse = (input, transform) => {
+export const parse = (input, transform) => {
     return parser(transform).process(input).result;
 };
 
-export let test = (spec, input, callback) => {
+export const test = (spec, input, callback) => {
     let tree;
 
-    let result = parse(input, (selectors) => tree = selectors);
+    let result = parse(input, (selectors) => (tree = selectors));
 
     if (callback) {
         ava(`${spec} (tree)`, t => {
@@ -23,7 +23,7 @@ export let test = (spec, input, callback) => {
     });
 };
 
-export let throws = (spec, input) => {
+export const throws = (spec, input) => {
     ava(`${spec} (throws)`, t => {
         t.throws(() => parser().process(input).result);
     });

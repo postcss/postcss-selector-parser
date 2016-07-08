@@ -72,7 +72,7 @@ export default class {
         return [
             this.spaces.before,
             String(this.value),
-            this.spaces.after
+            this.spaces.after,
         ].join('');
     }
 }

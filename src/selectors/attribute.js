@@ -13,7 +13,7 @@ export default class Attribute extends Namespace {
             this.spaces.before,
             '[',
             this.ns,
-            this.attribute
+            this.attribute,
         ];
 
         if (this.operator) {

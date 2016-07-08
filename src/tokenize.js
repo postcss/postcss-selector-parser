@@ -96,7 +96,7 @@ export default function tokenize (input) {
         case asterisk:
             tokens.push(['*', '*', line, pos - offset, pos]);
             break;
-        
+
         case ampersand:
             tokens.push(['&', '&', line, pos - offset, pos]);
             break;
@@ -149,7 +149,7 @@ export default function tokenize (input) {
             tokens.push(['string', css.slice(pos, next + 1),
                 line, pos  - offset,
                 line, next - offset,
-                pos
+                pos,
             ]);
             pos = next;
             break;
@@ -165,7 +165,7 @@ export default function tokenize (input) {
             tokens.push(['at-word', css.slice(pos, next + 1),
                 line, pos  - offset,
                 line, next - offset,
-                pos
+                pos,
             ]);
             pos = next;
             break;
@@ -189,7 +189,7 @@ export default function tokenize (input) {
             tokens.push(['word', css.slice(pos, next + 1),
                 line, pos  - offset,
                 line, next - offset,
-                pos
+                pos,
             ]);
             pos = next;
             break;
@@ -216,7 +216,7 @@ export default function tokenize (input) {
                 tokens.push(['comment', content,
                     line,     pos  - offset,
                     nextLine, next - nextOffset,
-                    pos
+                    pos,
                 ]);
 
                 offset = nextOffset;
@@ -235,7 +235,7 @@ export default function tokenize (input) {
                 tokens.push(['word', css.slice(pos, next + 1),
                     line, pos  - offset,
                     line, next - offset,
-                    pos
+                    pos,
                 ]);
                 pos = next;
             }

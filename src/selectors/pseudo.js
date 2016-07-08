@@ -13,7 +13,7 @@ export default class Pseudo extends Container {
             this.spaces.before,
             String(this.value),
             params,
-            this.spaces.after
+            this.spaces.after,
         ].join('');
     }
 }

@@ -2,7 +2,7 @@ import Node from './node';
 
 export default class Namespace extends Node {
     get ns () {
-        let n = this.namespace;
+        const n = this.namespace;
         return n ? (typeof n === 'string' ? n : '') + '|' : '';
     }
 
@@ -11,7 +11,7 @@ export default class Namespace extends Node {
             this.spaces.before,
             this.ns,
             String(this.value),
-            this.spaces.after
+            this.spaces.after,
         ].join('');
     }
 };

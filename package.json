@@ -32,8 +32,8 @@
     "pretest": "eslint src",
     "prepublish": "del-cli dist && BABEL_ENV=publish babel src --out-dir dist --ignore /__tests__/",
     "report": "nyc report --reporter=html",
-    "test": "nyc node batchTests.js 'src/__tests__/*.js'",
-    "test-fast": "nyc ava src/__tests__/*.js"
+    "test": "nyc ava src/__tests__/*.js",
+    "test-012": "nyc ava src/__tests__/*.js"
   },
   "dependencies": {
     "flatten": "^1.0.2",
@@ -50,7 +50,7 @@
   "repository": "postcss/postcss-selector-parser",
   "ava": {
     "require": "babel-register",
-    "serial": true
+    "concurrency": 5
   },
   "nyc": {
     "exclude": [

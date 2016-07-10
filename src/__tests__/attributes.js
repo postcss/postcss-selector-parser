@@ -218,6 +218,8 @@ test('spaces in attribute selectors', 'h1[  href  *=  "test"  ]', (t, tree) => {
     t.deepEqual(tree.nodes[0].nodes[1].attribute, '  href  ');
     t.deepEqual(tree.nodes[0].nodes[1].operator, '*=');
     t.deepEqual(tree.nodes[0].nodes[1].value, '  "test"  ');
+    t.truthy(tree.nodes[0].nodes[1].quoted);
+    t.deepEqual(tree.nodes[0].nodes[1].raws.unquoted, 'test');
 });
 
 test('insensitive attribute selector 1', '[href="test" i]', (t, tree) => {

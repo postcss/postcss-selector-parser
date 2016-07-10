@@ -1,3 +1,8 @@
+# 2.1.1
+
+* Better unquoted value handling within attribute selectors
+  (thanks to @evilebottnawi).
+
 # 2.1.0
 
 * Added: Use string constants for all node types & expose them on the main

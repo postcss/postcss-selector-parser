@@ -23,6 +23,7 @@ import * as types from './selectors/types';
 export default class Parser {
     constructor (input) {
         this.input = input;
+        this.lossy = input.options.lossless === false;
         this.position = 0;
         this.root = new Root();
 
@@ -30,7 +31,11 @@ export default class Parser {
         this.root.append(selectors);
 
         this.current = selectors;
-        this.tokens = tokenize(input);
+        if (this.lossy) {
+            this.tokens = tokenize({safe: input.safe, css: input.css.trim()});
+        } else {
+            this.tokens = tokenize(input);
+        }
 
         return this.loop();
     }
@@ -68,21 +73,23 @@ export default class Parser {
             if (namespace[0] === '') {
                 namespace[0] = true;
             }
-            attributeProps.attribute = namespace[2];
-            attributeProps.namespace = namespace[0];
+            attributeProps.attribute = this.parseValue(namespace[2]);
+            attributeProps.namespace = this.parseNamespace(namespace[0]);
         } else {
-            attributeProps.attribute = parts[0];
+            attributeProps.attribute = this.parseValue(parts[0]);
         }
         attr = new Attribute(attributeProps);
 
         if (parts[2]) {
             let insensitive = parts[2].split(/(\s+i\s*?)$/);
-            attr.value = insensitive[0];
+            let trimmedValue = insensitive[0].trim();
+            attr.value = this.lossy ? trimmedValue : insensitive[0];
             if (insensitive[1]) {
                 attr.insensitive = true;
-                attr.raws.insensitive = insensitive[1];
+                if (!this.lossy) {
+                    attr.raws.insensitive = insensitive[1];
+                }
             }
-            let trimmedValue = attr.value.trim();
             attr.quoted = trimmedValue[0] === '\'' || trimmedValue[0] === '"';
             attr.raws.unquoted = (attr.quoted) ? trimmedValue.slice(1, -1) : trimmedValue;
         }
@@ -112,16 +119,18 @@ export default class Parser {
                 (this.currToken[0] === 'space' ||
                 this.currToken[0] === 'combinator')) {
             if (this.nextToken && this.nextToken[0] === 'combinator') {
-                node.spaces.before = this.currToken[1];
+                node.spaces.before = this.parseSpace(this.currToken[1]);
                 node.source.start.line = this.nextToken[2];
                 node.source.start.column = this.nextToken[3];
                 node.source.end.column = this.nextToken[3];
                 node.source.end.line = this.nextToken[2];
                 node.sourceIndex = this.nextToken[4];
             } else if (this.prevToken && this.prevToken[0] === 'combinator') {
-                node.spaces.after = this.currToken[1];
-            } else if (this.currToken[0] === 'space' || this.currToken[0] === 'combinator') {
+                node.spaces.after = this.parseSpace(this.currToken[1]);
+            } else if (this.currToken[0] === 'combinator') {
                 node.value = this.currToken[1];
+            } else if (this.currToken[0] === 'space' && !(this.lossy && this.prevToken[0] === '&')) {
+                node.value = this.parseSpace(this.currToken[1], ' ');
             }
             this.position ++;
         }
@@ -239,7 +248,7 @@ export default class Parser {
                 if (this.currToken[0] === ')') {
                     balanced--;
                 }
-                last.value += this.currToken[1];
+                last.value += this.parseParenthesisPart(this.currToken);
                 this.position++;
             }
             if (balanced) {
@@ -290,10 +299,10 @@ export default class Parser {
         let token = this.currToken;
         // Handle space before and after the selector
         if (this.position === 0 || this.prevToken[0] === ',' || this.prevToken[0] === '(') {
-            this.spaces = token[1];
+            this.spaces = this.parseSpace(token[1]);
             this.position ++;
         } else if (this.position === (this.tokens.length - 1) || this.nextToken[0] === ',' || this.nextToken[0] === ')') {
-            this.current.last.spaces.after = token[1];
+            this.current.last.spaces.after = this.parseSpace(token[1]);
             this.position ++;
         } else {
             this.combinator();
@@ -352,7 +361,7 @@ export default class Parser {
             if (current.lastIndexOf('\\') === current.length - 1) {
                 let next = this.nextToken;
                 if (next && next[0] === 'space') {
-                    word += next[1];
+                    word += this.parseSpace(next[1], ' ');
                     this.position ++;
                 }
             }
@@ -491,9 +500,42 @@ export default class Parser {
      * Helpers
      */
 
+    parseNamespace (namespace) {
+        if (this.lossy && typeof namespace === 'string') {
+            const trimmed = namespace.trim();
+            if (!trimmed.length) {
+                return true;
+            }
+
+            return trimmed;
+        }
+
+        return namespace;
+    }
+
+    parseSpace (space, replacement) {
+        return this.lossy ? (replacement || '') : space;
+    }
+
+    parseValue (value) {
+        return this.lossy && value && typeof value === 'string' ? value.trim() : value;
+    }
+
+    parseParenthesisPart (part) {
+        if (!this.lossy) {
+            return part[1];
+        }
+
+        if (part[0] === 'space') {
+            return this.parseSpace(part[1], ' ');
+        }
+
+        return this.parseValue(part[1]);
+    }
+
     newNode (node, namespace) {
         if (namespace) {
-            node.namespace = namespace;
+            node.namespace = this.parseNamespace(namespace);
         }
         if (this.spaces) {
             node.spaces.before = this.spaces;

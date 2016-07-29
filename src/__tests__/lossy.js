@@ -5,79 +5,76 @@ export const parse = (input, options, transform) => {
     return parser(transform).process(input, options).result;
 };
 
-export const testLossy = (spec, input, expected) => {
+export const testLossy = (t, input, expected) => {
     let result = parse(input, {lossless:false});
-
-    ava(`${spec} (toString)`, t => {
-        t.deepEqual(result, expected);
-    });
+    t.deepEqual(result, expected);
 };
 
-testLossy('combinator, descendant - single', '.one .two', '.one .two');
-testLossy('combinator, descendant - multiple', '.one   .two', '.one .two');
-testLossy('combinator, child - space before', '.one >.two', '.one>.two');
-testLossy('combinator, child - space after', '.one> .two', '.one>.two');
-testLossy('combinator, sibling - space before', '.one ~.two', '.one~.two');
-testLossy('combinator, sibling - space after', '.one~ .two', '.one~.two');
-testLossy('combinator, adj sibling - space before', '.one +.two', '.one+.two');
-testLossy('combinator, adj sibling - space after', '.one+ .two', '.one+.two');
+ava('combinator, descendant - single', testLossy, '.one .two', '.one .two');
+ava('combinator, descendant - multiple', testLossy, '.one   .two', '.one .two');
+ava('combinator, child - space before', testLossy, '.one >.two', '.one>.two');
+ava('combinator, child - space after', testLossy, '.one> .two', '.one>.two');
+ava('combinator, sibling - space before', testLossy, '.one ~.two', '.one~.two');
+ava('combinator, sibling - space after', testLossy, '.one~ .two', '.one~.two');
+ava('combinator, adj sibling - space before', testLossy, '.one +.two', '.one+.two');
+ava('combinator, adj sibling - space after', testLossy, '.one+ .two', '.one+.two');
 
-testLossy('classes, extraneous spaces', '  .h1   ,  .h2   ', '.h1,.h2');
-testLossy('ids, extraneous spaces', '  #h1   ,  #h2   ', '#h1,#h2');
+ava('classes, extraneous spaces', testLossy, '  .h1   ,  .h2   ', '.h1,.h2');
+ava('ids, extraneous spaces', testLossy, '  #h1   ,  #h2   ', '#h1,#h2');
 
-testLossy('attribute, spaces in selector', 'h1[  href  *=  "test"  ]', 'h1[href*="test"]');
-testLossy('attribute, insensitive flag 1', '[href="test" i  ]', '[href="test" i]');
-testLossy('attribute, insensitive flag 2', '[href=TEsT i  ]', '[href=TEsT i]');
-testLossy('attribute, insensitive flag 3', '[href=test i  ]', '[href=test i]');
-testLossy('attribute, extreneous whitespace', '  [href]   ,  [class]   ', '[href],[class]');
+ava('attribute, spaces in selector', testLossy, 'h1[  href  *=  "test"  ]', 'h1[href*="test"]');
+ava('attribute, insensitive flag 1', testLossy, '[href="test" i  ]', '[href="test" i]');
+ava('attribute, insensitive flag 2', testLossy, '[href=TEsT i  ]', '[href=TEsT i]');
+ava('attribute, insensitive flag 3', testLossy, '[href=test i  ]', '[href=test i]');
+ava('attribute, extreneous whitespace', testLossy, '  [href]   ,  [class]   ', '[href],[class]');
 
-testLossy('namespace, space before', '   postcss|button', 'postcss|button');
-testLossy('namespace, space after', 'postcss|button     ', 'postcss|button');
-testLossy('namespace - all elements, space before', '   postcss|*', 'postcss|*');
-testLossy('namespace - all elements, space after', 'postcss|*     ', 'postcss|*');
-testLossy('namespace - all namespaces, space before', '   *|button', '*|button');
-testLossy('namespace - all namespaces, space after', '*|button     ', '*|button');
-testLossy('namespace - all elements in all namespaces, space before', '   *|*', '*|*');
-testLossy('namespace - all elements in all namespaces, space after', '*|*     ', '*|*');
-testLossy('namespace - all elements without namespace, space before', '   |*', '|*');
-testLossy('namespace - all elements without namespace, space after', '|*     ', '|*');
-testLossy('namespace - tag with no namespace, space before', '   |button', '|button');
-testLossy('namespace - tag with no namespace, space after', '|button     ', '|button');
-testLossy('namespace - inside attribute, space before', ' [  postcss|href=test]', '[postcss|href=test]');
-testLossy('namespace - inside attribute, space after', '[postcss|href=  test  ] ', '[postcss|href=test]');
-testLossy('namespace - inside attribute (2), space before', ' [  postcss|href]', '[postcss|href]');
-testLossy('namespace - inside attribute (2), space after', '[postcss|href ] ', '[postcss|href]');
-testLossy('namespace - inside attribute (3), space before', ' [  *|href=test]', '[*|href=test]');
-testLossy('namespace - inside attribute (3), space after', '[*|href=  test  ] ', '[*|href=test]');
-testLossy('namespace - inside attribute (4), space before', ' [  |href=test]', '[|href=test]');
-testLossy('namespace - inside attribute (4), space after', '[|href=  test  ] ', '[|href=test]');
+ava('namespace, space before', testLossy, '   postcss|button', 'postcss|button');
+ava('namespace, space after', testLossy, 'postcss|button     ', 'postcss|button');
+ava('namespace - all elements, space before', testLossy, '   postcss|*', 'postcss|*');
+ava('namespace - all elements, space after', testLossy, 'postcss|*     ', 'postcss|*');
+ava('namespace - all namespaces, space before', testLossy, '   *|button', '*|button');
+ava('namespace - all namespaces, space after', testLossy, '*|button     ', '*|button');
+ava('namespace - all elements in all namespaces, space before', testLossy, '   *|*', '*|*');
+ava('namespace - all elements in all namespaces, space after', testLossy, '*|*     ', '*|*');
+ava('namespace - all elements without namespace, space before', testLossy, '   |*', '|*');
+ava('namespace - all elements without namespace, space after', testLossy, '|*     ', '|*');
+ava('namespace - tag with no namespace, space before', testLossy, '   |button', '|button');
+ava('namespace - tag with no namespace, space after', testLossy, '|button     ', '|button');
+ava('namespace - inside attribute, space before', testLossy, ' [  postcss|href=test]', '[postcss|href=test]');
+ava('namespace - inside attribute, space after', testLossy, '[postcss|href=  test  ] ', '[postcss|href=test]');
+ava('namespace - inside attribute (2), space before', testLossy, ' [  postcss|href]', '[postcss|href]');
+ava('namespace - inside attribute (2), space after', testLossy, '[postcss|href ] ', '[postcss|href]');
+ava('namespace - inside attribute (3), space before', testLossy, ' [  *|href=test]', '[*|href=test]');
+ava('namespace - inside attribute (3), space after', testLossy, '[*|href=  test  ] ', '[*|href=test]');
+ava('namespace - inside attribute (4), space before', testLossy, ' [  |href=test]', '[|href=test]');
+ava('namespace - inside attribute (4), space after', testLossy, '[|href=  test  ] ', '[|href=test]');
 
-testLossy('tag - extraneous whitespace', '  h1   ,  h2   ', 'h1,h2');
-testLossy('tag - trailing comma', 'h1, ', 'h1,');
-testLossy('tag - trailing comma (1)', 'h1,', 'h1,');
-testLossy('tag - trailing comma (2)', 'h1', 'h1');
-testLossy('tag - trailing slash (1)', 'h1\\    ', 'h1\\');
-testLossy('tag - trailing slash (2)', 'h1\\    h2\\', 'h1\\ h2\\');
+ava('tag - extraneous whitespace', testLossy, '  h1   ,  h2   ', 'h1,h2');
+ava('tag - trailing comma', testLossy, 'h1, ', 'h1,');
+ava('tag - trailing comma (1)', testLossy, 'h1,', 'h1,');
+ava('tag - trailing comma (2)', testLossy, 'h1', 'h1');
+ava('tag - trailing slash (1)', testLossy, 'h1\\    ', 'h1\\');
+ava('tag - trailing slash (2)', testLossy, 'h1\\    h2\\', 'h1\\ h2\\');
 
-testLossy('universal - combinator', ' * + * ', '*+*');
-testLossy('universal - extraneous whitespace', '  *   ,  *   ', '*,*');
-testLossy('universal - qualified universal selector', '*[href] *:not(*.green)', '*[href] *:not(*.green)');
+ava('universal - combinator', testLossy, ' * + * ', '*+*');
+ava('universal - extraneous whitespace', testLossy, '  *   ,  *   ', '*,*');
+ava('universal - qualified universal selector', testLossy, '*[href] *:not(*.green)', '*[href] *:not(*.green)');
 
-testLossy('nesting - spacing before', '  &.class', '&.class');
-testLossy('nesting - spacing after', '&.class  ', '&.class');
-testLossy('nesting - spacing between', '&  .class  ', '&.class');
+ava('nesting - spacing before', testLossy, '  &.class', '&.class');
+ava('nesting - spacing after', testLossy, '&.class  ', '&.class');
+ava('nesting - spacing between', testLossy, '&  .class  ', '&.class');
 
-testLossy('pseudo (single) - spacing before', '  :after', ':after');
-testLossy('pseudo (single) - spacing after', ':after  ', ':after');
-testLossy('pseudo (double) - spacing before', '  ::after', '::after');
-testLossy('pseudo (double) - spacing after', '::after  ', '::after');
-testLossy('pseudo - multiple', ' *:target::before ,   a:after  ', '*:target::before,a:after');
-testLossy('pseudo - negated', 'h1:not( .heading )', 'h1:not(.heading)');
-testLossy('pseudo - negated with combinators (1)', 'h1:not(.heading > .title)   >  h1', 'h1:not(.heading>.title)>h1');
-testLossy('pseudo - negated with combinators (2)', '.foo:nth-child(2n + 1)', '.foo:nth-child(2n+1)');
-testLossy('pseudo - extra whitespace', 'a:not(   h2   )', 'a:not(h2)');
+ava('pseudo (single) - spacing before', testLossy, '  :after', ':after');
+ava('pseudo (single) - spacing after', testLossy, ':after  ', ':after');
+ava('pseudo (double) - spacing before', testLossy, '  ::after', '::after');
+ava('pseudo (double) - spacing after', testLossy, '::after  ', '::after');
+ava('pseudo - multiple', testLossy, ' *:target::before ,   a:after  ', '*:target::before,a:after');
+ava('pseudo - negated', testLossy, 'h1:not( .heading )', 'h1:not(.heading)');
+ava('pseudo - negated with combinators (1)', testLossy, 'h1:not(.heading > .title)   >  h1', 'h1:not(.heading>.title)>h1');
+ava('pseudo - negated with combinators (2)', testLossy, '.foo:nth-child(2n + 1)', '.foo:nth-child(2n+1)');
+ava('pseudo - extra whitespace', testLossy, 'a:not(   h2   )', 'a:not(h2)');
 
-testLossy('@words - space before', '  @media', '@media');
-testLossy('@words - space after', '@media  ', '@media');
-testLossy('@words - maintains space between', '@media (min-width: 700px) and (orientation: landscape)', '@media (min-width: 700px) and (orientation: landscape)');
-testLossy('@words - extraneous space between', '@media  (min-width:  700px)  and   (orientation:   landscape)', '@media (min-width: 700px) and (orientation: landscape)');
+ava('@words - space before', testLossy, '  @media', '@media');
+ava('@words - space after', testLossy, '@media  ', '@media');
+ava('@words - maintains space between', testLossy, '@media (min-width: 700px) and (orientation: landscape)', '@media (min-width: 700px) and (orientation: landscape)');
+ava('@words - extraneous space between', testLossy, '@media  (min-width:  700px)  and   (orientation:   landscape)', '@media (min-width: 700px) and (orientation: landscape)');

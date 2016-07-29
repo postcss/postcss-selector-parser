@@ -248,7 +248,7 @@ export default class Parser {
                 if (this.currToken[0] === ')') {
                     balanced--;
                 }
-                last.value += this.parseParenthesisPart(this.currToken);
+                last.value += this.parseParenthesisToken(this.currToken);
                 this.position++;
             }
             if (balanced) {
@@ -521,16 +521,16 @@ export default class Parser {
         return this.lossy && value && typeof value === 'string' ? value.trim() : value;
     }
 
-    parseParenthesisPart (part) {
+    parseParenthesisToken (token) {
         if (!this.lossy) {
-            return part[1];
+            return token[1];
         }
 
-        if (part[0] === 'space') {
-            return this.parseSpace(part[1], ' ');
+        if (token[0] === 'space') {
+            return this.parseSpace(token[1], ' ');
         }
 
-        return this.parseValue(part[1]);
+        return this.parseValue(token[1]);
     }
 
     newNode (node, namespace) {

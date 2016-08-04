@@ -606,11 +606,11 @@ Processes the `cssText`, returning the parsed output
 ```js
 var processor = parser();
 
-var result = parser().process('*.class').result;
-// => .class
+var result = processor.process(' .class').result;
+// =>  .class
 
 // To have the parser normalize whitespace values, utilize the options
-var result = parser(transform).process('  .class  ', {lossless: false}).result;
+var result = processor.process('  .class  ', {lossless: false}).result;
 // => .class
 ```
 

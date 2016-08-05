@@ -5,7 +5,7 @@ import parser from '../index';
 const nodeTypes = [
     ['attribute',  '[href]', {attribute: 'href'}],
     ['className',  '.classy', {value: 'classy'}],
-    ['combinator', '>>', {value: '>>'}],
+    ['combinator', ' >> ', {value: '>>', spaces: {before: ' ', after: ' '}}],
     ['comment',    '/* comment */', {value: '/* comment */'}],
     ['id',         '#test', {value: 'test'}],
     ['nesting',    '&'],

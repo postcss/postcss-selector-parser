@@ -31,7 +31,8 @@ export default class {
         for (let key in opts) {
             this[key] = opts[key];
         }
-        this.spaces = {before: '', after: ''};
+        let {spaces: {before = '', after = ''} = {}} = opts;
+        this.spaces = {before, after};
     }
 
     remove () {

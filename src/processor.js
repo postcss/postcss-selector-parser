@@ -6,12 +6,13 @@ export default class Processor {
         return this;
     }
 
-    process (selectors) {
+    process (selectors, options = {}) {
         let input = new Parser({
             css: selectors,
             error: (e) => {
                 throw new Error(e);
             },
+            options: options,
         });
         this.res = input;
         this.func(input);

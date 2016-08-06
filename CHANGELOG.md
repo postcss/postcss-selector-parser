@@ -1,3 +1,8 @@
+# 2.2.0
+
+* Added a new option to normalize whitespace when parsing the selector string
+  (thanks to @adam-26).
+
 # 2.1.1
 
 * Better unquoted value handling within attribute selectors

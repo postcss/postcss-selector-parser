@@ -172,6 +172,10 @@ export default class Parser {
         throw new this.input.error(message); // eslint-disable-line new-cap
     }
 
+    missingBackslash () {
+        return this.error('Expected a backslash preceding the semicolon.');
+    }
+
     missingParenthesis () {
         return this.error('Expected opening parenthesis.');
     }
@@ -477,6 +481,9 @@ export default class Parser {
             break;
         case ':':
             this.pseudo();
+            break;
+        case ';':
+            this.missingBackslash();
             break;
         case ',':
             this.comma();

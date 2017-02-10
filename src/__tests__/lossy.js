@@ -62,7 +62,7 @@ ava('universal - qualified universal selector', testLossy, '*[href] *:not(*.gree
 
 ava('nesting - spacing before', testLossy, '  &.class', '&.class');
 ava('nesting - spacing after', testLossy, '&.class  ', '&.class');
-ava('nesting - spacing between', testLossy, '&  .class  ', '&.class');
+ava('nesting - spacing between', testLossy, '&  .class  ', '& .class');
 
 ava('pseudo (single) - spacing before', testLossy, '  :after', ':after');
 ava('pseudo (single) - spacing after', testLossy, ':after  ', ':after');

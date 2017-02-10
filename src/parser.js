@@ -129,7 +129,7 @@ export default class Parser {
                 node.spaces.after = this.parseSpace(this.currToken[1]);
             } else if (this.currToken[0] === 'combinator') {
                 node.value = this.currToken[1];
-            } else if (this.currToken[0] === 'space' && !(this.lossy && this.prevToken[0] === '&')) {
+            } else if (this.currToken[0] === 'space') {
                 node.value = this.parseSpace(this.currToken[1], ' ');
             }
             this.position ++;

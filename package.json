@@ -1,6 +1,6 @@
 {
   "name": "postcss-selector-parser",
-  "version": "2.2.2",
+  "version": "2.2.3",
   "devDependencies": {
     "ava": "^0.17.0",
     "babel-cli": "^6.4.0",

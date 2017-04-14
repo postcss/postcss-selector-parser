@@ -14,6 +14,22 @@ test('container#each', (t) => {
     t.deepEqual(str, 'h1h2');
 });
 
+test('container#each (safe iteration)', (t) => {
+    let out = parse('.x, .y', (selectors) => {
+        selectors.each((selector) => {
+            selector.parent.insertBefore(
+                selector,
+                parser.className({value : 'b'})
+            );
+            selector.parent.insertAfter(
+                selector,
+                parser.className({value : 'a'})
+            );
+        });
+    });
+    t.deepEqual(out, '.b,.x,.a,.b, .y,.a');
+});
+
 test('container#walk', (t) => {
     let str = '';
     parse('h1, h2:not(h3, h4)', (selectors) => {

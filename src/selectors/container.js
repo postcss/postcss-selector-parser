@@ -73,6 +73,7 @@ export default class Container extends Node {
     }
 
     insertAfter (oldNode, newNode) {
+        newNode.parent = this;
         let oldIndex = this.index(oldNode);
         this.nodes.splice(oldIndex + 1, 0, newNode);
 
@@ -88,6 +89,7 @@ export default class Container extends Node {
     }
 
     insertBefore (oldNode, newNode) {
+        newNode.parent = this;
         let oldIndex = this.index(oldNode);
         this.nodes.splice(oldIndex, 0, newNode);
 

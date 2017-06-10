@@ -1,7 +1,7 @@
 import * as t from './tokenTypes';
 
 let atEnd        = /[ \n\t\r\{\(\)'"\\;/]/g,
-    wordEnd      = /[ \n\t\r\(\)\*:;@!&'"\+\|~>,\[\]\\]|\/(?=\*)/g;
+    wordEnd      = /[ \n\t\r\(\)\*:;!&'"\+\|~>,\[\]\\]|\/(?=\*)/g;
 
 export default function tokenize (input) {
     let tokens = [];

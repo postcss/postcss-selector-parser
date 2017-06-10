@@ -29,3 +29,9 @@ test('extraneous non-combinating whitespace', '  .h1   ,  .h2   ', (t, tree) => 
     t.deepEqual(tree.nodes[1].nodes[0].spaces.before, '  ');
     t.deepEqual(tree.nodes[1].nodes[0].spaces.after, '   ');
 });
+
+test('Less interpolation within a class', '.foo@{bar}', (t, tree) => {
+    t.deepEqual(tree.nodes[0].nodes.length, 1);
+    t.deepEqual(tree.nodes[0].nodes[0].type, 'class');
+    t.deepEqual(tree.nodes[0].nodes[0].value, 'foo@{bar}');
+});

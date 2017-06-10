@@ -8,9 +8,8 @@ test('non-standard selector', '.icon.is-$(network)', (t, tree) => {
 });
 
 test('at word in selector', 'em@il.com', (t, tree) => {
-    t.deepEqual(tree.nodes[0].nodes[0].value, 'em');
-    t.deepEqual(tree.nodes[0].nodes[1].value, '@il');
-    t.deepEqual(tree.nodes[0].nodes[2].value, 'com');
+    t.deepEqual(tree.nodes[0].nodes[0].value, 'em@il');
+    t.deepEqual(tree.nodes[0].nodes[1].value, 'com');
 });
 
 test('leading combinator', '> *', (t, tree) => {

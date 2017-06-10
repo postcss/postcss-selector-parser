@@ -51,3 +51,9 @@ test('Sass interpolation within an id', '#foo#{bar}', (t, tree) => {
     t.deepEqual(tree.nodes[0].nodes[0].type, 'id');
     t.deepEqual(tree.nodes[0].nodes[0].value, 'foo#{bar}');
 });
+
+test('Less interpolation within an id', '#foo@{bar}', (t, tree) => {
+    t.deepEqual(tree.nodes[0].nodes.length, 1);
+    t.deepEqual(tree.nodes[0].nodes[0].type, 'id');
+    t.deepEqual(tree.nodes[0].nodes[0].value, 'foo@{bar}');
+});

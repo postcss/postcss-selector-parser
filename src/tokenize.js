@@ -22,7 +22,7 @@ let singleQuote  = "'".charCodeAt(0),
     ampersand    = '&'.charCodeAt(0),
     at           = '@'.charCodeAt(0),
     atEnd        = /[ \n\t\r\{\(\)'"\\;/]/g,
-    wordEnd      = /[ \n\t\r\(\)\*:;@!&'"\+\|~>,\[\]\\]|\/(?=\*)/g;
+    wordEnd      = /[ \n\t\r\(\)\*:;!&'"\+\|~>,\[\]\\]|\/(?=\*)/g;
 
 export default function tokenize (input) {
     let tokens = [];

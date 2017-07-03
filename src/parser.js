@@ -18,6 +18,7 @@ import Nesting from './selectors/nesting';
 import sortAsc from './sortAscending';
 import tokenize from './tokenize';
 
+import * as tokens from './tokenTypes';
 import * as types from './selectors/types';
 
 export default class Parser {
@@ -45,7 +46,7 @@ export default class Parser {
         let attr;
         let startingToken = this.currToken;
         this.position ++;
-        while (this.position < this.tokens.length && this.currToken[0] !== ']') {
+        while (this.position < this.tokens.length && this.currToken[0] !== tokens.closeSquare) {
             str += this.tokens[this.position][1];
             this.position ++;
         }
@@ -116,20 +117,20 @@ export default class Parser {
             sourceIndex: this.currToken[4],
         });
         while ( this.position < this.tokens.length && this.currToken &&
-                (this.currToken[0] === 'space' ||
-                this.currToken[0] === 'combinator')) {
-            if (this.nextToken && this.nextToken[0] === 'combinator') {
+                (this.currToken[0] === tokens.space ||
+                this.currToken[0] === tokens.combinator)) {
+            if (this.nextToken && this.nextToken[0] === tokens.combinator) {
                 node.spaces.before = this.parseSpace(this.currToken[1]);
                 node.source.start.line = this.nextToken[2];
                 node.source.start.column = this.nextToken[3];
                 node.source.end.column = this.nextToken[3];
                 node.source.end.line = this.nextToken[2];
                 node.sourceIndex = this.nextToken[4];
-            } else if (this.prevToken && this.prevToken[0] === 'combinator') {
+            } else if (this.prevToken && this.prevToken[0] === tokens.combinator) {
                 node.spaces.after = this.parseSpace(this.currToken[1]);
-            } else if (this.currToken[0] === 'combinator') {
+            } else if (this.currToken[0] === tokens.combinator) {
                 node.value = this.currToken[1];
-            } else if (this.currToken[0] === 'space') {
+            } else if (this.currToken[0] === tokens.space) {
                 node.value = this.parseSpace(this.currToken[1], ' ');
             }
             this.position ++;
@@ -186,10 +187,10 @@ export default class Parser {
 
     namespace () {
         let before = this.prevToken && this.prevToken[1] || true;
-        if (this.nextToken[0] === 'word') {
+        if (this.nextToken[0] === tokens.word) {
             this.position ++;
             return this.word(before);
-        } else if (this.nextToken[0] === '*') {
+        } else if (this.nextToken[0] === tokens.asterisk) {
             this.position ++;
             return this.universal(before);
         }
@@ -223,10 +224,10 @@ export default class Parser {
             let balanced = 1;
             this.position ++;
             while (this.position < this.tokens.length && balanced) {
-                if (this.currToken[0] === '(') {
+                if (this.currToken[0] === tokens.openParenthesis) {
                     balanced++;
                 }
-                if (this.currToken[0] === ')') {
+                if (this.currToken[0] === tokens.closeParenthesis) {
                     balanced--;
                 }
                 if (balanced) {
@@ -246,10 +247,10 @@ export default class Parser {
             this.position ++;
             last.value += '(';
             while (this.position < this.tokens.length && balanced) {
-                if (this.currToken[0] === '(') {
+                if (this.currToken[0] === tokens.openParenthesis) {
                     balanced++;
                 }
-                if (this.currToken[0] === ')') {
+                if (this.currToken[0] === tokens.closeParenthesis) {
                     balanced--;
                 }
                 last.value += this.parseParenthesisToken(this.currToken);
@@ -264,14 +265,14 @@ export default class Parser {
     pseudo () {
         let pseudoStr = '';
         let startingToken = this.currToken;
-        while (this.currToken && this.currToken[0] === ':') {
+        while (this.currToken && this.currToken[0] === tokens.colon) {
             pseudoStr += this.currToken[1];
             this.position ++;
         }
         if (!this.currToken) {
             return this.error('Expected pseudo-class or pseudo-element');
         }
-        if (this.currToken[0] === 'word') {
+        if (this.currToken[0] === tokens.word) {
             let pseudo;
             this.splitWord(false, (first, length) => {
                 pseudoStr += first;
@@ -290,7 +291,7 @@ export default class Parser {
                     sourceIndex: startingToken[4],
                 });
                 this.newNode(pseudo);
-                if (length > 1 && this.nextToken && this.nextToken[0] === '(') {
+                if (length > 1 && this.nextToken && this.nextToken[0] === tokens.openParenthesis) {
                     this.error('Misplaced parenthesis.');
                 }
             });
@@ -302,10 +303,10 @@ export default class Parser {
     space () {
         let token = this.currToken;
         // Handle space before and after the selector
-        if (this.position === 0 || this.prevToken[0] === ',' || this.prevToken[0] === '(') {
+        if (this.position === 0 || this.prevToken[0] === tokens.comma || this.prevToken[0] === tokens.openParenthesis) {
             this.spaces = this.parseSpace(token[1]);
             this.position ++;
-        } else if (this.position === (this.tokens.length - 1) || this.nextToken[0] === ',' || this.nextToken[0] === ')') {
+        } else if (this.position === (this.tokens.length - 1) || this.nextToken[0] === tokens.comma || this.nextToken[0] === tokens.closeParenthesis) {
             this.current.last.spaces.after = this.parseSpace(token[1]);
             this.position ++;
         } else {
@@ -358,13 +359,13 @@ export default class Parser {
     splitWord (namespace, firstCallback) {
         let nextToken = this.nextToken;
         let word = this.currToken[1];
-        while (nextToken && nextToken[0] === 'word') {
+        while (nextToken && nextToken[0] === tokens.word) {
             this.position ++;
             let current = this.currToken[1];
             word += current;
             if (current.lastIndexOf('\\') === current.length - 1) {
                 let next = this.nextToken;
-                if (next && next[0] === 'space') {
+                if (next && next[0] === tokens.space) {
                     word += this.parseSpace(next[1], ' ');
                     this.position ++;
                 }
@@ -439,49 +440,49 @@ export default class Parser {
 
     parse (throwOnParenthesis) {
         switch (this.currToken[0]) {
-        case 'space':
+        case tokens.space:
             this.space();
             break;
-        case 'comment':
+        case tokens.comment:
             this.comment();
             break;
-        case '(':
+        case tokens.openParenthesis:
             this.parentheses();
             break;
-        case ')':
+        case tokens.closeParenthesis:
             if (throwOnParenthesis) {
                 this.missingParenthesis();
             }
             break;
-        case '[':
+        case tokens.openSquare:
             this.attribute();
             break;
-        case ']':
+        case tokens.closeSquare:
             this.missingSquareBracket();
             break;
-        case 'at-word':
-        case 'word':
+        case tokens.atWord:
+        case tokens.word:
             this.word();
             break;
-        case ':':
+        case tokens.colon:
             this.pseudo();
             break;
-        case ';':
+        case tokens.semicolon:
             this.missingBackslash();
             break;
-        case ',':
+        case tokens.comma:
             this.comma();
             break;
-        case '*':
+        case tokens.asterisk:
             this.universal();
             break;
-        case '&':
+        case tokens.ampersand:
             this.nesting();
             break;
-        case 'combinator':
+        case tokens.combinator:
             this.combinator();
             break;
-        case 'string':
+        case tokens.str:
             this.string();
             break;
         }
@@ -517,7 +518,7 @@ export default class Parser {
             return token[1];
         }
 
-        if (token[0] === 'space') {
+        if (token[0] === tokens.space) {
             return this.parseSpace(token[1], ' ');
         }
 

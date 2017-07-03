@@ -1,27 +1,6 @@
-let singleQuote  = "'".charCodeAt(0),
-    doubleQuote  = '"'.charCodeAt(0),
-    backslash    = '\\'.charCodeAt(0),
-    slash        = '/'.charCodeAt(0),
-    newline      = '\n'.charCodeAt(0),
-    space        = ' '.charCodeAt(0),
-    feed         = '\f'.charCodeAt(0),
-    tab          = '\t'.charCodeAt(0),
-    cr           = '\r'.charCodeAt(0),
-    plus         = '+'.charCodeAt(0),
-    gt           = '>'.charCodeAt(0),
-    tilde        = '~'.charCodeAt(0),
-    pipe         = '|'.charCodeAt(0),
-    comma        = ','.charCodeAt(0),
-    openBracket  = '('.charCodeAt(0),
-    closeBracket = ')'.charCodeAt(0),
-    openSq       = '['.charCodeAt(0),
-    closeSq      = ']'.charCodeAt(0),
-    semicolon    = ';'.charCodeAt(0),
-    asterisk     = '*'.charCodeAt(0),
-    colon        = ':'.charCodeAt(0),
-    ampersand    = '&'.charCodeAt(0),
-    at           = '@'.charCodeAt(0),
-    atEnd        = /[ \n\t\r\{\(\)'"\\;/]/g,
+import * as t from './tokenTypes';
+
+let atEnd        = /[ \n\t\r\{\(\)'"\\;/]/g,
     wordEnd      = /[ \n\t\r\(\)\*:;@!&'"\+\|~>,\[\]\\]|\/(?=\*)/g;
 
 export default function tokenize (input) {
@@ -48,90 +27,95 @@ export default function tokenize (input) {
     while ( pos < length ) {
         code = css.charCodeAt(pos);
 
-        if ( code === newline ) {
+        if ( code === t.newline ) {
             offset = pos;
             line  += 1;
         }
 
         switch ( code ) {
-        case newline:
-        case space:
-        case tab:
-        case cr:
-        case feed:
+        case t.newline:
+        case t.space:
+        case t.tab:
+        case t.cr:
+        case t.feed:
             next = pos;
             do {
                 next += 1;
                 code = css.charCodeAt(next);
-                if ( code === newline ) {
+                if ( code === t.newline ) {
                     offset = next;
                     line  += 1;
                 }
-            } while ( code === space   ||
-                      code === newline ||
-                      code === tab     ||
-                      code === cr      ||
-                      code === feed );
+            } while (
+                code === t.space   ||
+                code === t.newline ||
+                code === t.tab     ||
+                code === t.cr      ||
+                code === t.feed
+            );
 
-            tokens.push(['space', css.slice(pos, next), line, pos - offset, pos]);
+            tokens.push([t.space, css.slice(pos, next), line, pos - offset, pos]);
             pos = next - 1;
             break;
 
-        case plus:
-        case gt:
-        case tilde:
-        case pipe:
+        case t.plus:
+        case t.greaterThan:
+        case t.tilde:
+        case t.pipe:
             next = pos;
             do {
                 next += 1;
                 code = css.charCodeAt(next);
-            } while ( code === plus  ||
-                      code === gt    ||
-                      code === tilde ||
-                      code === pipe );
-            tokens.push(['combinator', css.slice(pos, next), line, pos - offset, pos]);
+            } while (
+                code === t.plus        ||
+                code === t.greaterThan ||
+                code === t.tilde       ||
+                code === t.pipe
+            );
+
+            tokens.push([t.combinator, css.slice(pos, next), line, pos - offset, pos]);
             pos = next - 1;
             break;
 
-        case asterisk:
-            tokens.push(['*', '*', line, pos - offset, pos]);
+        case t.asterisk:
+            tokens.push([t.asterisk, '*', line, pos - offset, pos]);
             break;
 
-        case ampersand:
-            tokens.push(['&', '&', line, pos - offset, pos]);
+        case t.ampersand:
+            tokens.push([t.ampersand, '&', line, pos - offset, pos]);
             break;
 
-        case comma:
-            tokens.push([',', ',', line, pos - offset, pos]);
+        case t.comma:
+            tokens.push([t.comma, ',', line, pos - offset, pos]);
             break;
 
-        case openSq:
-            tokens.push(['[', '[', line, pos - offset, pos]);
+        case t.openSquare:
+            tokens.push([t.openSquare, '[', line, pos - offset, pos]);
             break;
 
-        case closeSq:
-            tokens.push([']', ']', line, pos - offset, pos]);
+        case t.closeSquare:
+            tokens.push([t.closeSquare, ']', line, pos - offset, pos]);
             break;
 
-        case colon:
-            tokens.push([':', ':', line, pos - offset, pos]);
+        case t.colon:
+            tokens.push([t.colon, ':', line, pos - offset, pos]);
             break;
 
-        case semicolon:
-            tokens.push([';', ';', line, pos - offset, pos]);
+        case t.semicolon:
+            tokens.push([t.semicolon, ';', line, pos - offset, pos]);
             break;
 
-        case openBracket:
-            tokens.push(['(', '(', line, pos - offset, pos]);
+        case t.openParenthesis:
+            tokens.push([t.openParenthesis, '(', line, pos - offset, pos]);
             break;
 
-        case closeBracket:
-            tokens.push([')', ')', line, pos - offset, pos]);
+        case t.closeParenthesis:
+            tokens.push([t.closeParenthesis, ')', line, pos - offset, pos]);
             break;
 
-        case singleQuote:
-        case doubleQuote:
-            quote = code === singleQuote ? "'" : '"';
+        case t.singleQuote:
+        case t.doubleQuote:
+            quote = code === t.singleQuote ? "'" : '"';
             next  = pos;
             do {
                 escaped = false;
@@ -140,13 +124,13 @@ export default function tokenize (input) {
                     unclosed('quote', quote);
                 }
                 escapePos = next;
-                while ( css.charCodeAt(escapePos - 1) === backslash ) {
+                while ( css.charCodeAt(escapePos - 1) === t.backslash ) {
                     escapePos -= 1;
                     escaped = !escaped;
                 }
             } while ( escaped );
 
-            tokens.push(['string', css.slice(pos, next + 1),
+            tokens.push([t.str, css.slice(pos, next + 1),
                 line, pos  - offset,
                 line, next - offset,
                 pos,
@@ -154,7 +138,7 @@ export default function tokenize (input) {
             pos = next;
             break;
 
-        case at:
+        case t.at:
             atEnd.lastIndex = pos + 1;
             atEnd.test(css);
             if ( atEnd.lastIndex === 0 ) {
@@ -162,7 +146,7 @@ export default function tokenize (input) {
             } else {
                 next = atEnd.lastIndex - 2;
             }
-            tokens.push(['at-word', css.slice(pos, next + 1),
+            tokens.push([t.atWord, css.slice(pos, next + 1),
                 line, pos  - offset,
                 line, next - offset,
                 pos,
@@ -170,23 +154,25 @@ export default function tokenize (input) {
             pos = next;
             break;
 
-        case backslash:
+        case t.backslash:
             next   = pos;
             escape = true;
-            while ( css.charCodeAt(next + 1) === backslash ) {
+            while ( css.charCodeAt(next + 1) === t.backslash ) {
                 next  += 1;
                 escape = !escape;
             }
             code = css.charCodeAt(next + 1);
-            if ( escape && (code !== slash   &&
-                            code !== space   &&
-                            code !== newline &&
-                            code !== tab     &&
-                            code !== cr      &&
-                            code !== feed ) ) {
+            if (escape && (
+                code !== t.slash   &&
+                code !== t.space   &&
+                code !== t.newline &&
+                code !== t.tab     &&
+                code !== t.cr      &&
+                code !== t.feed
+            )) {
                 next += 1;
             }
-            tokens.push(['word', css.slice(pos, next + 1),
+            tokens.push([t.word, css.slice(pos, next + 1),
                 line, pos  - offset,
                 line, next - offset,
                 pos,
@@ -195,7 +181,7 @@ export default function tokenize (input) {
             break;
 
         default:
-            if ( code === slash && css.charCodeAt(pos + 1) === asterisk ) {
+            if ( code === t.slash && css.charCodeAt(pos + 1) === t.asterisk ) {
                 next = css.indexOf('*/', pos + 2) + 1;
                 if ( next === 0 ) {
                     unclosed('comment', '*/');
@@ -213,7 +199,7 @@ export default function tokenize (input) {
                     nextOffset = offset;
                 }
 
-                tokens.push(['comment', content,
+                tokens.push([t.comment, content,
                     line,     pos  - offset,
                     nextLine, next - nextOffset,
                     pos,
@@ -232,7 +218,7 @@ export default function tokenize (input) {
                     next = wordEnd.lastIndex - 2;
                 }
 
-                tokens.push(['word', css.slice(pos, next + 1),
+                tokens.push([t.word, css.slice(pos, next + 1),
                     line, pos  - offset,
                     line, next - offset,
                     pos,

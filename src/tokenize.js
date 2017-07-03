@@ -77,40 +77,17 @@ export default function tokenize (input) {
             pos = next - 1;
             break;
 
+        // Consume these characters as single tokens.
         case t.asterisk:
-            tokens.push([t.asterisk, '*', line, pos - offset, pos]);
-            break;
-
         case t.ampersand:
-            tokens.push([t.ampersand, '&', line, pos - offset, pos]);
-            break;
-
         case t.comma:
-            tokens.push([t.comma, ',', line, pos - offset, pos]);
-            break;
-
         case t.openSquare:
-            tokens.push([t.openSquare, '[', line, pos - offset, pos]);
-            break;
-
         case t.closeSquare:
-            tokens.push([t.closeSquare, ']', line, pos - offset, pos]);
-            break;
-
         case t.colon:
-            tokens.push([t.colon, ':', line, pos - offset, pos]);
-            break;
-
         case t.semicolon:
-            tokens.push([t.semicolon, ';', line, pos - offset, pos]);
-            break;
-
         case t.openParenthesis:
-            tokens.push([t.openParenthesis, '(', line, pos - offset, pos]);
-            break;
-
         case t.closeParenthesis:
-            tokens.push([t.closeParenthesis, ')', line, pos - offset, pos]);
+            tokens.push([code, css[pos], line, pos - offset, pos]);
             break;
 
         case t.singleQuote:

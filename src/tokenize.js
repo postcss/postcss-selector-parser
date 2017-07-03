@@ -7,7 +7,7 @@ export default function tokenize (input) {
     let tokens = [];
     let css    = input.css.valueOf();
 
-    let code, next, quote, lines, last, content, escape,
+    let code, next, quote, lines, last, content,
         nextLine, nextOffset, escaped, escapePos;
 
     let length = css.length;
@@ -133,13 +133,13 @@ export default function tokenize (input) {
 
         case t.backslash:
             next   = pos;
-            escape = true;
+            escaped = true;
             while ( css.charCodeAt(next + 1) === t.backslash ) {
                 next  += 1;
-                escape = !escape;
+                escaped = !escaped;
             }
             code = css.charCodeAt(next + 1);
-            if (escape && (
+            if (escaped && (
                 code !== t.slash   &&
                 code !== t.space   &&
                 code !== t.newline &&

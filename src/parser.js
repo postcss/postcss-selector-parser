@@ -316,7 +316,7 @@ export default class Parser {
     string () {
         let token = this.currToken;
         this.newNode(new Str({
-            value: this.currToken[1],
+            value: token[1],
             source: {
                 start: {
                     line: token[2],
@@ -386,50 +386,34 @@ export default class Parser {
                 return firstCallback.call(this, value, indices.length);
             }
             let node;
+            const sourceIndex = this.currToken[6] + indices[i];
+            const source = {
+                start: {
+                    line: this.currToken[2],
+                    column: this.currToken[3] + ind,
+                },
+                end: {
+                    line: this.currToken[4],
+                    column: this.currToken[3] + (index - 1),
+                },
+            };
             if (~hasClass.indexOf(ind)) {
                 node = new ClassName({
                     value: value.slice(1),
-                    source: {
-                        start: {
-                            line: this.currToken[2],
-                            column: this.currToken[3] + ind,
-                        },
-                        end: {
-                            line: this.currToken[4],
-                            column: this.currToken[3] + (index - 1),
-                        },
-                    },
-                    sourceIndex: this.currToken[6] + indices[i],
+                    source,
+                    sourceIndex,
                 });
             } else if (~hasId.indexOf(ind)) {
                 node = new ID({
                     value: value.slice(1),
-                    source: {
-                        start: {
-                            line: this.currToken[2],
-                            column: this.currToken[3] + ind,
-                        },
-                        end: {
-                            line: this.currToken[4],
-                            column: this.currToken[3] + (index - 1),
-                        },
-                    },
-                    sourceIndex: this.currToken[6] + indices[i],
+                    source,
+                    sourceIndex,
                 });
             } else {
                 node = new Tag({
                     value: value,
-                    source: {
-                        start: {
-                            line: this.currToken[2],
-                            column: this.currToken[3] + ind,
-                        },
-                        end: {
-                            line: this.currToken[4],
-                            column: this.currToken[3] + (index - 1),
-                        },
-                    },
-                    sourceIndex: this.currToken[6] + indices[i],
+                    source,
+                    sourceIndex,
                 });
             }
             this.newNode(node, namespace);

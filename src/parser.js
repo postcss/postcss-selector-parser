@@ -46,7 +46,10 @@ export default class Parser {
         let attr;
         let startingToken = this.currToken;
         this.position ++;
-        while (this.position < this.tokens.length && this.currToken[0] !== tokens.closeSquare) {
+        while (
+            this.position < this.tokens.length &&
+            this.currToken[0] !== tokens.closeSquare
+        ) {
             str += this.tokens[this.position][1];
             this.position ++;
         }
@@ -92,7 +95,7 @@ export default class Parser {
                 }
             }
             attr.quoted = trimmedValue[0] === '\'' || trimmedValue[0] === '"';
-            attr.raws.unquoted = (attr.quoted) ? trimmedValue.slice(1, -1) : trimmedValue;
+            attr.raws.unquoted = attr.quoted ? trimmedValue.slice(1, -1) : trimmedValue;
         }
         this.newNode(attr);
         this.position++;
@@ -291,7 +294,11 @@ export default class Parser {
                     sourceIndex: startingToken[4],
                 });
                 this.newNode(pseudo);
-                if (length > 1 && this.nextToken && this.nextToken[0] === tokens.openParenthesis) {
+                if (
+                    length > 1 &&
+                    this.nextToken &&
+                    this.nextToken[0] === tokens.openParenthesis
+                ) {
                     this.error('Misplaced parenthesis.');
                 }
             });
@@ -303,10 +310,18 @@ export default class Parser {
     space () {
         let token = this.currToken;
         // Handle space before and after the selector
-        if (this.position === 0 || this.prevToken[0] === tokens.comma || this.prevToken[0] === tokens.openParenthesis) {
+        if (
+            this.position === 0 ||
+            this.prevToken[0] === tokens.comma ||
+            this.prevToken[0] === tokens.openParenthesis
+        ) {
             this.spaces = this.parseSpace(token[1]);
             this.position ++;
-        } else if (this.position === (this.tokens.length - 1) || this.nextToken[0] === tokens.comma || this.nextToken[0] === tokens.closeParenthesis) {
+        } else if (
+            this.position === (this.tokens.length - 1) ||
+            this.nextToken[0] === tokens.comma ||
+            this.nextToken[0] === tokens.closeParenthesis
+        ) {
             this.current.last.spaces.after = this.parseSpace(token[1]);
             this.position ++;
         } else {
@@ -510,7 +525,10 @@ export default class Parser {
     }
 
     parseValue (value) {
-        return this.lossy && value && typeof value === 'string' ? value.trim() : value;
+        if (!this.lossy || !value || typeof value !== 'string') {
+            return value;
+        }
+        return value.trim();
     }
 
     parseParenthesisToken (token) {

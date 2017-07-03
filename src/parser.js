@@ -21,6 +21,19 @@ import tokenize from './tokenize';
 import * as tokens from './tokenTypes';
 import * as types from './selectors/types';
 
+function getSource (startLine, startColumn, endLine, endColumn) {
+    return {
+        start: {
+            line: startLine,
+            column: startColumn,
+        },
+        end: {
+            line: endLine,
+            column: endColumn,
+        },
+    };
+}
+
 export default class Parser {
     constructor (input) {
         this.input = input;
@@ -61,16 +74,12 @@ export default class Parser {
         let attributeProps = {
             operator: parts[1],
             value: parts[2],
-            source: {
-                start: {
-                    line: startingToken[2],
-                    column: startingToken[3],
-                },
-                end: {
-                    line: this.currToken[2],
-                    column: this.currToken[3],
-                },
-            },
+            source: getSource(
+                startingToken[2],
+                startingToken[3],
+                this.currToken[2],
+                this.currToken[3]
+            ),
             sourceIndex: startingToken[4],
         };
         if (namespace.length > 1) {
@@ -102,32 +111,31 @@ export default class Parser {
     }
 
     combinator () {
-        if (this.currToken[1] === '|') {
+        const current = this.currToken;
+        if (current[1] === '|') {
             return this.namespace();
         }
         let node = new Combinator({
             value: '',
-            source: {
-                start: {
-                    line: this.currToken[2],
-                    column: this.currToken[3],
-                },
-                end: {
-                    line: this.currToken[2],
-                    column: this.currToken[3],
-                },
-            },
-            sourceIndex: this.currToken[4],
+            source: getSource(
+                current[2],
+                current[3],
+                current[2],
+                current[3]
+            ),
+            sourceIndex: current[4],
         });
         while ( this.position < this.tokens.length && this.currToken &&
                 (this.currToken[0] === tokens.space ||
                 this.currToken[0] === tokens.combinator)) {
             if (this.nextToken && this.nextToken[0] === tokens.combinator) {
                 node.spaces.before = this.parseSpace(this.currToken[1]);
-                node.source.start.line = this.nextToken[2];
-                node.source.start.column = this.nextToken[3];
-                node.source.end.column = this.nextToken[3];
-                node.source.end.line = this.nextToken[2];
+                node.source = getSource(
+                    this.nextToken[2],
+                    this.nextToken[3],
+                    this.nextToken[2],
+                    this.nextToken[3]
+                );
                 node.sourceIndex = this.nextToken[4];
             } else if (this.prevToken && this.prevToken[0] === tokens.combinator) {
                 node.spaces.after = this.parseSpace(this.currToken[1]);
@@ -154,21 +162,17 @@ export default class Parser {
     }
 
     comment () {
-        let node = new Comment({
-            value: this.currToken[1],
-            source: {
-                start: {
-                    line: this.currToken[2],
-                    column: this.currToken[3],
-                },
-                end: {
-                    line: this.currToken[4],
-                    column: this.currToken[5],
-                },
-            },
-            sourceIndex: this.currToken[6],
-        });
-        this.newNode(node);
+        const current = this.currToken;
+        this.newNode(new Comment({
+            value: current[1],
+            source: getSource(
+                current[2],
+                current[3],
+                current[4],
+                current[5]
+            ),
+            sourceIndex: current[6],
+        }));
         this.position++;
     }
 
@@ -200,19 +204,16 @@ export default class Parser {
     }
 
     nesting () {
+        const current = this.currToken;
         this.newNode(new Nesting({
-            value: this.currToken[1],
-            source: {
-                start: {
-                    line: this.currToken[2],
-                    column: this.currToken[3],
-                },
-                end: {
-                    line: this.currToken[2],
-                    column: this.currToken[3],
-                },
-            },
-            sourceIndex: this.currToken[4],
+            value: current[1],
+            source: getSource(
+                current[2],
+                current[3],
+                current[2],
+                current[3]
+            ),
+            sourceIndex: current[4],
         }));
         this.position ++;
     }
@@ -281,16 +282,12 @@ export default class Parser {
                 pseudoStr += first;
                 pseudo = new Pseudo({
                     value: pseudoStr,
-                    source: {
-                        start: {
-                            line: startingToken[2],
-                            column: startingToken[3],
-                        },
-                        end: {
-                            line: this.currToken[4],
-                            column: this.currToken[5],
-                        },
-                    },
+                    source: getSource(
+                        startingToken[2],
+                        startingToken[3],
+                        this.currToken[4],
+                        this.currToken[5]
+                    ),
                     sourceIndex: startingToken[4],
                 });
                 this.newNode(pseudo);
@@ -333,16 +330,12 @@ export default class Parser {
         let token = this.currToken;
         this.newNode(new Str({
             value: token[1],
-            source: {
-                start: {
-                    line: token[2],
-                    column: token[3],
-                },
-                end: {
-                    line: token[4],
-                    column: token[5],
-                },
-            },
+            source: getSource(
+                token[2],
+                token[3],
+                token[4],
+                token[5]
+            ),
             sourceIndex: token[6],
         }));
         this.position++;
@@ -354,19 +347,16 @@ export default class Parser {
             this.position ++;
             return this.namespace();
         }
+        const current = this.currToken;
         this.newNode(new Universal({
-            value: this.currToken[1],
-            source: {
-                start: {
-                    line: this.currToken[2],
-                    column: this.currToken[3],
-                },
-                end: {
-                    line: this.currToken[2],
-                    column: this.currToken[3],
-                },
-            },
-            sourceIndex: this.currToken[4],
+            value: current[1],
+            source: getSource(
+                current[2],
+                current[3],
+                current[2],
+                current[3]
+            ),
+            sourceIndex: current[4],
         }), namespace);
         this.position ++;
     }
@@ -402,17 +392,14 @@ export default class Parser {
                 return firstCallback.call(this, value, indices.length);
             }
             let node;
-            const sourceIndex = this.currToken[6] + indices[i];
-            const source = {
-                start: {
-                    line: this.currToken[2],
-                    column: this.currToken[3] + ind,
-                },
-                end: {
-                    line: this.currToken[4],
-                    column: this.currToken[3] + (index - 1),
-                },
-            };
+            const current = this.currToken;
+            const sourceIndex = current[6] + indices[i];
+            const source = getSource(
+                current[2],
+                current[3] + ind,
+                current[4],
+                current[3] + (index - 1)
+            );
             if (~hasClass.indexOf(ind)) {
                 node = new ClassName({
                     value: value.slice(1),

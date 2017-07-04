@@ -56,7 +56,6 @@ export default class Parser {
 
     attribute () {
         let str = '';
-        let attr;
         const startingToken = this.currToken;
         this.position ++;
         while (
@@ -91,7 +90,7 @@ export default class Parser {
         } else {
             attributeProps.attribute = this.parseValue(parts[0]);
         }
-        attr = new Attribute(attributeProps);
+        const attr = new Attribute(attributeProps);
 
         if (parts[2]) {
             const insensitive = parts[2].split(/(\s+i\s*?)$/);
@@ -220,13 +219,13 @@ export default class Parser {
 
     parentheses () {
         const last = this.current.last;
+        let balanced = 1;
+        this.position ++;
         if (last && last.type === types.PSEUDO) {
             const selector = new Selector();
             const cache = this.current;
             last.append(selector);
             this.current = selector;
-            let balanced = 1;
-            this.position ++;
             while (this.position < this.tokens.length && balanced) {
                 if (this.currToken[0] === tokens.openParenthesis) {
                     balanced++;
@@ -242,13 +241,8 @@ export default class Parser {
                     this.position ++;
                 }
             }
-            if (balanced) {
-                this.error('Expected closing parenthesis.');
-            }
             this.current = cache;
         } else {
-            let balanced = 1;
-            this.position ++;
             last.value += '(';
             while (this.position < this.tokens.length && balanced) {
                 if (this.currToken[0] === tokens.openParenthesis) {
@@ -260,9 +254,9 @@ export default class Parser {
                 last.value += this.parseParenthesisToken(this.currToken);
                 this.position++;
             }
-            if (balanced) {
-                this.error('Expected closing parenthesis.');
-            }
+        }
+        if (balanced) {
+            this.error('Expected closing parenthesis.');
         }
     }
 
@@ -277,10 +271,9 @@ export default class Parser {
             return this.error('Expected pseudo-class or pseudo-element');
         }
         if (this.currToken[0] === tokens.word) {
-            let pseudo;
             this.splitWord(false, (first, length) => {
                 pseudoStr += first;
-                pseudo = new Pseudo({
+                this.newNode(new Pseudo({
                     value: pseudoStr,
                     source: getSource(
                         startingToken[2],
@@ -289,8 +282,7 @@ export default class Parser {
                         this.currToken[5]
                     ),
                     sourceIndex: startingToken[4],
-                });
-                this.newNode(pseudo);
+                }));
                 if (
                     length > 1 &&
                     this.nextToken &&
@@ -338,7 +330,7 @@ export default class Parser {
             ),
             sourceIndex: token[6],
         }));
-        this.position++;
+        this.position ++;
     }
 
     universal (namespace) {
@@ -459,18 +451,12 @@ export default class Parser {
         case tokens.openSquare:
             this.attribute();
             break;
-        case tokens.closeSquare:
-            this.missingSquareBracket();
-            break;
         case tokens.atWord:
         case tokens.word:
             this.word();
             break;
         case tokens.colon:
             this.pseudo();
-            break;
-        case tokens.semicolon:
-            this.missingBackslash();
             break;
         case tokens.comma:
             this.comma();
@@ -487,6 +473,11 @@ export default class Parser {
         case tokens.str:
             this.string();
             break;
+        // These cases throw; no break needed.
+        case tokens.closeSquare:
+            this.missingSquareBracket();
+        case tokens.semicolon:
+            this.missingBackslash();
         }
     }
 
@@ -507,8 +498,8 @@ export default class Parser {
         return namespace;
     }
 
-    parseSpace (space, replacement) {
-        return this.lossy ? (replacement || '') : space;
+    parseSpace (space, replacement = '') {
+        return this.lossy ? replacement : space;
     }
 
     parseValue (value) {

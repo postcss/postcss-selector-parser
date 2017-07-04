@@ -1,7 +1,6 @@
 import * as t from './tokenTypes';
 
-let atEnd        = /[ \n\t\r\{\(\)'"\\;/]/g,
-    wordEnd      = /[ \n\t\r\(\)\*:;!&'"\+\|~>,\[\]\\]|\/(?=\*)/g;
+const wordEnd = /[ \n\t\r\(\)\*:;!&'"\+\|~>,\[\]\\]|\/(?=\*)/g;
 
 export default function tokenize (input) {
     let tokens = [];
@@ -108,22 +107,6 @@ export default function tokenize (input) {
             } while ( escaped );
 
             tokens.push([t.str, css.slice(pos, next + 1),
-                line, pos  - offset,
-                line, next - offset,
-                pos,
-            ]);
-            pos = next;
-            break;
-
-        case t.at:
-            atEnd.lastIndex = pos + 1;
-            atEnd.test(css);
-            if ( atEnd.lastIndex === 0 ) {
-                next = css.length - 1;
-            } else {
-                next = atEnd.lastIndex - 2;
-            }
-            tokens.push([t.atWord, css.slice(pos, next + 1),
                 line, pos  - offset,
                 line, next - offset,
                 pos,

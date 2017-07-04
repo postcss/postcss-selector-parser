@@ -451,7 +451,6 @@ export default class Parser {
         case tokens.openSquare:
             this.attribute();
             break;
-        case tokens.atWord:
         case tokens.word:
             this.word();
             break;

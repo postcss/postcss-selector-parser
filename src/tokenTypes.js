@@ -28,6 +28,5 @@ export const combinator       = tilde;
 export const str              = singleQuote;
 
 // No good single character representation!
-export const atWord           = -1;
-export const comment          = -2;
-export const word             = -3;
+export const comment          = -1;
+export const word             = -2;

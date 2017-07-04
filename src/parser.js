@@ -41,10 +41,10 @@ export default class Parser {
         this.position = 0;
         this.root = new Root();
 
-        let selectors = new Selector();
-        this.root.append(selectors);
+        const selector = new Selector();
+        this.root.append(selector);
 
-        this.current = selectors;
+        this.current = selector;
         if (this.lossy) {
             this.tokens = tokenize({safe: input.safe, css: input.css.trim()});
         } else {
@@ -57,7 +57,7 @@ export default class Parser {
     attribute () {
         let str = '';
         let attr;
-        let startingToken = this.currToken;
+        const startingToken = this.currToken;
         this.position ++;
         while (
             this.position < this.tokens.length &&
@@ -69,9 +69,9 @@ export default class Parser {
         if (this.position === this.tokens.length && !~str.indexOf(']')) {
             this.error('Expected a closing square bracket.');
         }
-        let parts = str.split(/((?:[*~^$|]?=))([^]*)/);
-        let namespace = parts[0].split(/(\|)/g);
-        let attributeProps = {
+        const parts = str.split(/((?:[*~^$|]?=))([^]*)/);
+        const namespace = parts[0].split(/(\|)/g);
+        const attributeProps = {
             operator: parts[1],
             value: parts[2],
             source: getSource(
@@ -94,8 +94,8 @@ export default class Parser {
         attr = new Attribute(attributeProps);
 
         if (parts[2]) {
-            let insensitive = parts[2].split(/(\s+i\s*?)$/);
-            let trimmedValue = insensitive[0].trim();
+            const insensitive = parts[2].split(/(\s+i\s*?)$/);
+            const trimmedValue = insensitive[0].trim();
             attr.value = this.lossy ? trimmedValue : insensitive[0];
             if (insensitive[1]) {
                 attr.insensitive = true;
@@ -115,7 +115,7 @@ export default class Parser {
         if (current[1] === '|') {
             return this.namespace();
         }
-        let node = new Combinator({
+        const node = new Combinator({
             value: '',
             source: getSource(
                 current[2],
@@ -155,9 +155,9 @@ export default class Parser {
             this.position ++;
             return;
         }
-        let selectors = new Selector();
-        this.current.parent.append(selectors);
-        this.current = selectors;
+        const selector = new Selector();
+        this.current.parent.append(selector);
+        this.current = selector;
         this.position ++;
     }
 
@@ -193,7 +193,7 @@ export default class Parser {
     }
 
     namespace () {
-        let before = this.prevToken && this.prevToken[1] || true;
+        const before = this.prevToken && this.prevToken[1] || true;
         if (this.nextToken[0] === tokens.word) {
             this.position ++;
             return this.word(before);
@@ -219,10 +219,10 @@ export default class Parser {
     }
 
     parentheses () {
-        let last = this.current.last;
+        const last = this.current.last;
         if (last && last.type === types.PSEUDO) {
-            let selector = new Selector();
-            let cache = this.current;
+            const selector = new Selector();
+            const cache = this.current;
             last.append(selector);
             this.current = selector;
             let balanced = 1;
@@ -305,7 +305,7 @@ export default class Parser {
     }
 
     space () {
-        let token = this.currToken;
+        const token = this.currToken;
         // Handle space before and after the selector
         if (
             this.position === 0 ||
@@ -327,7 +327,7 @@ export default class Parser {
     }
 
     string () {
-        let token = this.currToken;
+        const token = this.currToken;
         this.newNode(new Str({
             value: token[1],
             source: getSource(
@@ -342,7 +342,7 @@ export default class Parser {
     }
 
     universal (namespace) {
-        let nextToken = this.nextToken;
+        const nextToken = this.nextToken;
         if (nextToken && nextToken[1] === '|') {
             this.position ++;
             return this.namespace();
@@ -377,17 +377,17 @@ export default class Parser {
             }
             nextToken = this.nextToken;
         }
-        let hasClass = indexesOf(word, '.');
+        const hasClass = indexesOf(word, '.');
         let hasId = indexesOf(word, '#');
         // Eliminate Sass interpolations from the list of id indexes
-        let interpolations = indexesOf(word, '#{');
+        const interpolations = indexesOf(word, '#{');
         if (interpolations.length) {
             hasId = hasId.filter(hashIndex => !~interpolations.indexOf(hashIndex));
         }
         let indices = sortAsc(uniq(flatten([[0], hasClass, hasId])));
         indices.forEach((ind, i) => {
-            let index = indices[i + 1] || word.length;
-            let value = word.slice(ind, index);
+            const index = indices[i + 1] || word.length;
+            const value = word.slice(ind, index);
             if (i === 0 && firstCallback) {
                 return firstCallback.call(this, value, indices.length);
             }
@@ -425,7 +425,7 @@ export default class Parser {
     }
 
     word (namespace) {
-        let nextToken = this.nextToken;
+        const nextToken = this.nextToken;
         if (nextToken && nextToken[1] === '|') {
             this.position ++;
             return this.namespace();

@@ -3,25 +3,32 @@ import * as t from './tokenTypes';
 const wordEnd = /[ \n\t\r\(\)\*:;!&'"\+\|~>,\[\]\\]|\/(?=\*)/g;
 
 export default function tokenize (input) {
-    let tokens = [];
-    let css    = input.css.valueOf();
+    const tokens   = [];
+    let css        = input.css.valueOf();
+    let {length}   = css;
+    let offset     = -1;
+    let line       =  1;
+    let start      =  0;
 
-    let code, next, quote, lines, last, content,
-        nextLine, nextOffset, escaped, escapePos;
+    let code,
+        content,
+        escaped,
+        escapePos,
+        last,
+        lines,
+        next,
+        nextLine,
+        nextOffset,
+        quote;
 
-    let length = css.length;
-    let offset = -1;
-    let line   =  1;
-    let start  =  0;
-
-    let unclosed = function (what, fix) {
+    function unclosed (what, fix) {
         if ( input.safe ) {
             css += fix;
             next = css.length - 1;
         } else {
             throw input.error('Unclosed ' + what, line, start - offset, start);
         }
-    };
+    }
 
     while ( start < length ) {
         code = css.charCodeAt(start);

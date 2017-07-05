@@ -76,10 +76,10 @@ export default class Parser {
             source: getSource(
                 startingToken[2],
                 startingToken[3],
-                this.currToken[2],
-                this.currToken[3]
+                this.currToken[4],
+                this.currToken[5]
             ),
-            sourceIndex: startingToken[4],
+            sourceIndex: startingToken[6],
         };
         if (namespace.length > 1) {
             if (namespace[0] === '') {
@@ -119,10 +119,10 @@ export default class Parser {
             source: getSource(
                 current[2],
                 current[3],
-                current[2],
-                current[3]
+                current[4],
+                current[5]
             ),
-            sourceIndex: current[4],
+            sourceIndex: current[6],
         });
         while ( this.position < this.tokens.length && this.currToken &&
                 (this.currToken[0] === tokens.space ||
@@ -132,10 +132,10 @@ export default class Parser {
                 node.source = getSource(
                     this.nextToken[2],
                     this.nextToken[3],
-                    this.nextToken[2],
-                    this.nextToken[3]
+                    this.nextToken[4],
+                    this.nextToken[5]
                 );
-                node.sourceIndex = this.nextToken[4];
+                node.sourceIndex = this.nextToken[6];
             } else if (this.prevToken && this.prevToken[0] === tokens.combinator) {
                 node.spaces.after = this.parseSpace(this.currToken[1]);
             } else if (this.currToken[0] === tokens.combinator) {
@@ -209,10 +209,10 @@ export default class Parser {
             source: getSource(
                 current[2],
                 current[3],
-                current[2],
-                current[3]
+                current[4],
+                current[5]
             ),
-            sourceIndex: current[4],
+            sourceIndex: current[6],
         }));
         this.position ++;
     }
@@ -236,8 +236,8 @@ export default class Parser {
                 if (balanced) {
                     this.parse();
                 } else {
-                    selector.parent.source.end.line = this.currToken[2];
-                    selector.parent.source.end.column = this.currToken[3];
+                    selector.parent.source.end.line = this.currToken[4];
+                    selector.parent.source.end.column = this.currToken[5];
                     this.position ++;
                 }
             }
@@ -281,7 +281,7 @@ export default class Parser {
                         this.currToken[4],
                         this.currToken[5]
                     ),
-                    sourceIndex: startingToken[4],
+                    sourceIndex: startingToken[6],
                 }));
                 if (
                     length > 1 &&
@@ -345,10 +345,10 @@ export default class Parser {
             source: getSource(
                 current[2],
                 current[3],
-                current[2],
-                current[3]
+                current[4],
+                current[5]
             ),
-            sourceIndex: current[4],
+            sourceIndex: current[6],
         }), namespace);
         this.position ++;
     }

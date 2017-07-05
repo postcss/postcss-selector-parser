@@ -58,6 +58,8 @@ export default function tokenize (input) {
                 css.slice(start, next), // content
                 line,                   // start line
                 start - offset,         // start column
+                line,                   // end line
+                start - offset,         // end column
                 start,                  // source index
             ]);
 
@@ -84,6 +86,8 @@ export default function tokenize (input) {
                 css.slice(start, next), // content
                 line,                   // start line
                 start - offset,         // start column
+                line,                   // end line
+                start - offset,         // end column
                 start,                  // source index
             ]);
 
@@ -105,6 +109,8 @@ export default function tokenize (input) {
                 css[start],     // content
                 line,           // start line
                 start - offset, // start column
+                line,           // end line
+                start - offset, // end column
                 start,          // source index
             ]);
             start ++;

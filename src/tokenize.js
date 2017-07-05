@@ -12,22 +12,22 @@ export default function tokenize (input) {
     let length = css.length;
     let offset = -1;
     let line   =  1;
-    let pos    =  0;
+    let start  =  0;
 
-    let unclosed = function (what, end) {
+    let unclosed = function (what, fix) {
         if ( input.safe ) {
-            css += end;
+            css += fix;
             next = css.length - 1;
         } else {
-            throw input.error('Unclosed ' + what, line, pos - offset, pos);
+            throw input.error('Unclosed ' + what, line, start - offset, start);
         }
     };
 
-    while ( pos < length ) {
-        code = css.charCodeAt(pos);
+    while ( start < length ) {
+        code = css.charCodeAt(start);
 
         if ( code === t.newline ) {
-            offset = pos;
+            offset = start;
             line  += 1;
         }
 
@@ -37,7 +37,7 @@ export default function tokenize (input) {
         case t.tab:
         case t.cr:
         case t.feed:
-            next = pos;
+            next = start;
             do {
                 next += 1;
                 code = css.charCodeAt(next);
@@ -53,15 +53,22 @@ export default function tokenize (input) {
                 code === t.feed
             );
 
-            tokens.push([t.space, css.slice(pos, next), line, pos - offset, pos]);
-            pos = next - 1;
+            tokens.push([
+                t.space,                // token type
+                css.slice(start, next), // content
+                line,                   // start line
+                start - offset,         // start column
+                start,                  // source index
+            ]);
+
+            start = next;
             break;
 
         case t.plus:
         case t.greaterThan:
         case t.tilde:
         case t.pipe:
-            next = pos;
+            next = start;
             do {
                 next += 1;
                 code = css.charCodeAt(next);
@@ -72,8 +79,15 @@ export default function tokenize (input) {
                 code === t.pipe
             );
 
-            tokens.push([t.combinator, css.slice(pos, next), line, pos - offset, pos]);
-            pos = next - 1;
+            tokens.push([
+                t.combinator,           // token type
+                css.slice(start, next), // content
+                line,                   // start line
+                start - offset,         // start column
+                start,                  // source index
+            ]);
+
+            start = next;
             break;
 
         // Consume these characters as single tokens.
@@ -86,13 +100,20 @@ export default function tokenize (input) {
         case t.semicolon:
         case t.openParenthesis:
         case t.closeParenthesis:
-            tokens.push([code, css[pos], line, pos - offset, pos]);
+            tokens.push([
+                code,           // token type
+                css[start],     // content
+                line,           // start line
+                start - offset, // start column
+                start,          // source index
+            ]);
+            start ++;
             break;
 
         case t.singleQuote:
         case t.doubleQuote:
             quote = code === t.singleQuote ? "'" : '"';
-            next  = pos;
+            next  = start;
             do {
                 escaped = false;
                 next    = css.indexOf(quote, next + 1);
@@ -106,16 +127,21 @@ export default function tokenize (input) {
                 }
             } while ( escaped );
 
-            tokens.push([t.str, css.slice(pos, next + 1),
-                line, pos  - offset,
-                line, next - offset,
-                pos,
+            tokens.push([
+                t.str,                      // token type
+                css.slice(start, next + 1), // content
+                line,                       // start line
+                start - offset,             // start column
+                line,                       // end line
+                next - offset,              // end column
+                start,                      // source index
             ]);
-            pos = next;
+
+            start = next + 1;
             break;
 
         case t.backslash:
-            next   = pos;
+            next   = start;
             escaped = true;
             while ( css.charCodeAt(next + 1) === t.backslash ) {
                 next  += 1;
@@ -132,22 +158,27 @@ export default function tokenize (input) {
             )) {
                 next += 1;
             }
-            tokens.push([t.word, css.slice(pos, next + 1),
-                line, pos  - offset,
-                line, next - offset,
-                pos,
+            tokens.push([
+                t.word,                     // token type
+                css.slice(start, next + 1), // content
+                line,                       // start line
+                start - offset,             // start column
+                line,                       // end line
+                next - offset,              // end column
+                start,                      // source index
             ]);
-            pos = next;
+
+            start = next + 1;
             break;
 
         default:
-            if ( code === t.slash && css.charCodeAt(pos + 1) === t.asterisk ) {
-                next = css.indexOf('*/', pos + 2) + 1;
+            if ( code === t.slash && css.charCodeAt(start + 1) === t.asterisk ) {
+                next = css.indexOf('*/', start + 2) + 1;
                 if ( next === 0 ) {
                     unclosed('comment', '*/');
                 }
 
-                content = css.slice(pos, next + 1);
+                content = css.slice(start, next + 1);
                 lines   = content.split('\n');
                 last    = lines.length - 1;
 
@@ -159,18 +190,22 @@ export default function tokenize (input) {
                     nextOffset = offset;
                 }
 
-                tokens.push([t.comment, content,
-                    line,     pos  - offset,
-                    nextLine, next - nextOffset,
-                    pos,
+                tokens.push([
+                    t.comment,         // token type
+                    content,           // content
+                    line,              // start line
+                    start - offset,    // start column
+                    nextLine,          // end line
+                    next - nextOffset, // end column
+                    start,             // source index
                 ]);
 
                 offset = nextOffset;
                 line   = nextLine;
-                pos    = next;
+                start  = next + 1;
 
             } else {
-                wordEnd.lastIndex = pos + 1;
+                wordEnd.lastIndex = start + 1;
                 wordEnd.test(css);
                 if ( wordEnd.lastIndex === 0 ) {
                     next = css.length - 1;
@@ -178,18 +213,21 @@ export default function tokenize (input) {
                     next = wordEnd.lastIndex - 2;
                 }
 
-                tokens.push([t.word, css.slice(pos, next + 1),
-                    line, pos  - offset,
-                    line, next - offset,
-                    pos,
+                tokens.push([
+                    t.word,                     // token type
+                    css.slice(start, next + 1), // content
+                    line,                       // start line
+                    start - offset,             // start column
+                    line,                       // end line
+                    next - offset,              // end column
+                    start,                      // source index
                 ]);
-                pos = next;
+
+                start = next + 1;
             }
 
             break;
         }
-
-        pos++;
     }
 
     return tokens;

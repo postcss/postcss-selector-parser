@@ -9,9 +9,12 @@ export default function tokenize (input) {
     let offset     = -1;
     let line       =  1;
     let start      =  0;
+    let end        =  0;
 
     let code,
         content,
+        endColumn,
+        endLine,
         escaped,
         escapePos,
         last,
@@ -19,7 +22,8 @@ export default function tokenize (input) {
         next,
         nextLine,
         nextOffset,
-        quote;
+        quote,
+        tokenType;
 
     function unclosed (what, fix) {
         if ( input.safe ) {
@@ -60,17 +64,10 @@ export default function tokenize (input) {
                 code === t.feed
             );
 
-            tokens.push([
-                t.space,                // token type
-                css.slice(start, next), // content
-                line,                   // start line
-                start - offset,         // start column
-                line,                   // end line
-                start - offset,         // end column
-                start,                  // source index
-            ]);
-
-            start = next;
+            tokenType = t.space;
+            endLine = line;
+            endColumn = start - offset;
+            end = next;
             break;
 
         case t.plus:
@@ -88,17 +85,10 @@ export default function tokenize (input) {
                 code === t.pipe
             );
 
-            tokens.push([
-                t.combinator,           // token type
-                css.slice(start, next), // content
-                line,                   // start line
-                start - offset,         // start column
-                line,                   // end line
-                start - offset,         // end column
-                start,                  // source index
-            ]);
-
-            start = next;
+            tokenType = t.combinator;
+            endLine = line;
+            endColumn = start - offset;
+            end = next;
             break;
 
         // Consume these characters as single tokens.
@@ -111,16 +101,11 @@ export default function tokenize (input) {
         case t.semicolon:
         case t.openParenthesis:
         case t.closeParenthesis:
-            tokens.push([
-                code,           // token type
-                css[start],     // content
-                line,           // start line
-                start - offset, // start column
-                line,           // end line
-                start - offset, // end column
-                start,          // source index
-            ]);
-            start ++;
+            next = start;
+            tokenType = code;
+            endLine = line;
+            endColumn = start - offset;
+            end = next + 1;
             break;
 
         case t.singleQuote:
@@ -140,17 +125,10 @@ export default function tokenize (input) {
                 }
             } while ( escaped );
 
-            tokens.push([
-                t.str,                      // token type
-                css.slice(start, next + 1), // content
-                line,                       // start line
-                start - offset,             // start column
-                line,                       // end line
-                next - offset,              // end column
-                start,                      // source index
-            ]);
-
-            start = next + 1;
+            tokenType = t.str;
+            endLine = line;
+            endColumn = start - offset;
+            end = next + 1;
             break;
 
         case t.backslash:
@@ -171,17 +149,11 @@ export default function tokenize (input) {
             )) {
                 next += 1;
             }
-            tokens.push([
-                t.word,                     // token type
-                css.slice(start, next + 1), // content
-                line,                       // start line
-                start - offset,             // start column
-                line,                       // end line
-                next - offset,              // end column
-                start,                      // source index
-            ]);
 
-            start = next + 1;
+            tokenType = t.word;
+            endLine = line;
+            endColumn = next - offset;
+            end = next + 1;
             break;
 
         default:
@@ -203,20 +175,10 @@ export default function tokenize (input) {
                     nextOffset = offset;
                 }
 
-                tokens.push([
-                    t.comment,         // token type
-                    content,           // content
-                    line,              // start line
-                    start - offset,    // start column
-                    nextLine,          // end line
-                    next - nextOffset, // end column
-                    start,             // source index
-                ]);
-
-                offset = nextOffset;
+                tokenType = t.comment;
                 line   = nextLine;
-                start  = next + 1;
-
+                endLine = nextLine;
+                endColumn = next - nextOffset;
             } else {
                 wordEnd.lastIndex = start + 1;
                 wordEnd.test(css);
@@ -226,21 +188,33 @@ export default function tokenize (input) {
                     next = wordEnd.lastIndex - 2;
                 }
 
-                tokens.push([
-                    t.word,                     // token type
-                    css.slice(start, next + 1), // content
-                    line,                       // start line
-                    start - offset,             // start column
-                    line,                       // end line
-                    next - offset,              // end column
-                    start,                      // source index
-                ]);
-
-                start = next + 1;
+                tokenType = t.word;
+                endLine = line;
+                endColumn = next - offset;
             }
 
+            end = next + 1;
             break;
         }
+
+        // Ensure that the token structure remains consistent
+        tokens.push([
+            tokenType,              // [0] Token type
+            css.slice(start, end),  // [1] Token contents
+            line,                   // [2] Starting line
+            start - offset,         // [3] Starting column
+            endLine,                // [4] Ending line
+            endColumn,              // [5] Ending column
+            start,                  // [6] Source index
+        ]);
+
+        // Reset offset for the next token
+        if (nextOffset) {
+            offset = nextOffset;
+            nextOffset = null;
+        }
+
+        start = end;
     }
 
     return tokens;

@@ -412,6 +412,8 @@ export default class Parser {
                 });
             }
             this.newNode(node, namespace);
+            // Ensure that the namespace is used only once
+            namespace = null;
         });
         this.position ++;
     }

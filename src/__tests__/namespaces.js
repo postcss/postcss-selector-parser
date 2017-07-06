@@ -54,3 +54,11 @@ test('match namespace inside attribute selector (4)', '[|href]', (t, tree) => {
     t.deepEqual(tree.nodes[0].nodes[0].namespace, true);
     t.deepEqual(tree.nodes[0].nodes[0].attribute, 'href');
 });
+
+test('namespace with qualified id selector', 'ns|h1#foo', (t, tree) => {
+    t.deepEqual(tree.nodes[0].nodes[0].namespace, 'ns');
+});
+
+test('namespace with qualified class selector', 'ns|h1.foo', (t, tree) => {
+    t.deepEqual(tree.nodes[0].nodes[0].namespace, 'ns');
+});

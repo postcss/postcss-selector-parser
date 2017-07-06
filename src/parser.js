@@ -62,7 +62,7 @@ export default class Parser {
             this.position < this.tokens.length &&
             this.currToken[0] !== tokens.closeSquare
         ) {
-            str += this.tokens[this.position][1];
+            str += this.currToken[1];
             this.position ++;
         }
         if (this.position === this.tokens.length && !~str.indexOf(']')) {
@@ -106,7 +106,7 @@ export default class Parser {
             attr.raws.unquoted = attr.quoted ? trimmedValue.slice(1, -1) : trimmedValue;
         }
         this.newNode(attr);
-        this.position++;
+        this.position ++;
     }
 
     combinator () {
@@ -172,7 +172,7 @@ export default class Parser {
             ),
             sourceIndex: current[6],
         }));
-        this.position++;
+        this.position ++;
     }
 
     error (message) {
@@ -228,10 +228,10 @@ export default class Parser {
             this.current = selector;
             while (this.position < this.tokens.length && balanced) {
                 if (this.currToken[0] === tokens.openParenthesis) {
-                    balanced++;
+                    balanced ++;
                 }
                 if (this.currToken[0] === tokens.closeParenthesis) {
-                    balanced--;
+                    balanced --;
                 }
                 if (balanced) {
                     this.parse();
@@ -246,13 +246,13 @@ export default class Parser {
             last.value += '(';
             while (this.position < this.tokens.length && balanced) {
                 if (this.currToken[0] === tokens.openParenthesis) {
-                    balanced++;
+                    balanced ++;
                 }
                 if (this.currToken[0] === tokens.closeParenthesis) {
-                    balanced--;
+                    balanced --;
                 }
                 last.value += this.parseParenthesisToken(this.currToken);
-                this.position++;
+                this.position ++;
             }
         }
         if (balanced) {
@@ -319,16 +319,16 @@ export default class Parser {
     }
 
     string () {
-        const token = this.currToken;
+        const current = this.currToken;
         this.newNode(new Str({
-            value: token[1],
+            value: current[1],
             source: getSource(
-                token[2],
-                token[3],
-                token[4],
-                token[5]
+                current[2],
+                current[3],
+                current[4],
+                current[5]
             ),
-            sourceIndex: token[6],
+            sourceIndex: current[6],
         }));
         this.position ++;
     }
@@ -406,7 +406,7 @@ export default class Parser {
                 });
             } else {
                 node = new Tag({
-                    value: value,
+                    value,
                     source,
                     sourceIndex,
                 });

@@ -8,7 +8,7 @@ not documented here are subject to change at any point.*
 This is the module's main entry point.
 
 ```js
-var parser = require('postcss-selector-parser');
+const parser = require('postcss-selector-parser');
 ```
 
 ### `parser([transform])`
@@ -16,19 +16,19 @@ var parser = require('postcss-selector-parser');
 Creates a new `processor` instance
 
 ```js
-var processor = parser();
+const processor = parser();
 
 // or, with optional transform function
-var transform = function (selectors) {
-    selectors.eachUniversal(function (selector) {
+const transform = selectors => {
+    selectors.eachUniversal(selector => {
         selector.remove();
     });
 };
 
-var processor = parser(transform)
+const processor = parser(transform)
 
 // Example
-var result = processor.processSync('*.class');
+const result = processor.processSync('*.class');
 // => .class
 ```
 
@@ -222,7 +222,7 @@ root.nodes[0].parent === root;
 Returns a string representation of the node.
 
 ```js
-var id = parser.id({value: 'search'});
+const id = parser.id({value: 'search'});
 console.log(String(id));
 // => #search
 ```
@@ -232,7 +232,7 @@ console.log(String(id));
 Returns the next/previous child of the parent node.
 
 ```js
-var next = id.next();
+const next = id.next();
 if (next && next.type !== 'combinator') {
     throw new Error('Qualified IDs are not allowed!');
 }
@@ -243,8 +243,8 @@ if (next && next.type !== 'combinator') {
 Replace a node with another.
 
 ```js
-var attr = selectors.first.first;
-var className = parser.className({value: 'test'});
+const attr = selectors.first.first;
+const className = parser.className({value: 'test'});
 attr.replaceWith(className);
 ```
 
@@ -268,7 +268,7 @@ Returns a copy of a node, detached from any parent containers that the
 original might have had.
 
 ```js
-var cloned = parser.id({value: 'search'});
+const cloned = parser.id({value: 'search'});
 String(cloned);
 
 // => #search
@@ -408,8 +408,8 @@ Iterate the container's immediate children, calling `callback` for each child.
 You may return `false` within the callback to break the iteration.
 
 ```js
-var className;
-selectors.each(function (selector, index) {
+let className;
+selectors.each((selector, index) => {
     if (selector.type === 'class') {
         className = selector.value;
         return false;
@@ -431,7 +431,7 @@ Like `container#each`, but will also iterate child nodes as long as they are
 `container` types.
 
 ```js
-selectors.walk(function (selector, index) {
+selectors.walk((selector, index) => {
     // all nodes
 });
 ```
@@ -468,7 +468,7 @@ to the groups that you created via the callback.
 
 ```js
 // (input) => h1 h2>>h3
-var list = selectors.first.split((selector) => {
+const list = selectors.first.split(selector => {
     return selector.type === 'combinator';
 });
 
@@ -486,7 +486,7 @@ Add a node to the start/end of the container. Note that doing so will set
 the parent property of the node to this container.
 
 ```js
-var id = parser.id({value: 'search'});
+const id = parser.id({value: 'search'});
 selector.append(id);
 ```
 
@@ -499,9 +499,9 @@ Arguments:
 Add a node before or after an existing node in a container:
 
 ```js
-selectors.walk(function (selector) {
+selectors.walk(selector => {
     if (selector.type !== 'class') {
-        var className = parser.className({value: 'theme-name'});
+        const className = parser.className({value: 'theme-name'});
         selector.parent.insertAfter(selector, className);
     }
 });
@@ -605,22 +605,22 @@ Processes the `css`, returning the parsed output. An async method is exposed
 as `process`.
 
 ```js
-var processor = parser();
+const processor = parser();
 
-var result = processor.processSync(' .class');
+const result = processor.processSync(' .class');
 // =>  .class
 
 // Asynchronous operation
 processor.process(' .class').then(result => /* ... */);
 
 // To have the parser normalize whitespace values, utilize the options
-var result = processor.processSync('  .class  ', {lossless: false});
+const result = processor.processSync('  .class  ', {lossless: false});
 // => .class
 
 // For better syntax errors, pass a PostCSS Rule node.
-var postcss = require('postcss');
-var rule = postcss.rule({selector: 'a'});
-var result = process.process(rule);
+const postcss = require('postcss');
+const rule = postcss.rule({selector: 'a'});
+const result = process.process(rule);
 ```
 
 Arguments:

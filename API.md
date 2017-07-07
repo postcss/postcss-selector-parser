@@ -612,11 +612,16 @@ var result = processor.process(' .class').result;
 // To have the parser normalize whitespace values, utilize the options
 var result = processor.process('  .class  ', {lossless: false}).result;
 // => .class
+
+// For better syntax errors, pass a PostCSS Rule node.
+var postcss = require('postcss');
+var rule = postcss.rule({selector: 'a'});
+var result = process.process(rule).result;
 ```
 
 Arguments:
 
-* `cssText (string)`: The css to be parsed.
+* `css (string|object)`: Either a selector string or a PostCSS Rule node.
 * `[options] (object)`: Process options
 
 Options:

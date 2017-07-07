@@ -43,12 +43,14 @@ export default class Parser {
 
         const selector = new Selector();
         this.root.append(selector);
-
         this.current = selector;
+
+        this.css = typeof input.css === 'string' ? input.css : input.css.selector;
+
         if (this.lossy) {
-            this.tokens = tokenize({safe: input.safe, css: input.css.trim()});
+            this.tokens = tokenize({safe: input.safe, css: this.css.trim()});
         } else {
-            this.tokens = tokenize(input);
+            this.tokens = tokenize(Object.assign({}, input, {css: this.css}));
         }
 
         return this.loop();
@@ -175,20 +177,26 @@ export default class Parser {
         this.position ++;
     }
 
-    error (message) {
-        throw new this.input.error(message); // eslint-disable-line new-cap
+    error (message, opts) {
+        throw new this.input.error(message, opts); // eslint-disable-line new-cap
     }
 
     missingBackslash () {
-        return this.error('Expected a backslash preceding the semicolon.');
+        return this.error('Expected a backslash preceding the semicolon.', {
+            index: this.currToken[6],
+        });
     }
 
     missingParenthesis () {
-        return this.error('Expected opening parenthesis.');
+        return this.error('Expected an opening parenthesis.', {
+            index: this.currToken[6],
+        });
     }
 
     missingSquareBracket () {
-        return this.error('Expected opening square bracket.');
+        return this.error('Expected an opening square bracket.', {
+            index: this.currToken[6],
+        });
     }
 
     namespace () {
@@ -256,7 +264,9 @@ export default class Parser {
             }
         }
         if (balanced) {
-            this.error('Expected closing parenthesis.');
+            this.error('Expected a closing parenthesis.', {
+                index: this.currToken[6],
+            });
         }
     }
 
@@ -268,7 +278,9 @@ export default class Parser {
             this.position ++;
         }
         if (!this.currToken) {
-            return this.error('Expected pseudo-class or pseudo-element');
+            return this.error('Expected a pseudo-class or pseudo-element.', {
+                index: this.position - 1,
+            });
         }
         if (this.currToken[0] === tokens.word) {
             this.splitWord(false, (first, length) => {
@@ -288,11 +300,15 @@ export default class Parser {
                     this.nextToken &&
                     this.nextToken[0] === tokens.openParenthesis
                 ) {
-                    this.error('Misplaced parenthesis.');
+                    this.error('Misplaced parenthesis.', {
+                        index: this.nextToken[6],
+                    });
                 }
             });
         } else {
-            this.error('Unexpected "' + this.currToken[0] + '" found.');
+            this.error('Expected a pseudo-class or pseudo-element.', {
+                index: this.currToken[6],
+            });
         }
     }
 

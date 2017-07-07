@@ -3,7 +3,7 @@ import ava from 'ava';
 import parser from '../../index';
 
 export const parse = (input, transform) => {
-    return parser(transform).process(input).result;
+    return parser(transform).processSync(input);
 };
 
 export const test = (spec, input, callback) => {
@@ -25,6 +25,6 @@ export const test = (spec, input, callback) => {
 
 export const throws = (spec, input) => {
     ava(`${spec} (throws)`, t => {
-        t.throws(() => parser().process(input).result);
+        t.throws(() => parser().processSync(input));
     });
 };

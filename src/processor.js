@@ -7,26 +7,32 @@ export default class Processor {
         return this;
     }
 
-    process (selectors, options = {}) {
-        let input = new Parser({
-            css: selectors,
-            error: (e) => {
-                throw new Error(e);
+    _input (rule, options = {}) {
+        return new Parser({
+            css: rule,
+            error: (e, opts) => {
+                if (typeof rule === 'string') {
+                    throw new Error(e);
+                }
+                throw rule.error(e, opts); // eslint-disable-line new-cap
             },
-            options: options,
+            options,
         });
-        this.res = input;
-        this.funcRes = this.func(input);
-        return this;
     }
 
-    get result () {
-        let isPromise = this.funcRes &&
-            typeof this.funcRes.then === 'function';
-
-        if (isPromise) {
-            return this.funcRes.then(() => String(this.res));
+    process (rule, options) {
+        let input;
+        try {
+            input = this._input(rule, options);
+        } catch (e) {
+            return Promise.reject(e);
         }
-        return String(this.res);
+        return Promise.resolve(this.func(input)).then(() => String(input));
+    }
+
+    processSync (rule, options = {}) {
+        const input = this._input(rule, options);
+        this.func(input);
+        return String(input);
     }
 }

@@ -28,7 +28,7 @@ var transform = function (selectors) {
 var processor = parser(transform)
 
 // Example
-var result = processor.process('*.class').result;
+var result = processor.processSync('*.class');
 // => .class
 ```
 
@@ -599,24 +599,28 @@ around it.
 
 ## `processor`
 
-### `process(cssText, [options])`
+### `process|processSync(css, [options])`
 
-Processes the `cssText`, returning the parsed output
+Processes the `css`, returning the parsed output. An async method is exposed
+as `process`.
 
 ```js
 var processor = parser();
 
-var result = processor.process(' .class').result;
+var result = processor.processSync(' .class');
 // =>  .class
 
+// Asynchronous operation
+processor.process(' .class').then(result => /* ... */);
+
 // To have the parser normalize whitespace values, utilize the options
-var result = processor.process('  .class  ', {lossless: false}).result;
+var result = processor.processSync('  .class  ', {lossless: false});
 // => .class
 
 // For better syntax errors, pass a PostCSS Rule node.
 var postcss = require('postcss');
 var rule = postcss.rule({selector: 'a'});
-var result = process.process(rule).result;
+var result = process.process(rule);
 ```
 
 Arguments:

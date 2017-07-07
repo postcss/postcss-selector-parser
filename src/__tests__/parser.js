@@ -46,7 +46,7 @@ test('construct a whole tree', (t) => {
 });
 
 test('no operation', (t) => {
-    t.notThrows(() => parser().process('h1 h2 h3').result);
+    t.notThrows(() => parser().processSync('h1 h2 h3'));
 });
 
 test('empty selector string', (t) => {
@@ -55,18 +55,26 @@ test('empty selector string', (t) => {
             selectors.walk((selector) => {
                 selector.type = 'tag';
             });
-        }).process('').result;
+        }).processSync('');
     });
 });
 
 test('async parser', (t) => {
-    t.plan(1);
-
-    t.notThrows(() => {
-        return parser(() => new Promise((res) => {
+    return parser((selectors) => new Promise((res) => {
+        setTimeout(() => {
+            selectors.first.nodes[0].value = 'bar';
             res();
-        })).process('').result.then(() => {
-            t.pass();
-        });
+        }, 1);
+    })).process('foo').then((result) => {
+        t.deepEqual(result, 'bar');
     });
+});
+
+test('parse errors with the async parser', (t) => {
+    return parser((selectors) => new Promise((res) => {
+        setTimeout(() => {
+            selectors.first.nodes[0].value = 'bar';
+            res();
+        }, 1);
+    })).process('a b: c').catch(err => t.truthy(err));
 });

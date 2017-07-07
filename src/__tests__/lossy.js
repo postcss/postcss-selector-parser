@@ -2,7 +2,7 @@ import ava from 'ava';
 import parser from '../index';
 
 export const parse = (input, options, transform) => {
-    return parser(transform).process(input, options).result;
+    return parser(transform).processSync(input, options);
 };
 
 export const testLossy = (t, input, expected) => {

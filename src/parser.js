@@ -76,12 +76,12 @@ export default class Parser {
             operator: parts[1],
             value: parts[2],
             source: getSource(
+                startingToken[1],
                 startingToken[2],
-                startingToken[3],
-                this.currToken[4],
-                this.currToken[5]
+                this.currToken[3],
+                this.currToken[4]
             ),
-            sourceIndex: startingToken[6],
+            sourceIndex: startingToken[5],
         };
         if (namespace.length > 1) {
             if (namespace[0] === '') {
@@ -119,12 +119,12 @@ export default class Parser {
         const node = new Combinator({
             value: '',
             source: getSource(
+                current[1],
                 current[2],
                 current[3],
-                current[4],
-                current[5]
+                current[4]
             ),
-            sourceIndex: current[6],
+            sourceIndex: current[5],
         });
         while ( this.position < this.tokens.length && this.currToken &&
                 (this.currToken[0] === tokens.space ||
@@ -133,12 +133,12 @@ export default class Parser {
             if (this.nextToken && this.nextToken[0] === tokens.combinator) {
                 node.spaces.before = this.parseSpace(content);
                 node.source = getSource(
+                    this.nextToken[1],
                     this.nextToken[2],
                     this.nextToken[3],
-                    this.nextToken[4],
-                    this.nextToken[5]
+                    this.nextToken[4]
                 );
-                node.sourceIndex = this.nextToken[6];
+                node.sourceIndex = this.nextToken[5];
             } else if (this.prevToken && this.prevToken[0] === tokens.combinator) {
                 node.spaces.after = this.parseSpace(content);
             } else if (this.currToken[0] === tokens.combinator) {
@@ -168,12 +168,12 @@ export default class Parser {
         this.newNode(new Comment({
             value: this.content(),
             source: getSource(
+                current[1],
                 current[2],
                 current[3],
-                current[4],
-                current[5]
+                current[4]
             ),
-            sourceIndex: current[6],
+            sourceIndex: current[5],
         }));
         this.position ++;
     }
@@ -184,19 +184,19 @@ export default class Parser {
 
     missingBackslash () {
         return this.error('Expected a backslash preceding the semicolon.', {
-            index: this.currToken[6],
+            index: this.currToken[5],
         });
     }
 
     missingParenthesis () {
         return this.error('Expected an opening parenthesis.', {
-            index: this.currToken[6],
+            index: this.currToken[5],
         });
     }
 
     missingSquareBracket () {
         return this.error('Expected an opening square bracket.', {
-            index: this.currToken[6],
+            index: this.currToken[5],
         });
     }
 
@@ -216,12 +216,12 @@ export default class Parser {
         this.newNode(new Nesting({
             value: this.content(),
             source: getSource(
+                current[1],
                 current[2],
                 current[3],
-                current[4],
-                current[5]
+                current[4]
             ),
-            sourceIndex: current[6],
+            sourceIndex: current[5],
         }));
         this.position ++;
     }
@@ -245,8 +245,8 @@ export default class Parser {
                 if (balanced) {
                     this.parse();
                 } else {
-                    selector.parent.source.end.line = this.currToken[4];
-                    selector.parent.source.end.column = this.currToken[5];
+                    selector.parent.source.end.line = this.currToken[3];
+                    selector.parent.source.end.column = this.currToken[4];
                     this.position ++;
                 }
             }
@@ -266,7 +266,7 @@ export default class Parser {
         }
         if (balanced) {
             this.error('Expected a closing parenthesis.', {
-                index: this.currToken[6],
+                index: this.currToken[5],
             });
         }
     }
@@ -289,12 +289,12 @@ export default class Parser {
                 this.newNode(new Pseudo({
                     value: pseudoStr,
                     source: getSource(
+                        startingToken[1],
                         startingToken[2],
-                        startingToken[3],
-                        this.currToken[4],
-                        this.currToken[5]
+                        this.currToken[3],
+                        this.currToken[4]
                     ),
-                    sourceIndex: startingToken[6],
+                    sourceIndex: startingToken[5],
                 }));
                 if (
                     length > 1 &&
@@ -302,13 +302,13 @@ export default class Parser {
                     this.nextToken[0] === tokens.openParenthesis
                 ) {
                     this.error('Misplaced parenthesis.', {
-                        index: this.nextToken[6],
+                        index: this.nextToken[5],
                     });
                 }
             });
         } else {
             this.error('Expected a pseudo-class or pseudo-element.', {
-                index: this.currToken[6],
+                index: this.currToken[5],
             });
         }
     }
@@ -340,12 +340,12 @@ export default class Parser {
         this.newNode(new Str({
             value: this.content(),
             source: getSource(
+                current[1],
                 current[2],
                 current[3],
-                current[4],
-                current[5]
+                current[4]
             ),
-            sourceIndex: current[6],
+            sourceIndex: current[5],
         }));
         this.position ++;
     }
@@ -360,12 +360,12 @@ export default class Parser {
         this.newNode(new Universal({
             value: this.content(),
             source: getSource(
+                current[1],
                 current[2],
                 current[3],
-                current[4],
-                current[5]
+                current[4]
             ),
-            sourceIndex: current[6],
+            sourceIndex: current[5],
         }), namespace);
         this.position ++;
     }
@@ -402,12 +402,12 @@ export default class Parser {
             }
             let node;
             const current = this.currToken;
-            const sourceIndex = current[6] + indices[i];
+            const sourceIndex = current[5] + indices[i];
             const source = getSource(
-                current[2],
-                current[3] + ind,
-                current[4],
-                current[3] + (index - 1)
+                current[1],
+                current[2] + ind,
+                current[3],
+                current[2] + (index - 1)
             );
             if (~hasClass.indexOf(ind)) {
                 node = new ClassName({
@@ -552,7 +552,7 @@ export default class Parser {
     }
 
     content (token = this.currToken) {
-        return this.css.slice(token[6], token[7]);
+        return this.css.slice(token[5], token[6]);
     }
 
     get currToken () {

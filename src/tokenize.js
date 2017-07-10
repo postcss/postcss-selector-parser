@@ -200,13 +200,12 @@ export default function tokenize (input) {
         // Ensure that the token structure remains consistent
         tokens.push([
             tokenType,              // [0] Token type
-            css.slice(start, end),  // [1] Token contents
-            line,                   // [2] Starting line
-            start - offset,         // [3] Starting column
-            endLine,                // [4] Ending line
-            endColumn,              // [5] Ending column
-            start,                  // [6] Start position / Source index
-            end,                    // [7] End position
+            line,                   // [1] Starting line
+            start - offset,         // [2] Starting column
+            endLine,                // [3] Ending line
+            endColumn,              // [4] Ending column
+            start,                  // [5] Start position / Source index
+            end,                    // [6] End position
         ]);
 
         // Reset offset for the next token

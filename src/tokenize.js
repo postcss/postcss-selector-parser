@@ -205,7 +205,8 @@ export default function tokenize (input) {
             start - offset,         // [3] Starting column
             endLine,                // [4] Ending line
             endColumn,              // [5] Ending column
-            start,                  // [6] Source index
+            start,                  // [6] Start position / Source index
+            end,                    // [7] End position
         ]);
 
         // Reset offset for the next token

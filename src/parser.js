@@ -189,15 +189,11 @@ export default class Parser {
     }
 
     missingParenthesis () {
-        return this.error('Expected an opening parenthesis.', {
-            index: this.currToken[5],
-        });
+        return this.expected('opening parenthesis', this.currToken[5]);
     }
 
     missingSquareBracket () {
-        return this.error('Expected an opening square bracket.', {
-            index: this.currToken[5],
-        });
+        return this.expected('opening square bracket', this.currToken[5]);
     }
 
     namespace () {
@@ -265,9 +261,7 @@ export default class Parser {
             }
         }
         if (balanced) {
-            this.error('Expected a closing parenthesis.', {
-                index: this.currToken[5],
-            });
+            return this.expected('closing parenthesis', this.currToken[5]);
         }
     }
 
@@ -279,9 +273,7 @@ export default class Parser {
             this.position ++;
         }
         if (!this.currToken) {
-            return this.error('Expected a pseudo-class or pseudo-element.', {
-                index: this.position - 1,
-            });
+            return this.expected(['pseudo-class', 'pseudo-element'], this.position - 1);
         }
         if (this.currToken[0] === tokens.word) {
             this.splitWord(false, (first, length) => {
@@ -307,9 +299,7 @@ export default class Parser {
                 }
             });
         } else {
-            this.error('Expected a pseudo-class or pseudo-element.', {
-                index: this.currToken[5],
-            });
+            return this.expected(['pseudo-class', 'pseudo-element'], this.currToken[5]);
         }
     }
 
@@ -502,6 +492,24 @@ export default class Parser {
     /**
      * Helpers
      */
+
+    expected (description, index, found) {
+        if (Array.isArray(description)) {
+            const last = description.pop();
+            description = `${description.join(', ')} or ${last}`;
+        }
+        const an = /^[aeiou]/.test(description[0]) ? 'an' : 'a';
+        if (!found) {
+            return this.error(
+                `Expected ${an} ${description}.`,
+                {index}
+            );
+        }
+        return this.error(
+            `Expected ${an} ${description}, found "${found}" instead.`,
+            {index}
+        );
+    }
 
     parseNamespace (namespace) {
         if (this.lossy && typeof namespace === 'string') {

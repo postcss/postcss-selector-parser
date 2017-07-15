@@ -2,10 +2,10 @@ import Namespace from './namespace';
 import {ATTRIBUTE} from './types';
 
 export default class Attribute extends Namespace {
-    constructor (opts) {
+    constructor (opts = {}) {
         super(opts);
         this.type = ATTRIBUTE;
-        this.raws = {};
+        this.raws = opts.raws || {};
     }
 
     toString () {

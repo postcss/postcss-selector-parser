@@ -8,8 +8,11 @@ export const openParenthesis  = `(`.charCodeAt(0);
 export const closeParenthesis = `)`.charCodeAt(0);
 export const openSquare       = `[`.charCodeAt(0);
 export const closeSquare      = `]`.charCodeAt(0);
+export const dollar           = `$`.charCodeAt(0);
 export const tilde            = `~`.charCodeAt(0);
+export const caret            = `^`.charCodeAt(0);
 export const plus             = `+`.charCodeAt(0);
+export const equals           = `=`.charCodeAt(0);
 export const pipe             = `|`.charCodeAt(0);
 export const greaterThan      = `>`.charCodeAt(0);
 export const space            = ` `.charCodeAt(0);
@@ -24,9 +27,9 @@ export const newline          = '\n'.charCodeAt(0);
 export const tab              = '\t'.charCodeAt(0);
 
 // Expose aliases primarily for readability.
-export const combinator       = tilde;
 export const str              = singleQuote;
 
 // No good single character representation!
 export const comment          = -1;
 export const word             = -2;
+export const combinator       = -3;

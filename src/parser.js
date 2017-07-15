@@ -1,3 +1,4 @@
+import dotProp from 'dot-prop';
 import indexesOf from 'indexes-of';
 import uniq from 'uniq';
 
@@ -57,24 +58,22 @@ export default class Parser {
     }
 
     attribute () {
-        let str = '';
+        const attr = [];
         const startingToken = this.currToken;
         this.position ++;
         while (
             this.position < this.tokens.length &&
             this.currToken[0] !== tokens.closeSquare
         ) {
-            str += this.content();
+            attr.push(this.currToken);
             this.position ++;
         }
-        if (this.position === this.tokens.length && !~str.indexOf(']')) {
-            this.error('Expected a closing square bracket.');
+        if (this.currToken[0] !== tokens.closeSquare) {
+            return this.expected('closing square bracket', this.currToken[5]);
         }
-        const parts = str.split(/((?:[*~^$|]?=))([^]*)/);
-        const namespace = parts[0].split(/(\|)/g);
-        const attributeProps = {
-            operator: parts[1],
-            value: parts[2],
+
+        const len = attr.length;
+        const node = {
             source: getSource(
                 startingToken[1],
                 startingToken[2],
@@ -83,31 +82,133 @@ export default class Parser {
             ),
             sourceIndex: startingToken[5],
         };
-        if (namespace.length > 1) {
-            if (namespace[0] === '') {
-                namespace[0] = true;
-            }
-            attributeProps.attribute = this.parseValue(namespace[2]);
-            attributeProps.namespace = this.parseNamespace(namespace[0]);
-        } else {
-            attributeProps.attribute = this.parseValue(parts[0]);
-        }
-        const attr = new Attribute(attributeProps);
 
-        if (parts[2]) {
-            const insensitive = parts[2].split(/(\s+i\s*?)$/);
-            const trimmedValue = insensitive[0].trim();
-            attr.value = this.lossy ? trimmedValue : insensitive[0];
-            if (insensitive[1]) {
-                attr.insensitive = true;
-                if (!this.lossy) {
-                    attr.raws.insensitive = insensitive[1];
-                }
-            }
-            attr.quoted = trimmedValue[0] === '\'' || trimmedValue[0] === '"';
-            attr.raws.unquoted = attr.quoted ? trimmedValue.slice(1, -1) : trimmedValue;
+        if (len === 1 && !~[tokens.word].indexOf(attr[0][0])) {
+            return this.expected('attribute', attr[0][5]);
         }
-        this.newNode(attr);
+
+        let pos = 0;
+        let spaceBefore = '';
+        let commentBefore = '';
+        let lastAdded = null;
+
+        while (pos < len) {
+            const token = attr[pos];
+            const content = this.content(token);
+            const next = attr[pos + 1];
+
+            switch (token[0]) {
+            case tokens.space:
+                if (
+                    len === 1 ||
+                    pos === 0 && this.content(next) === '|'
+                ) {
+                    return this.expected('attribute', token[5], content);
+                }
+                if (this.lossy) {
+                    break;
+                }
+                if (!lastAdded || this.content(next) === 'i') {
+                    spaceBefore = content;
+                } else {
+                    dotProp.set(node, lastAdded, dotProp.get(node, lastAdded) + content);
+                }
+                break;
+            case tokens.asterisk:
+                if (next[0] === tokens.equals) {
+                    node.operator = content;
+                    lastAdded = 'operator';
+                } else if (!node.namespace && next) {
+                    node.namespace = `${this.parseSpace(spaceBefore)}${content}`;
+                    lastAdded = 'namespace';
+                    spaceBefore = '';
+                }
+                break;
+            case tokens.dollar:
+            case tokens.caret:
+                if (next[0] === tokens.equals) {
+                    node.operator = content;
+                    lastAdded = 'operator';
+                }
+                break;
+            case tokens.combinator:
+                if (content === '~' && next[0] === tokens.equals) {
+                    node.operator = content;
+                    lastAdded = 'operator';
+                }
+                if (content !== '|') {
+                    break;
+                }
+                if (next[0] === tokens.equals) {
+                    node.operator = content;
+                    lastAdded = 'operator';
+                } else if (!node.namespace && !node.attribute) {
+                    node.namespace = true;
+                }
+                break;
+            case tokens.word:
+                if (
+                    next &&
+                    this.content(next) === '|' &&
+                    (attr[pos + 2] && attr[pos + 2][0] !== tokens.equals) &&
+                    !node.operator &&
+                    !node.namespace
+                ) {
+                    node.namespace = content;
+                    lastAdded = 'namespace';
+                } else if (!node.attribute) {
+                    node.attribute = `${this.parseSpace(spaceBefore)}${commentBefore}${content}`;
+                    lastAdded = 'attribute';
+                    spaceBefore = '';
+                    commentBefore = '';
+                } else if (!node.value) {
+                    node.value = content;
+                    lastAdded = 'value';
+                    dotProp.set(node, 'raws.unquoted', content);
+                } else if (content === 'i') {
+                    node.insensitive = true;
+                    if (!this.lossy) {
+                        lastAdded = 'raws.insensitive';
+                        dotProp.set(node, lastAdded, `${spaceBefore}${content}`);
+                        spaceBefore = '';
+                    }
+                }
+                break;
+            case tokens.str:
+                if (!node.attribute || !node.operator) {
+                    return this.error(`Expected an attribute followed by an operator preceding the string.`, {
+                        index: token[5],
+                    });
+                }
+                node.value = content;
+                node.quoted = true;
+                lastAdded = 'value';
+                dotProp.set(node, 'raws.unquoted', content.slice(1, -1));
+                break;
+            case tokens.equals:
+                if (!node.attribute) {
+                    return this.expected('attribute', token[5], content);
+                }
+                if (node.value) {
+                    return this.error('Unexpected "=" found; an operator was already defined.', {index: token[5]});
+                }
+                node.operator = node.operator ? `${node.operator}${content}` : content;
+                lastAdded = 'operator';
+                break;
+            case tokens.comment:
+                if (lastAdded) {
+                    dotProp.set(node, lastAdded, dotProp.get(node, lastAdded) + content);
+                } else {
+                    commentBefore = content;
+                }
+                break;
+            default:
+                return this.error(`Unexpected "${content}" found.`, {index: token[5]});
+            }
+            pos ++;
+        }
+
+        this.newNode(new Attribute(node));
         this.position ++;
     }
 
@@ -363,7 +464,10 @@ export default class Parser {
     splitWord (namespace, firstCallback) {
         let nextToken = this.nextToken;
         let word = this.content();
-        while (nextToken && nextToken[0] === tokens.word) {
+        while (
+            nextToken &&
+            ~[tokens.dollar, tokens.caret, tokens.equals, tokens.word].indexOf(nextToken[0])
+        ) {
             this.position ++;
             let current = this.content();
             word += current;
@@ -460,6 +564,9 @@ export default class Parser {
         case tokens.openSquare:
             this.attribute();
             break;
+        case tokens.dollar:
+        case tokens.caret:
+        case tokens.equals:
         case tokens.word:
             this.word();
             break;

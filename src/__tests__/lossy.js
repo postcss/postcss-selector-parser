@@ -46,7 +46,6 @@ ava('namespace - inside attribute (2), space before', testLossy, ' [  postcss|hr
 ava('namespace - inside attribute (2), space after', testLossy, '[postcss|href ] ', '[postcss|href]');
 ava('namespace - inside attribute (3), space before', testLossy, ' [  *|href=test]', '[*|href=test]');
 ava('namespace - inside attribute (3), space after', testLossy, '[*|href=  test  ] ', '[*|href=test]');
-ava('namespace - inside attribute (4), space before', testLossy, ' [  |href=test]', '[|href=test]');
 ava('namespace - inside attribute (4), space after', testLossy, '[|href=  test  ] ', '[|href=test]');
 
 ava('tag - extraneous whitespace', testLossy, '  h1   ,  h2   ', 'h1,h2');

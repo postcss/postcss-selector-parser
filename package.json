@@ -36,6 +36,7 @@
     "test": "nyc ava src/__tests__/*.js"
   },
   "dependencies": {
+    "dot-prop": "^4.1.1",
     "indexes-of": "^1.0.1",
     "uniq": "^1.0.1"
   },

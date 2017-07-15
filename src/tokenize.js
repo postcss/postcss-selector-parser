@@ -1,6 +1,6 @@
 import * as t from './tokenTypes';
 
-const wordEnd = /[ \n\t\r\(\)\*:;!&'"\+\|~>,\[\]\\]|\/(?=\*)/g;
+const wordEnd = /[ \n\t\r\(\)\*:;!&'"\+\|~>,=$^\[\]\\]|\/(?=\*)/g;
 
 export default function tokenize (input) {
     const tokens   = [];
@@ -95,6 +95,9 @@ export default function tokenize (input) {
         case t.asterisk:
         case t.ampersand:
         case t.comma:
+        case t.equals:
+        case t.dollar:
+        case t.caret:
         case t.openSquare:
         case t.closeSquare:
         case t.colon:

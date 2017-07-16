@@ -1,3 +1,24 @@
+# 3.0.0-rc.0
+
+## Breaking changes
+
+* Some tweaks to the tokenizer/attribute selector parsing mean that whitespace
+  locations might be slightly different to the 2.x code.
+* Better attribute selector parsing with more validation; postcss-selector-parser
+  no longer uses regular expressions to parse attribute selectors.
+* Added an async API (thanks to @jacobp100); the default `process` API is now
+  async, and the sync API is now accessed through `processSync` instead.
+* Tweaks handling of Less interpolation (thanks to @jwilsson).
+* Removes support for Node 0.12.
+
+## Other changes
+
+* Set the parent when inserting a node (thanks to @chriseppstein).
+* Correctly adjust indices when using insertBefore/insertAfter (thanks to @tivac).
+* Fixes handling of namespaces with qualified tag selectors.
+* Now accepts a PostCSS rule node for better syntax errors.
+* Now more memory efficient when tokenizing selectors.
+
 # 2.2.3
 
 * Resolves an issue where the parser would not reduce multiple spaces between an

@@ -20,7 +20,7 @@ const processor = parser();
 
 // or, with optional transform function
 const transform = selectors => {
-    selectors.eachUniversal(selector => {
+    selectors.walkUniversals(selector => {
         selector.remove();
     });
 };

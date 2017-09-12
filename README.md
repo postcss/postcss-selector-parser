@@ -15,7 +15,7 @@ npm install postcss-selector-parser
 ```js
 const parser = require('postcss-selector-parser');
 const transform = selectors => {
-    selectors.eachInside(selector => {
+    selectors.walk(selector => {
         // do something with the selector
         console.log(String(selector))
     });

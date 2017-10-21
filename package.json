@@ -23,6 +23,7 @@
     "postcss": "^6.0.6"
   },
   "main": "dist/index.js",
+  "types": "postcss-selector-parser.d.ts",
   "files": [
     "API.md",
     "CHANGELOG.md",

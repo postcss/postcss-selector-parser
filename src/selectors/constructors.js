@@ -1,0 +1,25 @@
+import Attribute  from './attribute';
+import ClassName  from './className';
+import Combinator from './combinator';
+import Comment    from './comment';
+import Id         from './id';
+import Nesting    from './nesting';
+import Pseudo     from './pseudo';
+import Root       from './root';
+import Selector   from './selector';
+import Str        from './string';
+import Tag        from './tag';
+import Universal  from './universal';
+
+export const attribute = opts => new Attribute(opts);
+export const className = opts => new ClassName(opts);
+export const combinator = opts => new Combinator(opts);
+export const comment = opts => new Comment(opts);
+export const id = opts => new Id(opts);
+export const nesting = opts => new Nesting(opts);
+export const pseudo = opts => new Pseudo(opts);
+export const root = opts => new Root(opts);
+export const selector = opts => new Selector(opts);
+export const string = opts => new Str(opts);
+export const tag = opts => new Tag(opts);
+export const universal = opts => new Universal(opts);

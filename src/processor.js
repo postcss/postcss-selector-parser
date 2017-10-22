@@ -50,7 +50,7 @@ export default class Processor {
         let root = this._root(rule, error, options);
         let transform = this.func(root);
         if (transform && typeof transform.then === "function") {
-            throw new Error("Cannot selector processor returned a promise to a synchronous call.");
+            throw new Error("Selector processor returned a promise to a synchronous call.");
         }
         let string = undefined;
         if (options.updateSelector && typeof rule !== "string") {

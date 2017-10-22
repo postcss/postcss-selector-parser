@@ -14,12 +14,12 @@
  */
 export = parser;
 
-declare function parser(): parser.Processor;
-declare function parser<Transform extends any>(processor: parser.SyncProcessor<Transform>): parser.Processor<Transform>;
-declare function parser(processor: parser.SyncProcessor): parser.Processor;
-declare function parser<Transform extends any>(processor: parser.AsyncProcessor<Transform>): parser.Processor<Transform, string>;
-declare function parser(processor: parser.AsyncProcessor): parser.Processor<never, string>;
-declare function parser<Transform>(processor?: parser.SyncProcessor<Transform> | parser.AsyncProcessor<Transform>): parser.Processor<Transform, string>;
+declare function parser(): parser.Processor<never>;
+declare function parser<Transform extends any>(processor: parser.AsyncProcessor<Transform>): parser.Processor<Transform, never>;
+declare function parser(processor: parser.AsyncProcessor): parser.Processor<never>;
+declare function parser<Transform extends any>(processor: parser.SyncProcessor<Transform>): parser.Processor<Transform, never>;
+declare function parser(processor: parser.SyncProcessor): parser.Processor<never>;
+declare function parser<Transform>(processor?: parser.SyncProcessor<Transform> | parser.AsyncProcessor<Transform>): parser.Processor<Transform>;
 
 /*~ If you want to expose types from your module as well, you can
  *~ place them in this block. Often you will want to describe the
@@ -45,7 +45,7 @@ declare namespace parser {
     /** Accepts a string  */
     type Selectors = string | PostCSSRuleNode
     type SyncProcessor<Transform = void> = (root: parser.Root) => Transform
-    type AsyncProcessor<Transform = void> = (root: parser.Root) => void | PromiseLike<Transform>
+    type AsyncProcessor<Transform = void> = (root: parser.Root) => Transform | PromiseLike<Transform>
 
     const TAG: "tag";
     const STRING: "string";
@@ -90,15 +90,18 @@ declare namespace parser {
          */
         updateSelector: boolean;
     }
-    class Processor<TransformType = never, AsyncProcessType extends string | never = never> {
+    class Processor<
+        TransformType = never,
+        SyncSelectorsType extends Selectors | never = Selectors
+    > {
         res: Root;
         readonly result: String;
         ast(selectors: Selectors, options?: Partial<Options>): Promise<Root>;
-        astSync(selectors: Selectors, options?: Partial<Options>): Root;
+        astSync(selectors: SyncSelectorsType, options?: Partial<Options>): Root;
         transform(selectors: Selectors, options?: Partial<Options>): Promise<TransformType>;
-        transformSync(selectors: Selectors, options?: Partial<Options>): TransformType;
-        process(selectors: Selectors, options?: Partial<Options>): Promise<AsyncProcessType>;
-        processSync(selectors: Selectors, options?: Partial<Options>): string;
+        transformSync(selectors: SyncSelectorsType, options?: Partial<Options>): TransformType;
+        process(selectors: Selectors, options?: Partial<Options>): Promise<string>;
+        processSync(selectors: SyncSelectorsType, options?: Partial<Options>): string;
     }
     interface ParserOptions {
         css: string;

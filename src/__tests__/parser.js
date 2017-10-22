@@ -78,3 +78,132 @@ test('parse errors with the async parser', (t) => {
         }, 1);
     })).process('a b: c').catch(err => t.truthy(err));
 });
+
+test('parse errors within the async processor', (t) => {
+    return parser((selectors) => new Promise((res, rej) => {
+        setTimeout(() => {
+            rej(selectors.error("async error"));
+        }, 1);
+    })).process('.foo').catch(err => t.truthy(err));
+});
+
+test('parse errors within the async processor before the promise returns', (t) => {
+    return parser((selectors) => {
+        throw selectors.error("async error");
+    }).process('.foo').catch(err => t.truthy(err));
+});
+
+test('returning a promise to the sync processor fails', (t) => {
+    t.throws(() => {
+        return parser(() => new Promise((res) => {
+            setTimeout(() => {
+                res();
+            }, 1);
+        })).processSync('.foo');
+    });
+});
+
+test('Passing a rule works async', (t) => {
+    let rule = {selector: '.foo'};
+    return parser((root) => new Promise((res) => {
+        setTimeout(() => {
+            root.walkClasses((node) => {
+                node.value = "bar";
+            });
+            res();
+        }, 1);
+    })).process(rule)
+    .then(newSel => {
+        t.deepEqual(newSel, ".bar");
+        t.deepEqual(rule.selector, ".foo");
+    });
+});
+
+test('Passing a rule with mutation works async', (t) => {
+    let rule = {selector: '.foo'};
+    return parser((root) => new Promise((res) => {
+        setTimeout(() => {
+            root.walkClasses((node) => {
+                node.value = "bar";
+            });
+            res();
+        }, 1);
+    })).process(rule, {updateSelector: true})
+    .then(newSel => {
+        t.deepEqual(newSel, ".bar");
+        t.deepEqual(rule.selector, ".bar");
+    });
+});
+
+test('Passing a rule with mutation works sync', (t) => {
+    let rule = {selector: '.foo'};
+    let newSel = parser((root) => {
+        root.walkClasses((node) => {
+            node.value = "bar";
+        });
+    }).processSync(rule, {updateSelector: true});
+    t.deepEqual(newSel, ".bar");
+    t.deepEqual(rule.selector, ".bar");
+});
+
+test('Transform a selector synchronously', (t) => {
+    let rule = {selector: '.foo'};
+    let count = parser((root) => {
+        let classCount = 0;
+        root.walkClasses((node) => {
+            classCount++;
+            node.value = "bar";
+        });
+        return classCount;
+    }).transformSync(rule, {updateSelector: true});
+    t.deepEqual(count, 1);
+    t.deepEqual(rule.selector, ".bar");
+});
+
+test('Transform a selector asynchronously', (t) => {
+    let rule = {selector: '.foo'};
+    return parser((root) => new Promise(res => {
+        setTimeout(() => {
+            let classCount = 0;
+            root.walkClasses((node) => {
+                classCount++;
+                node.value = "bar";
+            });
+            res(classCount);
+        }, 1);
+    })).transform(rule, {updateSelector: true}).then(count => {
+        t.deepEqual(count, 1);
+        t.deepEqual(rule.selector, ".bar");
+    });
+});
+
+test('get AST of a selector synchronously', (t) => {
+    let rule = {selector: '.foo'};
+    let ast = parser((root) => {
+        let classCount = 0;
+        root.walkClasses((node) => {
+            classCount++;
+            node.value = "bar";
+        });
+        return classCount;
+    }).astSync(rule, {updateSelector: true});
+    t.deepEqual(ast.nodes[0].nodes[0].value, "bar");
+    t.deepEqual(rule.selector, ".bar");
+});
+
+test('get AST a selector asynchronously', (t) => {
+    let rule = {selector: '.foo'};
+    return parser((root) => new Promise(res => {
+        setTimeout(() => {
+            let classCount = 0;
+            root.walkClasses((node) => {
+                classCount++;
+                node.value = "bar";
+            });
+            res(classCount);
+        }, 1);
+    })).ast(rule, {updateSelector: true}).then(ast => {
+        t.deepEqual(ast.nodes[0].nodes[0].value, "bar");
+        t.deepEqual(rule.selector, ".bar");
+    });
+});

@@ -14,4 +14,16 @@ export default class Root extends Container {
         }, '').slice(0, -1);
         return this.trailingComma ? str + ',' : str;
     }
+
+    error (message, options) {
+        if (this._error) {
+            return this._error(message, options);
+        } else {
+            return new Error(message);
+        }
+    }
+
+    set errorGenerator (handler) {
+        this._error = handler;
+    }
 }

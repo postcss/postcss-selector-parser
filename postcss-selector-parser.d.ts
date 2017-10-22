@@ -14,8 +14,12 @@
  */
 export = parser;
 
-/*~ This example shows how to have multiple overloads for your function */
-declare function parser(processor?: (parser: parser.Parser) => void): parser.Processor;
+declare function parser(): parser.Processor;
+declare function parser<Transform extends any>(processor: parser.SyncProcessor<Transform>): parser.Processor<Transform>;
+declare function parser(processor: parser.SyncProcessor): parser.Processor;
+declare function parser<Transform extends any>(processor: parser.AsyncProcessor<Transform>): parser.Processor<Transform, string>;
+declare function parser(processor: parser.AsyncProcessor): parser.Processor<never, string>;
+declare function parser<Transform>(processor?: parser.SyncProcessor<Transform> | parser.AsyncProcessor<Transform>): parser.Processor<Transform, string>;
 
 /*~ If you want to expose types from your module as well, you can
  *~ place them in this block. Often you will want to describe the
@@ -23,6 +27,26 @@ declare function parser(processor?: (parser: parser.Parser) => void): parser.Pro
  *~ be declared in here, as this example shows.
  */
 declare namespace parser {
+    /* copied from postcss -- so we don't need to add a dependency */
+    type ErrorOptions = {
+        plugin?: string;
+        word?: string;
+        index?: number
+    };
+    /* the bits we use of postcss.Rule, copied from postcss -- so we don't need to add a dependency */
+    type PostCSSRuleNode = {
+        selector: string
+        /**
+         * @returns postcss.CssSyntaxError but it's a complex object, caller
+         *   should cast to it if they have a dependency on postcss.
+         */
+        error(message: string, options?: ErrorOptions): Error;
+    };
+    /** Accepts a string  */
+    type Selectors = string | PostCSSRuleNode
+    type SyncProcessor<Transform = void> = (root: parser.Root) => Transform
+    type AsyncProcessor<Transform = void> = (root: parser.Root) => void | PromiseLike<Transform>
+
     const TAG: "tag";
     const STRING: "string";
     const SELECTOR: "selector";
@@ -56,16 +80,29 @@ declare namespace parser {
     function isNode(node: any): node is Node;
 
     interface Options {
+        /**
+         * Preserve whitespace when true. Default: false;
+         */
         lossless: boolean;
+        /**
+         * When true and a postcss.Rule is passed, set the result of
+         * processing back onto the rule when done. Default: false.
+         */
+        updateSelector: boolean;
     }
-    class Processor {
+    class Processor<TransformType = never, AsyncProcessType extends string | never = never> {
         res: Root;
         readonly result: String;
-        process(selectors: string, options?: Options): Processor;
+        ast(selectors: Selectors, options?: Partial<Options>): Promise<Root>;
+        astSync(selectors: Selectors, options?: Partial<Options>): Root;
+        transform(selectors: Selectors, options?: Partial<Options>): Promise<TransformType>;
+        transformSync(selectors: Selectors, options?: Partial<Options>): TransformType;
+        process(selectors: Selectors, options?: Partial<Options>): Promise<AsyncProcessType>;
+        processSync(selectors: Selectors, options?: Partial<Options>): string;
     }
     interface ParserOptions {
         css: string;
-        error: (e: Error) => void;
+        error: (message: string, options: ErrorOptions) => Error;
         options: Options;
     }
     class Parser {
@@ -75,8 +112,12 @@ declare namespace parser {
         root: Root;
         selectors: string;
         current: Selector;
-      constructor(input: ParserOptions);
-      loop(): Root;
+        constructor(input: ParserOptions);
+        /**
+         * Raises an error, if the processor is invoked on
+         * a postcss Rule node, a better error message is raised.
+         */
+        error(message: string, options?: ErrorOptions): void;
     }
     interface NodeSource {
         start?: {
@@ -167,6 +208,11 @@ declare namespace parser {
 
     interface Root extends Container<undefined> {
         type: "root";
+        /**
+         * Raises an error, if the processor is invoked on
+         * a postcss Rule node, a better error message is raised.
+         */
+        error(message: string, options?: ErrorOptions): Error;
     }
     function root(opts: ContainerOptions): Root;
     function isRoot(node: any): node is Root;

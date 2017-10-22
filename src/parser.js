@@ -40,6 +40,7 @@ export default class Parser {
         this.lossy = input.options.lossless === false;
         this.position = 0;
         this.root = new Root();
+        this.root.errorGenerator = (message, options) => this.input.error(message, options);
 
         const selector = new Selector();
         this.root.append(selector);
@@ -280,7 +281,7 @@ export default class Parser {
     }
 
     error (message, opts) {
-        throw new this.input.error(message, opts); // eslint-disable-line new-cap
+        throw this.input.error(message, opts); // eslint-disable-line new-cap
     }
 
     missingBackslash () {

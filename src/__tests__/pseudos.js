@@ -86,3 +86,8 @@ test('negation pseudo element with single quotes', "h1:not('.heading')", (t, tre
     t.deepEqual(tree.nodes[0].nodes[1].value, ':not');
     t.deepEqual(tree.nodes[0].nodes[1].nodes[0].nodes[0].value, "'.heading'");
 });
+
+test('Issue #116', "svg:not(:root)", (t, tree) => {
+    t.deepEqual(tree.nodes[0].nodes[1].value, ':not');
+    t.deepEqual(tree.nodes[0].nodes[1].nodes[0].nodes[0].value, ':root');
+});

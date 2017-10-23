@@ -6,7 +6,7 @@ export const parse = (input, transform) => {
     return parser(transform).processSync(input);
 };
 
-export function test(spec, input, callback, only = false) {
+export function test (spec, input, callback, only = false) {
     let tester = only ? ava.only : ava;
     if (only) {
         let e = new Error();
@@ -22,12 +22,12 @@ export function test(spec, input, callback, only = false) {
     }
 
     tester(`${spec} (toString)`, t => {
-        let result = parser().processSync(input)
+        let result = parser().processSync(input);
         t.deepEqual(result, input);
     });
 }
 
-test.only = (spec, input, callback) => { test(spec, input, callback, true) };
+test.only = (spec, input, callback) => test(spec, input, callback, true);
 
 export const throws = (spec, input) => {
     ava(`${spec} (throws)`, t => {

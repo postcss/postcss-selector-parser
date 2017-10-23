@@ -123,12 +123,10 @@ export default class Parser {
                 }
                 if (!lastAdded || this.content(next) === 'i') {
                     spaceBefore = content;
+                } else if (lastAdded === 'operator') {
+                    dotProp.set(node, `raws.${lastAdded}`, dotProp.get(node, lastAdded) + content);
                 } else {
-                    if (lastAdded === 'operator') {
-                        dotProp.set(node, `raws.${lastAdded}`, dotProp.get(node, lastAdded) + content);
-                    } else {
-                        dotProp.set(node, lastAdded, dotProp.get(node, lastAdded) + content);
-                    }
+                    dotProp.set(node, lastAdded, dotProp.get(node, lastAdded) + content);
                 }
                 break;
             case tokens.asterisk:

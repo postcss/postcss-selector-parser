@@ -597,37 +597,167 @@ around it.
 [id=Bar   i  ] /* "   i  " */
 ```
 
-## `processor`
+## `Processor`
 
-### `process|processSync(css, [options])`
+### `ProcessorOptions`
 
-Processes the `css`, returning the parsed output. An async method is exposed
-as `process`.
+* `lossless` - When true, whitespace is preserved. Defaults to true.
+* `updateSelector` - When true, if any processor methods are passed a postcss
+  `Rule` node instead of a string, then that Rule's selector is updated
+  with the results of the processing.
+
+### `process|processSync(selectors, [options])`
+
+Processes the `selectors`, returning a string from the result of processing.
+
+Note: when the `updateSelector` option is set, the rule's selector
+will be updated with the resulting string.
+
+**Example:**
 
 ```js
+const parser = require("postcss-selector-parser");
 const processor = parser();
 
-const result = processor.processSync(' .class');
+let result = processor.processSync(' .class');
+console.log(result);
 // =>  .class
 
 // Asynchronous operation
-processor.process(' .class').then(result => /* ... */);
+let promise = processor.process(' .class').then(result => {
+    console.log(result)
+    // => .class
+});
 
 // To have the parser normalize whitespace values, utilize the options
-const result = processor.processSync('  .class  ', {lossless: false});
+result = processor.processSync('  .class  ', {lossless: false});
+console.log(result);
 // => .class
 
 // For better syntax errors, pass a PostCSS Rule node.
 const postcss = require('postcss');
-const rule = postcss.rule({selector: 'a'});
-const result = process.process(rule);
+rule = postcss.rule({selector: ' #foo    > a,  .class  '});
+processor.process(rule, {lossless: false, updateSelector: true}).then(result => {
+    console.log(result);
+    // => #foo>a,.class
+    console.log("rule:", rule.selector);
+    // => rule: #foo>a,.class
+})
 ```
 
 Arguments:
 
-* `css (string|object)`: Either a selector string or a PostCSS Rule node.
+* `selectors (string|postcss.Rule)`: Either a selector string or a PostCSS Rule
+  node.
 * `[options] (object)`: Process options
 
-Options:
 
-* `lossless (boolean)`: false to normalize the selector whitespace, defaults to true
+### `ast|astSync(selectors, [options])`
+
+Like `process()` and `processSync()` but after
+processing the `selectors` these methods return the `Root` node of the result
+instead of a string.
+
+Note: when the `updateSelector` option is set, the rule's selector
+will be updated with the resulting string.
+
+### `transform|transformSync(selectors, [options])`
+
+Like `process()` and `processSync()` but after
+processing the `selectors` these methods return the value returned by the
+processor callback.
+
+Note: when the `updateSelector` option is set, the rule's selector
+will be updated with the resulting string.
+
+### Error Handling Within Selector Processors
+
+The root node passed to the selector processor callback
+has a method `error(message, options)` that returns an
+error object. This method should always be used to raise
+errors relating to the syntax of selectors. The options
+to this method are passed to postcss's error constructor
+([documentation](http://api.postcss.org/Container.html#error)).
+
+#### Async Error Example
+
+```js
+let processor = (root) => {
+    return new Promise((resolve, reject) => {
+        root.walkClasses((classNode) => {
+            if (/^(.*)[-_]/.test(classNode.value)) {
+                let msg = "classes may not have underscores or dashes in them";
+                reject(root.error(msg, {
+                    index: classNode.sourceIndex + RegExp.$1.length + 1,
+                    word: classNode.value
+                }));
+            }
+        });
+        resolve();
+    });
+};
+
+const postcss = require("postcss");
+const parser = require("postcss-selector-parser");
+const selectorProcessor = parser(processor);
+const plugin = postcss.plugin('classValidator', (options) => {
+    return (root) => {
+        let promises = [];
+        root.walkRules(rule => {
+            promises.push(selectorProcessor.process(rule));
+        });
+        return Promise.all(promises);
+    };
+});
+postcss(plugin()).process(`
+.foo-bar {
+  color: red;
+}
+`.trim(), {from: 'test.css'}).catch((e) => console.error(e.toString()));
+
+// CssSyntaxError: classValidator: ./test.css:1:5: classes may not have underscores or dashes in them
+// 
+// > 1 | .foo-bar {
+//     |     ^
+//   2 |   color: red;
+//   3 | }
+```
+
+#### Synchronous Error Example
+
+```js
+let processor = (root) => {
+    root.walkClasses((classNode) => {
+        if (/.*[-_]/.test(classNode.value)) {
+            let msg = "classes may not have underscores or dashes in them";
+            throw root.error(msg, {
+                index: classNode.sourceIndex,
+                word: classNode.value
+            });
+        }
+    });
+};
+
+const postcss = require("postcss");
+const parser = require("postcss-selector-parser");
+const selectorProcessor = parser(processor);
+const plugin = postcss.plugin('classValidator', (options) => {
+    return (root) => {
+        root.walkRules(rule => {
+            selectorProcessor.processSync(rule);
+        });
+    };
+});
+postcss(plugin()).process(`
+.foo-bar {
+  color: red;
+}
+`.trim(), {from: 'test.css'}).catch((e) => console.error(e.toString()));
+
+// CssSyntaxError: classValidator: ./test.css:1:5: classes may not have underscores or dashes in them
+// 
+// > 1 | .foo-bar {
+//     |     ^
+//   2 |   color: red;
+//   3 | }
+```

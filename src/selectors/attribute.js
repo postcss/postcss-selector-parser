@@ -16,7 +16,9 @@ export default class Attribute extends Namespace {
             this.attribute,
         ];
 
-        if (this.operator) {
+        if (this.raws.operator) {
+            selector.push(this.raws.operator);
+        } else if (this.operator) {
             selector.push(this.operator);
         }
         if (this.value) {

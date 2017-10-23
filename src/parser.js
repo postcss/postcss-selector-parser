@@ -124,7 +124,11 @@ export default class Parser {
                 if (!lastAdded || this.content(next) === 'i') {
                     spaceBefore = content;
                 } else {
-                    dotProp.set(node, lastAdded, dotProp.get(node, lastAdded) + content);
+                    if (lastAdded === 'operator') {
+                        dotProp.set(node, `raws.${lastAdded}`, dotProp.get(node, lastAdded) + content);
+                    } else {
+                        dotProp.set(node, lastAdded, dotProp.get(node, lastAdded) + content);
+                    }
                 }
                 break;
             case tokens.asterisk:
@@ -205,7 +209,7 @@ export default class Parser {
                 if (node.value) {
                     return this.error('Unexpected "=" found; an operator was already defined.', {index: token[5]});
                 }
-                node.operator = node.operator ? `${node.operator}${content}` : content;
+                node.operator = node.operator ? node.operator + content : content;
                 lastAdded = 'operator';
                 break;
             case tokens.comment:

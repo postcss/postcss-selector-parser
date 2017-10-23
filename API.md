@@ -11,7 +11,7 @@ This is the module's main entry point.
 const parser = require('postcss-selector-parser');
 ```
 
-### `parser([transform])`
+### `parser([transform], [options])`
 
 Creates a new `processor` instance
 
@@ -37,6 +37,7 @@ const result = processor.processSync('*.class');
 Arguments:
 
 * `transform (function)`: Provide a function to work with the parsed AST.
+* `options (object)`: Provide default options for all calls on the returned `Processor`.
 
 ### `parser.attribute([props])`
 
@@ -601,10 +602,10 @@ around it.
 
 ### `ProcessorOptions`
 
-* `lossless` - When true, whitespace is preserved. Defaults to true.
-* `updateSelector` - When true, if any processor methods are passed a postcss
+* `lossless` - When `true`, whitespace is preserved. Defaults to `true`.
+* `updateSelector` - When `true`, if any processor methods are passed a postcss
   `Rule` node instead of a string, then that Rule's selector is updated
-  with the results of the processing.
+  with the results of the processing. Defaults to `true`.
 
 ### `process|processSync(selectors, [options])`
 

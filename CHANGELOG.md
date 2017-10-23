@@ -8,16 +8,35 @@
   no longer uses regular expressions to parse attribute selectors.
 * Added an async API (thanks to @jacobp100); the default `process` API is now
   async, and the sync API is now accessed through `processSync` instead.
+* `process()` and `processSync()` now return a string instead of the Processor
+  instance.
 * Tweaks handling of Less interpolation (thanks to @jwilsson).
 * Removes support for Node 0.12.
 
 ## Other changes
 
+* `ast()` and `astSync()` methods have been added to the `Processor`. These
+  return the `Root` node of the selectors after processing them.
+* `transform()` and `transformSync()` methods have been added to the
+  `Processor`. These return the value returned by the processor callback
+  after processing the selectors.
 * Set the parent when inserting a node (thanks to @chriseppstein).
 * Correctly adjust indices when using insertBefore/insertAfter (thanks to @tivac).
 * Fixes handling of namespaces with qualified tag selectors.
-* Now accepts a PostCSS rule node for better syntax errors.
+* `process`, `ast` and `transform` (and their sync variants) now accept a
+  `postcss` rule node. When provided, better errors are generated and selector
+  processing is automatically set back to the rule selector (unless the `updateSelector` option is set to `false`.)
 * Now more memory efficient when tokenizing selectors.
+
+### Upgrade hints
+
+The pattern of:
+
+`rule.selector = processor.process(rule.selector).result.toString();`
+
+is now:
+
+`processor.processSync(rule)`
 
 # 2.2.3
 

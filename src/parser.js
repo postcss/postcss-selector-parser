@@ -35,27 +35,39 @@ function getSource (startLine, startColumn, endLine, endColumn) {
 }
 
 export default class Parser {
-    constructor (input) {
-        this.input = input;
-        this.lossy = input.options.lossless === false;
+    constructor (rule, options = {}) {
+        this.rule = rule;
+        this.options = Object.assign({lossy: false, safe: false}, options);
         this.position = 0;
         this.root = new Root();
-        this.root.errorGenerator = (message, options) => this.input.error(message, options);
+        this.root.errorGenerator = this._errorGenerator();
+
 
         const selector = new Selector();
         this.root.append(selector);
         this.current = selector;
 
-        this.css = typeof input.css === 'string' ? input.css : input.css.selector;
+        this.css = typeof this.rule === 'string' ? this.rule : this.rule.selector;
 
-        if (this.lossy) {
+        if (this.options.lossy) {
             this.css = this.css.trim();
-            this.tokens = tokenize({safe: input.safe, css: this.css});
-        } else {
-            this.tokens = tokenize(Object.assign({}, input, {css: this.css}));
         }
+        this.tokens = tokenize({
+            css: this.css,
+            error: this._errorGenerator(),
+            safe: this.options.safe,
+        });
 
-        return this.loop();
+        this.loop();
+    }
+
+    _errorGenerator () {
+        return (message, errorOptions) => {
+            if (typeof this.rule === 'string') {
+                return new Error(message);
+            }
+            return this.rule.error(message, errorOptions);
+        };
     }
 
     attribute () {
@@ -106,7 +118,7 @@ export default class Parser {
                 ) {
                     return this.expected('attribute', token[5], content);
                 }
-                if (this.lossy) {
+                if (this.options.lossy) {
                     break;
                 }
                 if (!lastAdded || this.content(next) === 'i') {
@@ -168,7 +180,7 @@ export default class Parser {
                     dotProp.set(node, 'raws.unquoted', content);
                 } else if (content === 'i') {
                     node.insensitive = true;
-                    if (!this.lossy) {
+                    if (!this.options.lossy) {
                         lastAdded = 'raws.insensitive';
                         dotProp.set(node, lastAdded, `${spaceBefore}${content}`);
                         spaceBefore = '';
@@ -281,7 +293,7 @@ export default class Parser {
     }
 
     error (message, opts) {
-        throw this.input.error(message, opts); // eslint-disable-line new-cap
+        throw this.root.error(message, opts);
     }
 
     missingBackslash () {
@@ -620,7 +632,7 @@ export default class Parser {
     }
 
     parseNamespace (namespace) {
-        if (this.lossy && typeof namespace === 'string') {
+        if (this.options.lossy && typeof namespace === 'string') {
             const trimmed = namespace.trim();
             if (!trimmed.length) {
                 return true;
@@ -633,11 +645,11 @@ export default class Parser {
     }
 
     parseSpace (space, replacement = '') {
-        return this.lossy ? replacement : space;
+        return this.options.lossy ? replacement : space;
     }
 
     parseValue (value) {
-        if (!this.lossy || !value || typeof value !== 'string') {
+        if (!this.options.lossy || !value || typeof value !== 'string') {
             return value;
         }
         return value.trim();
@@ -645,7 +657,7 @@ export default class Parser {
 
     parseParenthesisToken (token) {
         const content = this.content(token);
-        if (!this.lossy) {
+        if (!this.options.lossy) {
             return content;
         }
 

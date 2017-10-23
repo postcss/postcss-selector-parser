@@ -115,11 +115,11 @@ test('Passing a rule works async', (t) => {
     })).process(rule)
     .then(newSel => {
         t.deepEqual(newSel, ".bar");
-        t.deepEqual(rule.selector, ".foo");
+        t.deepEqual(rule.selector, ".bar");
     });
 });
 
-test('Passing a rule with mutation works async', (t) => {
+test('Passing a rule with mutation disabled works async', (t) => {
     let rule = {selector: '.foo'};
     return parser((root) => new Promise((res) => {
         setTimeout(() => {
@@ -128,10 +128,10 @@ test('Passing a rule with mutation works async', (t) => {
             });
             res();
         }, 1);
-    })).process(rule, {updateSelector: true})
+    })).process(rule, {updateSelector: false})
     .then(newSel => {
         t.deepEqual(newSel, ".bar");
-        t.deepEqual(rule.selector, ".bar");
+        t.deepEqual(rule.selector, ".foo");
     });
 });
 

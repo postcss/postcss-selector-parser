@@ -1,33 +1,48 @@
-// / @ts-check
 import Parser from './parser';
 
 export default class Processor {
-    constructor (func) {
+    constructor (func, options) {
         this.func = func || function noop () {};
         this.funcRes = null;
+        this.options = options;
     }
 
-    _root (rule, err, options = {}) {
-        return new Parser({
-            css: rule,
-            error: err,
-            options,
-        });
+    _shouldUpdateSelector (rule, options = {}) {
+        let merged = Object.assign({}, this.options, options);
+        if (merged.updateSelector === false) {
+            return false;
+        } else {
+            return typeof rule !== "string";
+        }
+    }
+
+    _isLossy (options = {}) {
+        let merged = Object.assign({}, this.options, options);
+        if (merged.lossless === false) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    _root (rule, options = {}) {
+        let parser = new Parser(rule, this._parseOptions(options));
+        return parser.root;
+    }
+
+    _parseOptions (options) {
+        return {
+            lossy: this._isLossy(options),
+        };
     }
 
     _run (rule, options = {}) {
         return new Promise((resolve, reject) => {
-            function error (e, opts) {
-                if (typeof rule === 'string') {
-                    return new Error(e);
-                }
-                return rule.error(e, opts);
-            }
             try {
-                let root = this._root(rule, error, options);
+                let root = this._root(rule, options);
                 Promise.resolve(this.func(root)).then(transform => {
                     let string = undefined;
-                    if (options.updateSelector && typeof rule !== "string") {
+                    if (this._shouldUpdateSelector(rule, options)) {
                         string = root.toString();
                         rule.selector = string;
                     }
@@ -41,13 +56,7 @@ export default class Processor {
     }
 
     _runSync (rule, options = {}) {
-        function error (e, opts) {
-            if (typeof rule === 'string') {
-                return new Error(e);
-            }
-            return rule.error(e, opts);
-        }
-        let root = this._root(rule, error, options);
+        let root = this._root(rule, options);
         let transform = this.func(root);
         if (transform && typeof transform.then === "function") {
             throw new Error("Selector processor returned a promise to a synchronous call.");

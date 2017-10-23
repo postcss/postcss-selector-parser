@@ -26,7 +26,7 @@ export default function tokenize (input) {
         tokenType;
 
     function unclosed (what, fix) {
-        if ( input.safe ) {
+        if ( input.safe ) { // fyi: this is never set to true.
             css += fix;
             next = css.length - 1;
         } else {

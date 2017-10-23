@@ -7,19 +7,31 @@ test('attribute selector', '[href]', (t, tree) => {
 });
 
 test('attribute selector spaces (before)', '[  href]', (t, tree) => {
-    t.deepEqual(tree.nodes[0].nodes[0].attribute, '  href');
+    t.deepEqual(tree.nodes[0].nodes[0].attribute, 'href');
+    t.deepEqual(tree.nodes[0].nodes[0].spaces.attribute.before, '  ');
     t.deepEqual(tree.nodes[0].nodes[0].type, 'attribute');
     t.falsy(tree.nodes[0].nodes[0].quoted);
 });
 
 test('attribute selector spaces (after)', '[href  ]', (t, tree) => {
-    t.deepEqual(tree.nodes[0].nodes[0].attribute, 'href  ');
+    t.deepEqual(tree.nodes[0].nodes[0].attribute, 'href');
+    t.deepEqual(tree.nodes[0].nodes[0].spaces.attribute.after, '  ');
     t.deepEqual(tree.nodes[0].nodes[0].type, 'attribute');
     t.falsy(tree.nodes[0].nodes[0].quoted);
 });
 
-test('attribute selector spaces (both)', '[  href  ]', (t, tree) => {
-    t.deepEqual(tree.nodes[0].nodes[0].attribute, '  href  ');
+test('attribute selector spaces with namespace (both)', '[  foo|bar   ]', (t, tree) => {
+    t.deepEqual(tree.nodes[0].nodes[0].ns, 'foo');
+    t.deepEqual(tree.nodes[0].nodes[0].attribute, 'bar');
+    t.deepEqual(tree.nodes[0].nodes[0].spaces.attribute.before, '  ');
+    t.deepEqual(tree.nodes[0].nodes[0].spaces.attribute.after, '   ');
+    t.deepEqual(tree.nodes[0].nodes[0].type, 'attribute');
+    t.falsy(tree.nodes[0].nodes[0].quoted);
+});
+test('attribute selector spaces (both)', '[  href   ]', (t, tree) => {
+    t.deepEqual(tree.nodes[0].nodes[0].attribute, 'href');
+    t.deepEqual(tree.nodes[0].nodes[0].spaces.attribute.before, '  ');
+    t.deepEqual(tree.nodes[0].nodes[0].spaces.attribute.after, '   ');
     t.deepEqual(tree.nodes[0].nodes[0].type, 'attribute');
     t.falsy(tree.nodes[0].nodes[0].quoted);
 });
@@ -238,10 +250,14 @@ test('more multiple attribute selectors with quoted value containing multiple "=
 });
 
 test('spaces in attribute selectors', 'h1[  href  *=  "test"  ]', (t, tree) => {
-    t.deepEqual(tree.nodes[0].nodes[1].attribute, '  href  ');
-    t.deepEqual(tree.nodes[0].nodes[1].operator, '*=');
-    t.deepEqual(tree.nodes[0].nodes[1].raws.operator, '*=  ');
-    t.deepEqual(tree.nodes[0].nodes[1].value, '"test"  ');
+    let attr = tree.nodes[0].nodes[1];
+    t.deepEqual(attr.attribute, 'href');
+    t.deepEqual(attr.spaces.attribute.before, '  ');
+    t.deepEqual(attr.spaces.attribute.after, '  ');
+    t.deepEqual(attr.operator, '*=');
+    t.deepEqual(attr.spaces.operator.after, '  ');
+    t.deepEqual(attr.value, '"test"');
+    t.deepEqual(attr.spaces.value.after, '  ');
     t.truthy(tree.nodes[0].nodes[1].quoted);
     t.deepEqual(tree.nodes[0].nodes[1].raws.unquoted, 'test');
 });
@@ -249,11 +265,14 @@ test('spaces in attribute selectors', 'h1[  href  *=  "test"  ]', (t, tree) => {
 test('insensitive attribute selector 1', '[href="test" i]', (t, tree) => {
     t.deepEqual(tree.nodes[0].nodes[0].value, '"test"');
     t.deepEqual(tree.nodes[0].nodes[0].insensitive, true);
+    t.deepEqual(tree.nodes[0].nodes[0].insensitive, true);
 });
 
 test('insensitive attribute selector 2', '[href=TEsT i  ]', (t, tree) => {
     t.deepEqual(tree.nodes[0].nodes[0].value, 'TEsT');
-    t.deepEqual(tree.nodes[0].nodes[0].raws.insensitive, ' i  ');
+    t.deepEqual(tree.nodes[0].nodes[0].insensitive, true);
+    t.deepEqual(tree.nodes[0].nodes[0].spaces.value.after, ' ');
+    t.deepEqual(tree.nodes[0].nodes[0].spaces.insensitive.after, '  ');
 });
 
 test('insensitive attribute selector 3', '[href=test i]', (t, tree) => {
@@ -271,19 +290,38 @@ test('extraneous non-combinating whitespace', '  [href]   ,  [class]   ', (t, tr
 });
 
 test('comments within attribute selectors', '[href/* wow */=/* wow */test]', (t, tree) => {
-    t.deepEqual(tree.nodes[0].nodes[0].attribute, 'href/* wow */');
-    t.deepEqual(tree.nodes[0].nodes[0].operator, '=/* wow */');
+    t.deepEqual(tree.nodes[0].nodes[0].attribute, 'href');
+    t.deepEqual(tree.nodes[0].nodes[0].operator, '=');
+    t.deepEqual(tree.nodes[0].nodes[0].value, 'test');
+    t.deepEqual(tree.nodes[0].nodes[0].raws.attribute, 'href/* wow */');
+    t.deepEqual(tree.nodes[0].nodes[0].raws.operator, '=/* wow */');
     t.deepEqual(tree.nodes[0].nodes[0].value, 'test');
 });
 
 test('comments within attribute selectors (2)', '[/* wow */href=test/* wow */]', (t, tree) => {
-    t.deepEqual(tree.nodes[0].nodes[0].attribute, '/* wow */href');
+    t.deepEqual(tree.nodes[0].nodes[0].attribute, 'href');
     t.deepEqual(tree.nodes[0].nodes[0].operator, '=');
-    t.deepEqual(tree.nodes[0].nodes[0].value, 'test/* wow */');
+    t.deepEqual(tree.nodes[0].nodes[0].value, 'test');
+    t.deepEqual(tree.nodes[0].nodes[0].raws.spaces.attribute.before, '/* wow */');
+    t.deepEqual(tree.nodes[0].nodes[0].operator, '=');
+    t.deepEqual(tree.nodes[0].nodes[0].raws.value, 'test/* wow */');
 });
 
 test('comments within attribute selectors (3)', '[href=test/* wow */i]', (t, tree) => {
     t.deepEqual(tree.nodes[0].nodes[0].attribute, 'href');
-    t.deepEqual(tree.nodes[0].nodes[0].value, 'test/* wow */');
-    t.deepEqual(tree.nodes[0].nodes[0].insensitive, true);
+    t.deepEqual(tree.nodes[0].nodes[0].value, 'testi');
+    t.deepEqual(tree.nodes[0].nodes[0].raws.value, 'test/* wow */i');
+    t.falsy(tree.nodes[0].nodes[0].insensitive);
+});
+
+test('comments within attribute selectors (4)', '[href=test/* wow */ /*omg*/i/*bbq*/ /*whodoesthis*/]', (t, tree) => {
+    t.deepEqual(tree.nodes[0].nodes[0].attribute, 'href');
+    t.deepEqual(tree.nodes[0].nodes[0].value, 'test');
+    t.deepEqual(tree.nodes[0].nodes[0].raws.spaces.value.after, '/* wow */ /*omg*/');
+    t.truthy(tree.nodes[0].nodes[0].insensitive);
+    t.deepEqual(tree.nodes[0].nodes[0].raws.spaces.insensitive.after, '/*bbq*/ /*whodoesthis*/');
+});
+
+test('attributes with escapes', '[ng\\:cloak]', (t, tree) => {
+    t.deepEqual(tree.toString(), '[ng\\:cloak]');
 });

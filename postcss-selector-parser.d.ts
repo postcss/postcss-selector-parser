@@ -132,22 +132,26 @@ declare namespace parser {
             column: number
         }
     }
+    interface SpaceAround {
+      before: string;
+      after: string;
+    }
+    interface Spaces extends SpaceAround {
+      [spaceType: string]: string | Partial<SpaceAround> | undefined;
+    }
     interface NodeOptions<Value = string> {
         value: Value;
-        spaces?: {
-            before: string;
-            after: string;
-        }
+        spaces?: Partial<Spaces>;
         source?: NodeSource;
     }
-    interface Base<Value extends string | undefined = string> {
+    interface Base<
+        Value extends string | undefined = string,
+        ParentType extends Container | undefined = Container | undefined
+    > {
         type: keyof NodeTypes;
-        parent?: Selector;
+        parent: ParentType;
         value: Value;
-        spaces?: {
-            before: string;
-            after: string;
-        }
+        spaces: Spaces;
         source?: NodeSource;
         remove(): Node;
         replaceWith(...nodes: Node[]): Node;
@@ -155,7 +159,6 @@ declare namespace parser {
         prev(): Node;
         clone(opts: {[override: string]:any}): Node;
         toString(): string;
-
     }
     interface ContainerOptions extends NodeOptions {
         nodes?: Array<Node>;
@@ -195,17 +198,20 @@ declare namespace parser {
     }
     function isContainer(node: any): node is Root | Selector | Pseudo;
 
-    interface NamespaceOptions extends NodeOptions {
-        /** Namespace prefix including the | */
-        ns?: string;
-        /** Namespace prefix excluding the | */
+    interface NamespaceOptions<Value extends string | undefined = string> extends NodeOptions<Value> {
         namespace?: string;
     }
     interface Namespace<Value extends string | undefined = string> extends Base<Value> {
-        /** Namespace prefix including the | */
-        readonly ns: string;
-        /** Namespace prefix excluding the | */
-        readonly namespace: string;
+        /** alias for namespace */
+        ns: string;
+        /**
+         *  namespace prefix.
+         */
+        namespace: string;
+        /**
+         * If a namespace exists, prefix the value provided with it, separated by |.
+         */
+        qualifiedName(value: string): string;
     }
     function isNamespace(node: any): node is ClassName | Attribute | Tag;
 
@@ -238,25 +244,61 @@ declare namespace parser {
     function className(opts: NamespaceOptions): ClassName;
     function isClassName(node: any): node is ClassName;
 
-    interface AttributeOptions extends NodeOptions {
+    type AttributeOperator = "=" | "~=" | "|=" | "^=" | "$=" | "*=";
+    interface AttributeOptions extends NamespaceOptions<string | undefined> {
         attribute: string;
-        operator: string;
+        operator?: AttributeOperator;
         insensitive?: boolean;
-        ns?: string;
-        raws?: {
-          insensitive?: boolean;
+        quoted?: boolean;
+        spaces?: {
+            before?: string;
+            after?: string;
+            attribute?: Partial<SpaceAround>;
+            operator?: Partial<SpaceAround>;
+            value?: Partial<SpaceAround>;
+            insensitive?: Partial<SpaceAround>;
+        }
+        raws: {
+            unquoted?: string;
+            attribute?: string;
+            operator?: string;
+            value?: string;
+            insensitive?: string;
+            spaces?: {
+                attribute?: Partial<Spaces>;
+                operator?: Partial<Spaces>;
+                value?: Partial<Spaces>;
+                insensitive?: Partial<Spaces>;
+            }
         };
     }
-    type AttributeOperator = "=" | "~=" | "|=" | "^=" | "$=" | "*=";
     interface Attribute extends Namespace<string | undefined> {
         type: "attribute";
         attribute: string;
-        operator: AttributeOperator | undefined;
+        operator?: AttributeOperator;
         insensitive?: boolean;
+        quoted?: boolean;
+        spaces: {
+            before: string;
+            after: string;
+            attribute?: Partial<Spaces>;
+            operator?: Partial<Spaces>;
+            value?: Partial<Spaces>;
+            insensitive?: Partial<Spaces>;
+        }
         raws: {
-          insensitive?: boolean;
+            unquoted?: string;
+            attribute?: string;
+            operator?: string;
+            value?: string;
+            insensitive?: string;
+            spaces?: {
+                attribute?: Partial<Spaces>;
+                operator?: Partial<Spaces>;
+                value?: Partial<Spaces>;
+                insensitive?: Partial<Spaces>;
+            }
         };
-        toString(): string;
     }
     function attribute(opts: AttributeOptions): Attribute;
     function isAttribute(node: any): node is Attribute;

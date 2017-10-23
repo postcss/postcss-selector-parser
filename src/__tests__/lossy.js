@@ -23,7 +23,7 @@ ava('classes, extraneous spaces', testLossy, '  .h1   ,  .h2   ', '.h1,.h2');
 ava('ids, extraneous spaces', testLossy, '  #h1   ,  #h2   ', '#h1,#h2');
 
 ava('attribute, spaces in selector', testLossy, 'h1[  href  *=  "test"  ]', 'h1[href*="test"]');
-ava('attribute, insensitive flag 1', testLossy, '[href="test" i  ]', '[href="test" i]');
+ava('attribute, insensitive flag 1', testLossy, '[href="test" i  ]', '[href="test"i]');
 ava('attribute, insensitive flag 2', testLossy, '[href=TEsT i  ]', '[href=TEsT i]');
 ava('attribute, insensitive flag 3', testLossy, '[href=test i  ]', '[href=test i]');
 ava('attribute, extreneous whitespace', testLossy, '  [href]   ,  [class]   ', '[href],[class]');

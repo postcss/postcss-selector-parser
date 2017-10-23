@@ -104,6 +104,7 @@ export default class Parser {
         let spaceBefore = '';
         let commentBefore = '';
         let lastAdded = null;
+        let spaceAfterMeaningfulToken = false;
 
         while (pos < len) {
             const token = attr[pos];
@@ -118,15 +119,21 @@ export default class Parser {
                 ) {
                     return this.expected('attribute', token[5], content);
                 }
+                spaceAfterMeaningfulToken = true;
                 if (this.options.lossy) {
                     break;
                 }
-                if (!lastAdded || this.content(next) === 'i') {
-                    spaceBefore = content;
-                } else if (lastAdded === 'operator') {
-                    dotProp.set(node, `raws.${lastAdded}`, dotProp.get(node, lastAdded) + content);
+                if (lastAdded) {
+                    let spaceProp = `spaces.${lastAdded}.after`;
+                    dotProp.set(node, spaceProp, dotProp.get(node, spaceProp, '') + content);
+                    let commentProp = `raws.spaces.${lastAdded}.after`;
+                    let existingComment = dotProp.get(node, commentProp);
+                    if (existingComment) {
+                        dotProp.set(node, commentProp, existingComment + content);
+                    }
                 } else {
-                    dotProp.set(node, lastAdded, dotProp.get(node, lastAdded) + content);
+                    spaceBefore = spaceBefore + content;
+                    commentBefore = commentBefore + content;
                 }
                 break;
             case tokens.asterisk:
@@ -134,10 +141,18 @@ export default class Parser {
                     node.operator = content;
                     lastAdded = 'operator';
                 } else if (!node.namespace && next) {
-                    node.namespace = `${this.parseSpace(spaceBefore)}${content}`;
+                    if (spaceBefore) {
+                        dotProp.set(node, 'spaces.attribute.before', spaceBefore);
+                        spaceBefore = '';
+                    }
+                    if (commentBefore) {
+                        dotProp.set(node, 'raws.spaces.attribute.before', spaceBefore);
+                        commentBefore = '';
+                    }
+                    node.namespace = content;
                     lastAdded = 'namespace';
-                    spaceBefore = '';
                 }
+                spaceAfterMeaningfulToken = false;
                 break;
             case tokens.dollar:
             case tokens.caret:
@@ -145,6 +160,7 @@ export default class Parser {
                     node.operator = content;
                     lastAdded = 'operator';
                 }
+                spaceAfterMeaningfulToken = false;
                 break;
             case tokens.combinator:
                 if (content === '~' && next[0] === tokens.equals) {
@@ -152,6 +168,7 @@ export default class Parser {
                     lastAdded = 'operator';
                 }
                 if (content !== '|') {
+                    spaceAfterMeaningfulToken = false;
                     break;
                 }
                 if (next[0] === tokens.equals) {
@@ -160,6 +177,7 @@ export default class Parser {
                 } else if (!node.namespace && !node.attribute) {
                     node.namespace = true;
                 }
+                spaceAfterMeaningfulToken = false;
                 break;
             case tokens.word:
                 if (
@@ -172,22 +190,41 @@ export default class Parser {
                     node.namespace = content;
                     lastAdded = 'namespace';
                 } else if (!node.attribute) {
-                    node.attribute = `${this.parseSpace(spaceBefore)}${commentBefore}${content}`;
+                    if (spaceBefore) {
+                        dotProp.set(node, 'spaces.attribute.before', spaceBefore);
+                        spaceBefore = '';
+                    }
+                    if (commentBefore) {
+                        dotProp.set(node, 'raws.spaces.attribute.before', commentBefore);
+                        commentBefore = '';
+                    }
+                    node.attribute = content;
                     lastAdded = 'attribute';
-                    spaceBefore = '';
-                    commentBefore = '';
                 } else if (!node.value) {
                     node.value = content;
                     lastAdded = 'value';
                     dotProp.set(node, 'raws.unquoted', content);
                 } else if (content === 'i') {
-                    node.insensitive = true;
-                    if (!this.options.lossy) {
-                        lastAdded = 'raws.insensitive';
-                        dotProp.set(node, lastAdded, `${spaceBefore}${content}`);
-                        spaceBefore = '';
+                    if (node.value && (node.quoted || spaceAfterMeaningfulToken)) {
+                        node.insensitive = true;
+                        lastAdded = 'insensitive';
+                        if (spaceBefore) {
+                            dotProp.set(node, `spaces.insensitive.before`, spaceBefore);
+                            spaceBefore = '';
+                        }
+                        if (commentBefore) {
+                            dotProp.set(node, `raws.spaces.insensitive.before`, commentBefore);
+                            commentBefore = '';
+                        }
+                    } else if (node.value) {
+                        lastAdded = 'value';
+                        node.value += 'i';
+                        if (node.raws.value) {
+                            node.raws.value += 'i';
+                        }
                     }
                 }
+                spaceAfterMeaningfulToken = false;
                 break;
             case tokens.str:
                 if (!node.attribute || !node.operator) {
@@ -199,6 +236,7 @@ export default class Parser {
                 node.quoted = true;
                 lastAdded = 'value';
                 dotProp.set(node, 'raws.unquoted', content.slice(1, -1));
+                spaceAfterMeaningfulToken = false;
                 break;
             case tokens.equals:
                 if (!node.attribute) {
@@ -209,12 +247,19 @@ export default class Parser {
                 }
                 node.operator = node.operator ? node.operator + content : content;
                 lastAdded = 'operator';
+                spaceAfterMeaningfulToken = false;
                 break;
             case tokens.comment:
                 if (lastAdded) {
-                    dotProp.set(node, lastAdded, dotProp.get(node, lastAdded) + content);
+                    if (spaceAfterMeaningfulToken || (next && next[0] === tokens.space)) {
+                        let lastComment = dotProp.get(node, `raws.spaces.${lastAdded}.after`, dotProp.get(node, `spaces.${lastAdded}.after`, ''));
+                        dotProp.set(node, `raws.spaces.${lastAdded}.after`, lastComment + content);
+                    } else {
+                        let lastValue = dotProp.get(node, `raws.${lastAdded}`, dotProp.get(node, lastAdded, ''));
+                        dotProp.set(node, `raws.${lastAdded}`, lastValue + content);
+                    }
                 } else {
-                    commentBefore = content;
+                    commentBefore = commentBefore + content;
                 }
                 break;
             default:

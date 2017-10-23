@@ -28,11 +28,10 @@ let cloneNode = function (obj, parent) {
 
 export default class {
     constructor (opts = {}) {
-        for (let key in opts) {
-            this[key] = opts[key];
-        }
-        let {spaces: {before = '', after = ''} = {}} = opts;
-        this.spaces = {before, after};
+        Object.assign(this, opts);
+        this.spaces = this.spaces || {};
+        this.spaces.before = this.spaces.before || '';
+        this.spaces.after = this.spaces.after || '';
     }
 
     remove () {

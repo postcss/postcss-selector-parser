@@ -1,6 +1,6 @@
 {
   "name": "postcss-selector-parser",
-  "version": "3.0.0-rc.0",
+  "version": "3.0.0",
   "devDependencies": {
     "ava": "^0.20.0",
     "babel-cli": "^6.4.0",
@@ -46,11 +46,18 @@
     "node": ">=4"
   },
   "homepage": "https://github.com/postcss/postcss-selector-parser",
-  "author": {
-    "name": "Ben Briggs",
-    "email": "beneb.info@gmail.com",
-    "url": "http://beneb.info"
-  },
+  "contributors": [
+    {
+      "name": "Ben Briggs",
+      "email": "beneb.info@gmail.com",
+      "url": "http://beneb.info"
+    },
+    {
+      "name": "Chris Eppstein",
+      "email": "chris@eppsteins.net",
+      "url": "http://twitter.com/chriseppstein"
+    }
+  ],
   "repository": "postcss/postcss-selector-parser",
   "ava": {
     "require": "babel-register",

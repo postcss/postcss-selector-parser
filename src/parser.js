@@ -140,7 +140,7 @@ export default class Parser {
                 if (next[0] === tokens.equals) {
                     node.operator = content;
                     lastAdded = 'operator';
-                } else if (!node.namespace && next) {
+                } else if ((!node.namespace || (lastAdded === "namespace" && !spaceAfterMeaningfulToken)) && next) {
                     if (spaceBefore) {
                         dotProp.set(node, 'spaces.attribute.before', spaceBefore);
                         spaceBefore = '';
@@ -149,7 +149,11 @@ export default class Parser {
                         dotProp.set(node, 'raws.spaces.attribute.before', spaceBefore);
                         commentBefore = '';
                     }
-                    node.namespace = content;
+                    node.namespace = (node.namespace || "") + content;
+                    let rawValue = dotProp.get(node, "raws.namespace");
+                    if (rawValue) {
+                        node.raws.namespace += content;
+                    }
                     lastAdded = 'namespace';
                 }
                 spaceAfterMeaningfulToken = false;
@@ -183,13 +187,13 @@ export default class Parser {
                 if (
                     next &&
                     this.content(next) === '|' &&
-                    (attr[pos + 2] && attr[pos + 2][0] !== tokens.equals) &&
+                    (attr[pos + 2] && attr[pos + 2][0] !== tokens.equals) && // this look-ahead probably fails with comment nodes involved.
                     !node.operator &&
                     !node.namespace
                 ) {
                     node.namespace = content;
                     lastAdded = 'namespace';
-                } else if (!node.attribute) {
+                } else if (!node.attribute || (lastAdded === "attribute" && !spaceAfterMeaningfulToken)) {
                     if (spaceBefore) {
                         dotProp.set(node, 'spaces.attribute.before', spaceBefore);
                         spaceBefore = '';
@@ -198,12 +202,20 @@ export default class Parser {
                         dotProp.set(node, 'raws.spaces.attribute.before', commentBefore);
                         commentBefore = '';
                     }
-                    node.attribute = content;
+                    node.attribute = (node.attribute || "") + content;
+                    let rawValue = dotProp.get(node, "raws.attribute");
+                    if (rawValue) {
+                        node.raws.attribute += content;
+                    }
                     lastAdded = 'attribute';
-                } else if (!node.value) {
-                    node.value = content;
+                } else if (!node.value || (lastAdded === "value" && !spaceAfterMeaningfulToken)) {
+                    node.value = (node.value || "") + content;
+                    let rawValue = dotProp.get(node, "raws.value");
+                    if (rawValue) {
+                        node.raws.value += content;
+                    }
                     lastAdded = 'value';
-                    dotProp.set(node, 'raws.unquoted', content);
+                    dotProp.set(node, 'raws.unquoted', dotProp.get(node, 'raws.unquoted', '') + content);
                 } else if (content === 'i') {
                     if (node.value && (node.quoted || spaceAfterMeaningfulToken)) {
                         node.insensitive = true;

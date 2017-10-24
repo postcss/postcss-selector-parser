@@ -314,15 +314,18 @@ test('comments within attribute selectors (3)', '[href=test/* wow */i]', (t, tre
     t.falsy(tree.nodes[0].nodes[0].insensitive);
 });
 
-test('comments within attribute selectors (4)', '[href=test/* wow */ /*omg*/i/*bbq*/ /*whodoesthis*/]', (t, tree) => {
+test('comments within attribute selectors (4)', '[ /*before*/ href /* after-attr */ = /* after-operator */ te/*inside-value*/st/* wow */ /*omg*/i/*bbq*/ /*whodoesthis*/]', (t, tree) => {
     let attr = tree.nodes[0].nodes[0];
+    console.log(attr.spaces);
+    console.log(attr.raws);
     t.deepEqual(attr.attribute, 'href');
     t.deepEqual(attr.value, 'test');
+    t.deepEqual(attr.raws.unquoted, 'test');
     t.deepEqual(attr.raws.spaces.value.after, '/* wow */ /*omg*/');
     t.truthy(attr.insensitive);
-    t.deepEqual(attr.offsetOf("attribute"), 1);
-    t.deepEqual(attr.offsetOf("operator"), 5);
-    t.deepEqual(attr.offsetOf("insensitive"), 27);
+    t.deepEqual(attr.offsetOf("attribute"), 13);
+    t.deepEqual(attr.offsetOf("operator"), 35);
+    t.deepEqual(attr.offsetOf("insensitive"), 95);
     t.deepEqual(attr.raws.spaces.insensitive.after, '/*bbq*/ /*whodoesthis*/');
 });
 

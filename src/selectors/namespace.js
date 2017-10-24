@@ -20,16 +20,25 @@ export default class Namespace extends Node {
         }
     }
 
-    qualifiedName (value) {
-        let qName = [String(value)];
+    get namespaceString () {
         if (this.namespace) {
             let ns = this.raws && this.raws.namespace || this.namespace;
             if (ns === true) {
-                ns = '';
+                return '';
+            } else {
+                return ns;
             }
-            qName.unshift(ns);
+        } else {
+            return '';
         }
-        return qName.join("|");
+    }
+
+    qualifiedName (value) {
+        if (this.namespace) {
+            return `${this.namespaceString}|${value}`;
+        } else {
+            return value;
+        }
     }
 
     toString () {

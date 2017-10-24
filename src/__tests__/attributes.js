@@ -315,11 +315,15 @@ test('comments within attribute selectors (3)', '[href=test/* wow */i]', (t, tre
 });
 
 test('comments within attribute selectors (4)', '[href=test/* wow */ /*omg*/i/*bbq*/ /*whodoesthis*/]', (t, tree) => {
-    t.deepEqual(tree.nodes[0].nodes[0].attribute, 'href');
-    t.deepEqual(tree.nodes[0].nodes[0].value, 'test');
-    t.deepEqual(tree.nodes[0].nodes[0].raws.spaces.value.after, '/* wow */ /*omg*/');
-    t.truthy(tree.nodes[0].nodes[0].insensitive);
-    t.deepEqual(tree.nodes[0].nodes[0].raws.spaces.insensitive.after, '/*bbq*/ /*whodoesthis*/');
+    let attr = tree.nodes[0].nodes[0];
+    t.deepEqual(attr.attribute, 'href');
+    t.deepEqual(attr.value, 'test');
+    t.deepEqual(attr.raws.spaces.value.after, '/* wow */ /*omg*/');
+    t.truthy(attr.insensitive);
+    t.deepEqual(attr.offsetOf("attribute"), 1);
+    t.deepEqual(attr.offsetOf("operator"), 5);
+    t.deepEqual(attr.offsetOf("insensitive"), 27);
+    t.deepEqual(attr.raws.spaces.insensitive.after, '/*bbq*/ /*whodoesthis*/');
 });
 
 // test('attributes with escapes', '[ng\\:cloak]', (t, tree) => {

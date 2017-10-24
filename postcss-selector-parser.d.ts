@@ -143,6 +143,7 @@ declare namespace parser {
         value: Value;
         spaces?: Partial<Spaces>;
         source?: NodeSource;
+        sourceIndex?: number;
     }
     interface Base<
         Value extends string | undefined = string,
@@ -153,6 +154,7 @@ declare namespace parser {
         value: Value;
         spaces: Spaces;
         source?: NodeSource;
+        sourceIndex: number;
         remove(): Node;
         replaceWith(...nodes: Node[]): Node;
         next(): Node;
@@ -199,19 +201,23 @@ declare namespace parser {
     function isContainer(node: any): node is Root | Selector | Pseudo;
 
     interface NamespaceOptions<Value extends string | undefined = string> extends NodeOptions<Value> {
-        namespace?: string;
+        namespace?: string | true;
     }
     interface Namespace<Value extends string | undefined = string> extends Base<Value> {
         /** alias for namespace */
-        ns: string;
+        ns: string | true;
         /**
          *  namespace prefix.
          */
-        namespace: string;
+        namespace: string | true;
         /**
          * If a namespace exists, prefix the value provided with it, separated by |.
          */
         qualifiedName(value: string): string;
+        /**
+         * A string representing the namespace suitable for output.
+         */
+        readonly namespaceString: string;
     }
     function isNamespace(node: any): node is ClassName | Attribute | Tag;
 
@@ -299,6 +305,25 @@ declare namespace parser {
                 insensitive?: Partial<Spaces>;
             }
         };
+        /**
+         * The attribute name after having been qualified with a namespace.
+         */
+        readonly qualifiedAttribute: string;
+        /**
+         * returns the offset of the attribute part specified relative to the
+         * start of the node of the output string.
+         *
+         * * "ns" - alias for "namespace"
+         * * "namespace" - the namespace if it exists.
+         * * "attribute" - the attribute name
+         * * "attributeNS" - the start of the attribute or its namespace
+         * * "operator" - the match operator of the attribute
+         * * "value" - The value (string or identifier)
+         * * "insensitive" - the case insensitivity flag;
+         * @param part One of the possible values inside an attribute.
+         * @returns -1 if the name is invalid or the value doesn't exist in this attribute.
+         */
+        offsetOf(part: "ns" | "namespace" | "attribute" | "attributeNS" | "operator" | "value" | "insensitive"): number;
     }
     function attribute(opts: AttributeOptions): Attribute;
     function isAttribute(node: any): node is Attribute;

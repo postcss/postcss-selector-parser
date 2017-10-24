@@ -6,6 +6,7 @@ export default class Attribute extends Namespace {
         super(opts);
         this.type = ATTRIBUTE;
         this.raws = this.raws || {};
+        this._constructed = true;
     }
 
     get qualifiedAttribute () {
@@ -14,6 +15,61 @@ export default class Attribute extends Namespace {
 
     get insensitiveFlag () {
         return this.insensitive ? 'i' : '';
+    }
+
+    get value () {
+        return this._value;
+    }
+
+    set value (v) {
+        this._value = v;
+        if (this._constructed) {
+            delete this.raws.value;
+        }
+    }
+
+    get value () {
+        return this._value;
+    }
+
+    set value (v) {
+        this._value = v;
+        if (this._constructed) {
+            delete this.raws.value;
+        }
+    }
+
+    get namespace () {
+        return this._namespace;
+    }
+
+    set namespace (v) {
+        this._namespace = v;
+        if (this._constructed) {
+            delete this.raws.namespace;
+        }
+    }
+
+    get namespace () {
+        return this._namespace;
+    }
+
+    set namespace (v) {
+        this._namespace = v;
+        if (this._constructed) {
+            delete this.raws.namespace;
+        }
+    }
+
+    get attribute () {
+        return this._attribute;
+    }
+
+    set attribute (v) {
+        this._attribute = v;
+        if (this._constructed) {
+            delete this.raws.attibute;
+        }
     }
 
     _spacesFor (name) {

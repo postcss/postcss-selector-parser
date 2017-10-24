@@ -576,6 +576,30 @@ Remains `undefined` if there is no attribute value.
 [href] /* undefined */
 ```
 
+### `attribute.qualifiedAttribute`
+
+Returns the attribute name qualified with the namespace if one is given.
+
+### `attribute.offsetOf(part)`
+
+ Returns the offset of the attribute part specified relative to the
+ start of the node of the output string. This is useful in raising
+ error messages about a specific part of the attribute, especially
+ in combination with `attribute.sourceIndex`.
+
+ Returns `-1` if the name is invalid or the value doesn't exist in this
+ attribute.
+
+ The legal values for `part` are:
+
+ * `"ns"` - alias for "namespace"
+ * `"namespace"` - the namespace if it exists.
+ * `"attribute"` - the attribute name
+ * `"attributeNS"` - the start of the attribute or its namespace
+ * `"operator"` - the match operator of the attribute
+ * `"value"` - The value (string or identifier)
+ * `"insensitive"` - the case insensitivity flag
+
 ### `attribute.raws.unquoted`
 
 Returns the unquoted content of the attribute's value.
@@ -588,14 +612,62 @@ Remains `undefined` if there is no attribute value.
 [href] /* undefined */
 ```
 
-### `attribute.raws.insensitive`
+### `attribute.spaces`
 
-If there is an `i` specifying case insensitivity, returns that `i` along with the whitespace
-around it.
+Like `node.spaces` with the `before` and `after` values containing the spaces
+around the element, the parts of the attribute can also have spaces before
+and after them. The for each of `attribute`, `operator`, `value` and
+`insensitive` there is corresponding property of the same nam in
+`node.spaces` that has an optional `before` or `after` string containing only
+whitespace.
 
-```css
-[id=Bar i ] /* " i " */
-[id=Bar   i  ] /* "   i  " */
+Note that corresponding values in `attributes.raws.spaces` contain values
+including any comments. If set, these values will override the
+`attribute.spaces` value. Take care to remove them if changing
+`attribute.spaces`.
+
+### `attribute.raws`
+
+The raws object stores comments and other information necessary to re-render
+the node exactly as it was in the source.
+
+If a comment is embedded within the identifiers for the `namespace`, `attribute`
+or `value` then a property is placed in the raws for that value containing the full source of the propery including comments.
+
+If a comment is embedded within the space between parts of the attribute
+then the raw for that space is set accordingly.
+
+Setting an attribute's property `raws` value to be deleted.
+
+For now, changing the spaces required also updating or removing any of the 
+raws values that override them.
+
+Example: `[ /*before*/ href /* after-attr */ = /* after-operator */ te/*inside-value*/st/* wow */ /*omg*/i/*bbq*/ /*whodoesthis*/]` would parse as:
+
+```js
+{
+  attribute: "href",
+  operatator: "=",
+  value: "test",
+  spaces: {
+    before: '',
+    after: '',
+    attribute: { before: '  ', after: '  ' },
+    operator: { after: '  ' },
+    value: { after: ' ' },
+    insensitive: { after: ' ' }
+  },
+  raws: {
+    spaces: {
+      attribute: { before: ' /*before*/ ', after: ' /* after-attr */ ' },
+      operator: { after: ' /* after-operator */ ' },
+      value: { after: '/* wow */ /*omg*/' },
+      insensitive: { after: '/*bbq*/ /*whodoesthis*/' }
+    },
+    unquoted: 'test',
+    value: 'te/*inside-value*/st'
+  }
+}
 ```
 
 ## `Processor`

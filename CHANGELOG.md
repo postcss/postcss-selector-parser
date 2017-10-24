@@ -1,3 +1,11 @@
+# 3.1.0
+
+* Fixed numerous bugs in attribute nodes relating to the handling of comments
+  and whitespace. There's significant changes to `attrNode.spaces` and `attrNode.raws` since the `3.0.0` release.
+* Added `Attribute#offsetOf(part)` to get the offset location of
+  attribute parts like `"operator"` and `"value"`. This is most
+  often added to `Attribute#sourceIndex` for error reporting.
+
 # 3.0.0
 
 ## Breaking changes

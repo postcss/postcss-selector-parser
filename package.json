@@ -28,7 +28,8 @@
     "API.md",
     "CHANGELOG.md",
     "LICENSE-MIT",
-    "dist"
+    "dist",
+    "postcss-selector-parser.d.ts"
   ],
   "scripts": {
     "pretest": "eslint src",

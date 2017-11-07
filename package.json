@@ -1,6 +1,6 @@
 {
   "name": "postcss-selector-parser",
-  "version": "3.1.0",
+  "version": "3.1.1",
   "devDependencies": {
     "ava": "^0.20.0",
     "babel-cli": "^6.4.0",
@@ -28,7 +28,8 @@
     "API.md",
     "CHANGELOG.md",
     "LICENSE-MIT",
-    "dist"
+    "dist",
+    "postcss-selector-parser.d.ts"
   ],
   "scripts": {
     "pretest": "eslint src",

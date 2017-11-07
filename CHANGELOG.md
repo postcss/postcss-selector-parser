@@ -1,3 +1,7 @@
+# 3.1.1
+
+* Fix: typescript definitions weren't in the published package.
+
 # 3.1.0
 
 * Fixed numerous bugs in attribute nodes relating to the handling of comments

@@ -2,7 +2,7 @@
   "name": "postcss-selector-parser",
   "version": "3.1.1",
   "devDependencies": {
-    "ava": "^0.20.0",
+    "ava": "^0.24.0",
     "babel-cli": "^6.4.0",
     "babel-core": "^6.4.0",
     "babel-plugin-add-module-exports": "^0.2.0",
@@ -19,7 +19,7 @@
     "eslint-plugin-import": "^1.10.2",
     "glob": "^7.0.3",
     "minimist": "^1.2.0",
-    "nyc": "^10.0.0",
+    "nyc": "^11.4.1",
     "postcss": "^6.0.6"
   },
   "main": "dist/index.js",

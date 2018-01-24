@@ -2,6 +2,24 @@ import test from 'ava';
 import parser from '..';
 import {parse} from './util/helpers';
 
+test('container#append', (t) => {
+    let out = parse('h1', (selectors) => {
+        let selector = selectors.first;
+        let clone = selector.first.clone({value: 'h2'});
+        selectors.append(clone);
+    });
+    t.deepEqual(out, 'h1,h2');
+});
+
+test('container#prepend', (t) => {
+    let out = parse('h2', (selectors) => {
+        let selector = selectors.first;
+        let clone = selector.first.clone({value: 'h1'});
+        selectors.prepend(clone);
+    });
+    t.deepEqual(out, 'h1,h2');
+});
+
 test('container#each', (t) => {
     let str = '';
     parse('h1, h2:not(h3, h4)', (selectors) => {
@@ -30,6 +48,19 @@ test('container#each (safe iteration)', (t) => {
     t.deepEqual(out, '.b,.x,.a,.b, .y,.a');
 });
 
+test('container#each (early exit)', (t) => {
+    let str = '';
+    parse('h1, h2, h3, h4', (selectors) => {
+        const eachReturn = selectors.each((selector) => {
+            const tag = selector.first.value;
+            str += tag;
+            return tag !== 'h2';
+        });
+        t.false(eachReturn);
+    });
+    t.deepEqual(str, 'h1h2');
+});
+
 test('container#walk', (t) => {
     let str = '';
     parse('h1, h2:not(h3, h4)', (selectors) => {
@@ -52,6 +83,21 @@ test('container#walk (safe iteration)', (t) => {
         });
     });
     t.deepEqual(out, '[class] + [href] :not(.green)');
+});
+
+test('container#walk (early exit)', (t) => {
+    let str = '';
+    parse('h1, h2:not(h3, h4)', (selectors) => {
+        const walkReturn = selectors.walk((selector) => {
+            if (selector.type === 'tag') {
+                const tag = selector.value;
+                str += tag;
+                return tag !== 'h3';
+            }
+        });
+        t.false(walkReturn);
+    });
+    t.deepEqual(str, 'h1h2h3');
 });
 
 test('container#walkAttribute', (t) => {

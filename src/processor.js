@@ -41,9 +41,9 @@ export default class Processor {
             try {
                 let root = this._root(rule, options);
                 Promise.resolve(this.func(root)).then(transform => {
-                    let string = undefined;
+                    let string = root.toString();
                     if (this._shouldUpdateSelector(rule, options)) {
-                        string = root.toString();
+                        // string = root.toString();
                         rule.selector = string;
                     }
                     return {transform, root, string};
@@ -61,9 +61,9 @@ export default class Processor {
         if (transform && typeof transform.then === "function") {
             throw new Error("Selector processor returned a promise to a synchronous call.");
         }
-        let string = undefined;
+        let string = root.toString();
         if (options.updateSelector && typeof rule !== "string") {
-            string = root.toString();
+            // string = root.toString();
             rule.selector = string;
         }
         return {transform, root, string};

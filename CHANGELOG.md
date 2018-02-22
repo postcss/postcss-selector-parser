@@ -1,3 +1,7 @@
+# 3.1.2
+
+* Fix: Removed dot-prop dependency since it's no longer written in es5.
+
 # 3.1.1
 
 * Fix: typescript definitions weren't in the published package.

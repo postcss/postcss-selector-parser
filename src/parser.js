@@ -1,4 +1,3 @@
-import dotProp from 'dot-prop';
 import indexesOf from 'indexes-of';
 import uniq from 'uniq';
 
@@ -32,6 +31,32 @@ function getSource (startLine, startColumn, endLine, endColumn) {
             column: endColumn,
         },
     };
+}
+
+function ensureObject (obj, ...props) {
+    while (props.length > 0) {
+        const prop = props.shift();
+
+        if (!obj[prop]) {
+            obj[prop] = {};
+        }
+
+        obj = obj[prop];
+    }
+}
+
+function getProp (obj, ...props) {
+    while (props.length > 0) {
+        const prop = props.shift();
+
+        if (!obj[prop]) {
+            return undefined;
+        }
+
+        obj = obj[prop];
+    }
+
+    return obj;
 }
 
 export default class Parser {
@@ -124,12 +149,14 @@ export default class Parser {
                     break;
                 }
                 if (lastAdded) {
-                    let spaceProp = `spaces.${lastAdded}.after`;
-                    dotProp.set(node, spaceProp, dotProp.get(node, spaceProp, '') + content);
-                    let commentProp = `raws.spaces.${lastAdded}.after`;
-                    let existingComment = dotProp.get(node, commentProp);
+                    ensureObject(node, 'spaces', lastAdded);
+                    const prevContent = node.spaces[lastAdded].after || '';
+                    node.spaces[lastAdded].after = prevContent + content;
+
+                    const existingComment = getProp(node, 'raws', 'spaces', lastAdded, 'after') || null;
+
                     if (existingComment) {
-                        dotProp.set(node, commentProp, existingComment + content);
+                        node.raws.spaces[lastAdded].after = existingComment + content;
                     }
                 } else {
                     spaceBefore = spaceBefore + content;
@@ -142,15 +169,17 @@ export default class Parser {
                     lastAdded = 'operator';
                 } else if ((!node.namespace || (lastAdded === "namespace" && !spaceAfterMeaningfulToken)) && next) {
                     if (spaceBefore) {
-                        dotProp.set(node, 'spaces.attribute.before', spaceBefore);
+                        ensureObject(node, 'spaces', 'attribute');
+                        node.spaces.attribute.before = spaceBefore;
                         spaceBefore = '';
                     }
                     if (commentBefore) {
-                        dotProp.set(node, 'raws.spaces.attribute.before', spaceBefore);
+                        ensureObject(node, 'raws', 'spaces', 'attribute');
+                        node.raws.spaces.attribute.before = spaceBefore;
                         commentBefore = '';
                     }
                     node.namespace = (node.namespace || "") + content;
-                    let rawValue = dotProp.get(node, "raws.namespace");
+                    const rawValue = getProp(node, 'raws', 'namespace') || null;
                     if (rawValue) {
                         node.raws.namespace += content;
                     }
@@ -195,37 +224,46 @@ export default class Parser {
                     lastAdded = 'namespace';
                 } else if (!node.attribute || (lastAdded === "attribute" && !spaceAfterMeaningfulToken)) {
                     if (spaceBefore) {
-                        dotProp.set(node, 'spaces.attribute.before', spaceBefore);
+                        ensureObject(node, 'spaces', 'attribute');
+                        node.spaces.attribute.before = spaceBefore;
+
                         spaceBefore = '';
                     }
                     if (commentBefore) {
-                        dotProp.set(node, 'raws.spaces.attribute.before', commentBefore);
+                        ensureObject(node, 'raws', 'spaces', 'attribute');
+                        node.raws.spaces.attribute.before = commentBefore;
                         commentBefore = '';
                     }
                     node.attribute = (node.attribute || "") + content;
-                    let rawValue = dotProp.get(node, "raws.attribute");
+                    const rawValue = getProp(node, 'raws', 'attribute') || null;
                     if (rawValue) {
                         node.raws.attribute += content;
                     }
                     lastAdded = 'attribute';
                 } else if (!node.value || (lastAdded === "value" && !spaceAfterMeaningfulToken)) {
                     node.value = (node.value || "") + content;
-                    let rawValue = dotProp.get(node, "raws.value");
+                    const rawValue = getProp(node, 'raws', 'value') || null;
                     if (rawValue) {
                         node.raws.value += content;
                     }
                     lastAdded = 'value';
-                    dotProp.set(node, 'raws.unquoted', dotProp.get(node, 'raws.unquoted', '') + content);
+
+                    ensureObject(node, 'raws');
+                    const prevContent = getProp(node, 'raws', 'unquoted') || '';
+                    node.raws.unquoted = prevContent + content;
                 } else if (content === 'i') {
                     if (node.value && (node.quoted || spaceAfterMeaningfulToken)) {
                         node.insensitive = true;
                         lastAdded = 'insensitive';
                         if (spaceBefore) {
-                            dotProp.set(node, `spaces.insensitive.before`, spaceBefore);
+                            ensureObject(node, 'spaces', 'insensitive');
+                            node.spaces.insensitive.before = spaceBefore;
+
                             spaceBefore = '';
                         }
                         if (commentBefore) {
-                            dotProp.set(node, `raws.spaces.insensitive.before`, commentBefore);
+                            ensureObject(node, 'raws', 'spaces', 'insensitive');
+                            node.raws.spaces.insensitive.before = commentBefore;
                             commentBefore = '';
                         }
                     } else if (node.value) {
@@ -247,7 +285,10 @@ export default class Parser {
                 node.value = content;
                 node.quoted = true;
                 lastAdded = 'value';
-                dotProp.set(node, 'raws.unquoted', content.slice(1, -1));
+
+                ensureObject(node, 'raws');
+                node.raws.unquoted = content.slice(1, -1);
+
                 spaceAfterMeaningfulToken = false;
                 break;
             case tokens.equals:
@@ -264,11 +305,16 @@ export default class Parser {
             case tokens.comment:
                 if (lastAdded) {
                     if (spaceAfterMeaningfulToken || (next && next[0] === tokens.space)) {
-                        let lastComment = dotProp.get(node, `raws.spaces.${lastAdded}.after`, dotProp.get(node, `spaces.${lastAdded}.after`, ''));
-                        dotProp.set(node, `raws.spaces.${lastAdded}.after`, lastComment + content);
+                        const lastComment = getProp(node, 'spaces', lastAdded, 'after') || '';
+                        const rawLastComment = getProp(node, 'raws', 'spaces', lastAdded, 'after') || lastComment;
+
+                        ensureObject(node, 'raws', 'spaces', lastAdded);
+                        node.raws.spaces[lastAdded].after = rawLastComment + content;
                     } else {
-                        let lastValue = dotProp.get(node, `raws.${lastAdded}`, dotProp.get(node, lastAdded, ''));
-                        dotProp.set(node, `raws.${lastAdded}`, lastValue + content);
+                        const lastValue = node[lastAdded] || '';
+                        const rawLastValue = getProp(node, 'raws', lastAdded) || lastValue;
+                        ensureObject(node, 'raws');
+                        node.raws[lastAdded] = rawLastValue + content;
                     }
                 } else {
                     commentBefore = commentBefore + content;

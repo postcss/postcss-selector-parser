@@ -14,11 +14,12 @@
  */
 export = parser;
 
+// TODO: Conditional types in TS 1.8 will really clean this up.
 declare function parser(): parser.Processor<never>;
-declare function parser<Transform extends any>(processor: parser.AsyncProcessor<Transform>): parser.Processor<Transform, never>;
-declare function parser(processor: parser.AsyncProcessor): parser.Processor<never>;
-declare function parser<Transform extends any>(processor: parser.SyncProcessor<Transform>): parser.Processor<Transform, never>;
-declare function parser(processor: parser.SyncProcessor): parser.Processor<never>;
+declare function parser<Transform>(processor: parser.AsyncProcessor<Transform>): parser.Processor<Transform, never>;
+declare function parser(processor: parser.AsyncProcessor<void>): parser.Processor<never, never>;
+declare function parser<Transform>(processor: parser.SyncProcessor<Transform>): parser.Processor<Transform>;
+declare function parser(processor: parser.SyncProcessor<void>): parser.Processor<never>;
 declare function parser<Transform>(processor?: parser.SyncProcessor<Transform> | parser.AsyncProcessor<Transform>): parser.Processor<Transform>;
 
 /*~ If you want to expose types from your module as well, you can
@@ -44,8 +45,9 @@ declare namespace parser {
     };
     /** Accepts a string  */
     type Selectors = string | PostCSSRuleNode
-    type SyncProcessor<Transform = void> = (root: parser.Root) => Transform
-    type AsyncProcessor<Transform = void> = (root: parser.Root) => Transform | PromiseLike<Transform>
+    type ProcessorFn<ReturnType = void> = (root: parser.Root) => ReturnType;
+    type SyncProcessor<Transform = void> = ProcessorFn<Transform>;
+    type AsyncProcessor<Transform = void> = ProcessorFn<PromiseLike<Transform>>;
 
     const TAG: "tag";
     const STRING: "string";

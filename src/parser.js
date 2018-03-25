@@ -36,7 +36,10 @@ function getSource (startLine, startColumn, endLine, endColumn) {
 
 function unescapeProp (node, prop) {
     let value = node[prop];
-    if (value && value.indexOf("\\") !== -1) {
+    if (typeof value !== "string") {
+        return;
+    }
+    if (value.indexOf("\\") !== -1) {
         ensureObject(node, 'raws');
         if (node.raws[prop] === undefined) {
             node.raws[prop] = value;

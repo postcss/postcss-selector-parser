@@ -15,7 +15,6 @@ const wordDelimiters = {
 
     [t.ampersand]: true,
     [t.asterisk]: true,
-    [t.at]: true,
     [t.bang]: true,
     [t.comma]: true,
     [t.colon]: true,

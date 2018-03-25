@@ -64,7 +64,6 @@ test('attribute selector with a value', '[name=james]', (t, tree) => {
     t.deepEqual(tree.nodes[0].nodes[0].operator, '=');
     t.deepEqual(tree.nodes[0].nodes[0].value, 'james');
     t.falsy(tree.nodes[0].nodes[0].quoted);
-    t.deepEqual(tree.nodes[0].nodes[0].raws.unquoted, 'james');
 });
 
 test('attribute selector with quoted value', '[name="james"]', (t, tree) => {
@@ -74,7 +73,6 @@ test('attribute selector with quoted value', '[name="james"]', (t, tree) => {
     t.deepEqual(attr.value, 'james');
     t.deepEqual(attr.quoteMark, '"');
     t.truthy(attr.quoted);
-    t.deepEqual(attr.raws.unquoted, 'james');
     t.deepEqual(attr.quoteValue(), '"james"');
 });
 
@@ -87,7 +85,6 @@ test('attribute selector with escaped quote', '[title="Something \\"weird\\""]',
     t.deepEqual(attr.quoteMark, '"');
     t.truthy(attr.quoted);
     t.deepEqual(attr.raws.value, '"Something \\"weird\\""');
-    t.deepEqual(attr.raws.unquoted, 'Something "weird"');
     t.deepEqual(tree.toString(), '[title="Something \\"weird\\""]');
 });
 
@@ -318,7 +315,6 @@ test('spaces in attribute selectors', 'h1[  href  *=  "test"  ]', (t, tree) => {
     t.deepEqual(attr.value, 'test');
     t.deepEqual(attr.spaces.value.after, '  ');
     t.truthy(tree.nodes[0].nodes[1].quoted);
-    t.deepEqual(tree.nodes[0].nodes[1].raws.unquoted, 'test');
 });
 
 test('insensitive attribute selector 1', '[href="test" i]', (t, tree) => {
@@ -377,8 +373,8 @@ test('comments within attribute selectors (4)', '[ /*before*/ href /* after-attr
     let attr = tree.nodes[0].nodes[0];
     t.deepEqual(attr.attribute, 'href');
     t.deepEqual(attr.value, 'test');
+    t.deepEqual(attr.quoteValue(), 'test');
     t.deepEqual(attr.raws.value, 'te/*inside-value*/st');
-    t.deepEqual(attr.raws.unquoted, 'test');
     t.deepEqual(attr.raws.spaces.value.after, '/* wow */ /*omg*/');
     t.truthy(attr.insensitive);
     t.deepEqual(attr.offsetOf("attribute"), 13);

@@ -9,7 +9,7 @@ import ID from './selectors/id';
 import Tag from './selectors/tag';
 import Str from './selectors/string';
 import Pseudo from './selectors/pseudo';
-import Attribute from './selectors/attribute';
+import Attribute, {unescapeValue} from './selectors/attribute';
 import Universal from './selectors/universal';
 import Combinator from './selectors/combinator';
 import Nesting from './selectors/nesting';
@@ -230,18 +230,18 @@ export default class Parser {
                     }
                     lastAdded = 'attribute';
                 } else if (!node.value || (lastAdded === "value" && !spaceAfterMeaningfulToken)) {
-                    node.value = (node.value || "") + content;
-                    const rawValue = getProp(node, 'raws', 'value') || null;
-                    if (rawValue) {
-                        node.raws.value += content;
+                    let unescaped = unesc(content);
+                    let oldRawValue = getProp(node, 'raws', 'value') || '';
+                    let oldValue = node.value || '';
+                    node.value = oldValue + unescaped;
+                    node.quoteMark = null;
+                    if (unescaped !== content || oldRawValue) {
+                        ensureObject(node, 'raws');
+                        node.raws.value = (oldRawValue || oldValue) + content;
                     }
                     lastAdded = 'value';
-
-                    ensureObject(node, 'raws');
-                    const prevContent = getProp(node, 'raws', 'unquoted') || '';
-                    node.raws.unquoted = prevContent + content;
                 } else if (content === 'i') {
-                    if (node.value && (node.quoted || spaceAfterMeaningfulToken)) {
+                    if (node.value && (node.quoteMark || spaceAfterMeaningfulToken)) {
                         node.insensitive = true;
                         lastAdded = 'insensitive';
                         if (spaceBefore) {
@@ -271,12 +271,13 @@ export default class Parser {
                         index: token[5],
                     });
                 }
-                node.value = content;
-                node.quoted = true;
+                let {unescaped, quoteMark} = unescapeValue(content);
+                node.value = unescaped;
+                node.quoteMark = quoteMark;
                 lastAdded = 'value';
 
                 ensureObject(node, 'raws');
-                node.raws.unquoted = content.slice(1, -1);
+                node.raws.value = content;
 
                 spaceAfterMeaningfulToken = false;
                 break;

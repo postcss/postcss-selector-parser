@@ -35,9 +35,11 @@
     "pretest": "eslint src",
     "prepublish": "del-cli dist && BABEL_ENV=publish babel src --out-dir dist --ignore /__tests__/",
     "report": "nyc report --reporter=html",
-    "test": "nyc ava src/__tests__/*.js"
+    "test": "nyc ava src/__tests__/*.js",
+    "testone": "ava"
   },
   "dependencies": {
+    "cssesc": "^1.0.1",
     "indexes-of": "^1.0.1",
     "uniq": "^1.0.1"
   },

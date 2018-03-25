@@ -71,7 +71,7 @@ export default class Processor {
 
     /**
      * Process rule into a selector AST.
-     * 
+     *
      * @param rule {postcss.Rule | string} The css selector to be processed
      * @param options The options for processing
      * @returns {Promise<parser.Root>} The AST of the selector after processing it.
@@ -82,7 +82,7 @@ export default class Processor {
 
     /**
      * Process rule into a selector AST synchronously.
-     * 
+     *
      * @param rule {postcss.Rule | string} The css selector to be processed
      * @param options The options for processing
      * @returns {parser.Root} The AST of the selector after processing it.
@@ -93,7 +93,7 @@ export default class Processor {
 
     /**
      * Process a selector into a transformed value asynchronously
-     * 
+     *
      * @param rule {postcss.Rule | string} The css selector to be processed
      * @param options The options for processing
      * @returns {Promise<any>} The value returned by the processor.
@@ -104,7 +104,7 @@ export default class Processor {
 
     /**
      * Process a selector into a transformed value synchronously.
-     * 
+     *
      * @param rule {postcss.Rule | string} The css selector to be processed
      * @param options The options for processing
      * @returns {any} The value returned by the processor.
@@ -115,7 +115,7 @@ export default class Processor {
 
     /**
      * Process a selector into a new selector string asynchronously.
-     * 
+     *
      * @param rule {postcss.Rule | string} The css selector to be processed
      * @param options The options for processing
      * @returns {string} the selector after processing.
@@ -127,7 +127,7 @@ export default class Processor {
 
     /**
      * Process a selector into a new selector string synchronously.
-     * 
+     *
      * @param rule {postcss.Rule | string} The css selector to be processed
      * @param options The options for processing
      * @returns {string} the selector after processing.

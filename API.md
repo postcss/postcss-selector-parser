@@ -639,7 +639,7 @@ then the raw for that space is set accordingly.
 
 Setting an attribute's property `raws` value to be deleted.
 
-For now, changing the spaces required also updating or removing any of the 
+For now, changing the spaces required also updating or removing any of the
 raws values that override them.
 
 Example: `[ /*before*/ href /* after-attr */ = /* after-operator */ te/*inside-value*/st/* wow */ /*omg*/i/*bbq*/ /*whodoesthis*/]` would parse as:
@@ -789,7 +789,7 @@ postcss(plugin()).process(`
 `.trim(), {from: 'test.css'}).catch((e) => console.error(e.toString()));
 
 // CssSyntaxError: classValidator: ./test.css:1:5: classes may not have underscores or dashes in them
-// 
+//
 // > 1 | .foo-bar {
 //     |     ^
 //   2 |   color: red;
@@ -828,7 +828,7 @@ postcss(plugin()).process(`
 `.trim(), {from: 'test.css'}).catch((e) => console.error(e.toString()));
 
 // CssSyntaxError: classValidator: ./test.css:1:5: classes may not have underscores or dashes in them
-// 
+//
 // > 1 | .foo-bar {
 //     |     ^
 //   2 |   color: red;

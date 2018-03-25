@@ -19,6 +19,7 @@ import tokenize from './tokenize';
 
 import * as tokens from './tokenTypes';
 import * as types from './selectors/types';
+import {unesc, getProp, ensureObject} from './util';
 
 function getSource (startLine, startColumn, endLine, endColumn) {
     return {
@@ -33,30 +34,15 @@ function getSource (startLine, startColumn, endLine, endColumn) {
     };
 }
 
-function ensureObject (obj, ...props) {
-    while (props.length > 0) {
-        const prop = props.shift();
-
-        if (!obj[prop]) {
-            obj[prop] = {};
+function unescapeProp (node, prop) {
+    let value = node[prop];
+    if (value && value.indexOf("\\") !== -1) {
+        ensureObject(node, 'raws');
+        if (node.raws[prop] === undefined) {
+            node.raws[prop] = value;
         }
-
-        obj = obj[prop];
+        node[prop] = unesc(value);
     }
-}
-
-function getProp (obj, ...props) {
-    while (props.length > 0) {
-        const prop = props.shift();
-
-        if (!obj[prop]) {
-            return undefined;
-        }
-
-        obj = obj[prop];
-    }
-
-    return obj;
 }
 
 export default class Parser {
@@ -325,7 +311,8 @@ export default class Parser {
             }
             pos ++;
         }
-
+        unescapeProp(node, "attribute");
+        unescapeProp(node, "namespace");
         this.newNode(new Attribute(node));
         this.position ++;
     }

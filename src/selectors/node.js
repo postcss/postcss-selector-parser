@@ -26,7 +26,7 @@ let cloneNode = function (obj, parent) {
     return cloned;
 };
 
-export default class {
+export default class Node {
     constructor (opts = {}) {
         Object.assign(this, opts);
         this.spaces = this.spaces || {};

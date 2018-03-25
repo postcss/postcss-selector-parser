@@ -1,6 +1,98 @@
 import * as t from './tokenTypes';
 
-const wordEnd = /[ \n\t\r\(\)\*:;!&'"\+\|~>,=$^\[\]\\]|\/(?=\*)/g;
+const unescapable = {
+    [t.tab]: true,
+    [t.newline]: true,
+    [t.cr]: true,
+    [t.feed]: true,
+};
+const wordDelimiters = {
+    [t.space]: true,
+    [t.tab]: true,
+    [t.newline]: true,
+    [t.cr]: true,
+    [t.feed]: true,
+
+    [t.ampersand]: true,
+    [t.asterisk]: true,
+    [t.at]: true,
+    [t.bang]: true,
+    [t.comma]: true,
+    [t.colon]: true,
+    [t.semicolon]: true,
+    [t.openParenthesis]: true,
+    [t.closeParenthesis]: true,
+    [t.openSquare]: true,
+    [t.closeSquare]: true,
+    [t.singleQuote]: true,
+    [t.doubleQuote]: true,
+    [t.plus]: true,
+    [t.pipe]: true,
+    [t.tilde]: true,
+    [t.greaterThan]: true,
+    [t.equals]: true,
+    [t.dollar]: true,
+    [t.caret]: true,
+    [t.slash]: true,
+};
+
+
+const hex = {};
+const hexChars = "0123456789abcdefABCDEF";
+for (let i = 0; i < hexChars.length; i++) {
+    hex[hexChars.charCodeAt(i)] = true;
+}
+
+/**
+ *  Returns the last index of the bar css word
+ * @param {string} css The string in which the word begins
+ * @param {number} start The index into the string where word's first letter occurs
+ */
+function consumeWord (css, start) {
+    let next = start;
+    let code;
+    do {
+        code = css.charCodeAt(next);
+        if (wordDelimiters[code]) {
+            return next - 1;
+        } else if (code === t.backslash) {
+            next = consumeEscape(css, next) + 1;
+        } else {
+            // All other characters are part of the word
+            next++;
+        }
+    } while (next < css.length);
+    return next - 1;
+}
+
+/**
+ *  Returns the last index of the escape sequence
+ * @param {string} css The string in which the sequence begins
+ * @param {number} start The index into the string where escape character (`\`) occurs.
+ */
+function consumeEscape (css, start) {
+    let next = start;
+    let code = css.charCodeAt(next + 1);
+    if (unescapable[code]) {
+        // just consume the escape char
+    } else if (hex[code]) {
+        let hexDigits = 0;
+        // consume up to 6 hex chars
+        do {
+            next++;
+            hexDigits++;
+            code = css.charCodeAt(next + 1);
+        } while (hex[code] && hexDigits < 6);
+        // if fewer than 6 hex chars, a trailing space ends the escape
+        if (hexDigits < 6 && code === t.space) {
+            next++;
+        }
+    } else {
+        // the next char is part of the current word
+        next++;
+    }
+    return next;
+}
 
 export default function tokenize (input) {
     const tokens   = [];
@@ -43,9 +135,9 @@ export default function tokenize (input) {
         }
 
         switch ( code ) {
-        case t.newline:
         case t.space:
         case t.tab:
+        case t.newline:
         case t.cr:
         case t.feed:
             next = start;
@@ -134,31 +226,6 @@ export default function tokenize (input) {
             end = next + 1;
             break;
 
-        case t.backslash:
-            next   = start;
-            escaped = true;
-            while ( css.charCodeAt(next + 1) === t.backslash ) {
-                next  += 1;
-                escaped = !escaped;
-            }
-            code = css.charCodeAt(next + 1);
-            if (escaped && (
-                code !== t.slash   &&
-                code !== t.space   &&
-                code !== t.newline &&
-                code !== t.tab     &&
-                code !== t.cr      &&
-                code !== t.feed
-            )) {
-                next += 1;
-            }
-
-            tokenType = t.word;
-            endLine = line;
-            endColumn = next - offset;
-            end = next + 1;
-            break;
-
         default:
             if ( code === t.slash && css.charCodeAt(start + 1) === t.asterisk ) {
                 next = css.indexOf('*/', start + 2) + 1;
@@ -183,14 +250,7 @@ export default function tokenize (input) {
                 endLine = nextLine;
                 endColumn = next - nextOffset;
             } else {
-                wordEnd.lastIndex = start + 1;
-                wordEnd.test(css);
-                if ( wordEnd.lastIndex === 0 ) {
-                    next = css.length - 1;
-                } else {
-                    next = wordEnd.lastIndex - 2;
-                }
-
+                next = consumeWord(css, start);
                 tokenType = t.word;
                 endLine = line;
                 endColumn = next - offset;

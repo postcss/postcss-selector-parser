@@ -1,12 +1,212 @@
+import cssesc from "cssesc";
+import unesc from "../util/unesc";
 import Namespace from './namespace';
 import {ATTRIBUTE} from './types';
 
+const {deprecate} = require("util");
+
+const WRAPPED_IN_QUOTES = /^('|")(.*)\1$/;
+
+const warnOfDeprecatedValueAssignment = deprecate(() => {},
+    "Assigning an attribute a value containing characters that might need to be escaped is deprecated. " +
+    "Call attribute.setValue() instead.");
+
+const warnOfDeprecatedQuotedAssignment = deprecate(() => {},
+    "Assigning attr.quoted is deprecated and has no effect. Assign to attr.quoteMark instead.");
+
+const warnOfDeprecatedConstructor = deprecate(() => {},
+    "Constructing an Attribute selector with a value without specifying quoteMark is deprecated. Note: The value should be unescaped now.");
+
+export function unescapeValue (value) {
+    let deprecatedUsage = false;
+    let quoteMark = null;
+    let unescaped = value;
+    let m = unescaped.match(WRAPPED_IN_QUOTES);
+    if (m) {
+        quoteMark = m[1];
+        unescaped = m[2];
+    }
+    unescaped = unesc(unescaped);
+    if (unescaped !== value) {
+        deprecatedUsage = true;
+    }
+    return {
+        deprecatedUsage,
+        unescaped,
+        quoteMark,
+    };
+}
+
+function handleDeprecatedContructorOpts (opts) {
+    if (opts.quoteMark !== undefined) {
+        return opts;
+    }
+    if (opts.value === undefined) {
+        return opts;
+    }
+    warnOfDeprecatedConstructor();
+    let {quoteMark, unescaped} = unescapeValue(opts.value);
+    if (!opts.raws) {
+        opts.raws = {};
+    }
+    if (opts.raws.value === undefined) {
+        opts.raws.value = opts.value;
+    }
+    opts.value = unescaped;
+    opts.quoteMark = quoteMark;
+    return opts;
+}
+
 export default class Attribute extends Namespace {
+    static NO_QUOTE = null;
+    static SINGLE_QUOTE = "'";
+    static DOUBLE_QUOTE = '"';
     constructor (opts = {}) {
-        super(opts);
+        super(handleDeprecatedContructorOpts(opts));
         this.type = ATTRIBUTE;
         this.raws = this.raws || {};
+        Object.defineProperty(this.raws, 'unquoted', {
+            get: deprecate(() => this.value,
+                           "attr.raws.unquoted is deprecated. Call attr.value instead."),
+            set: deprecate(() => this.value,
+                           "Setting attr.raws.unquoted is deprecated and has no effect. attr.value is unescaped by default now."),
+        });
         this._constructed = true;
+    }
+
+    /**
+     * Returns the Attribute's value quoted such that it would be legal to use
+     * in the value of a css file. The original value's quotation setting
+     * used for stringification is left unchanged. See `setValue(value, options)`
+     * if you want to control the quote settings of a new value for the attribute.
+     *
+     * You can also change the quotation used for the current value by setting quoteMark.
+     *
+     * Options:
+     *   * quoteMark {'"' | "'" | null} - Use this value to quote the value. If this
+     *     option is not set, the original value for quoteMark will be used. If
+     *     indeterminate, a double quote is used. The legal values are:
+     *     * `null` - the value will be unquoted and characters will be escaped as necessary.
+     *     * `'` - the value will be quoted with a single quote and single quotes are escaped.
+     *     * `"` - the value will be quoted with a double quote and double quotes are escaped.
+     *   * preferSourceFormat {boolean} - if true, prefer the source quote mark
+     *     over the quoteMark option value.
+     *   * smart {boolean} - if true, will select a quote mark based on the value
+     *     and the other options specified here. See the `smartQuoteMark()`
+     *     method.
+     **/
+    quoteValue (options = {}) {
+        let quoteMark = this._determineQuoteMark(options);
+        let cssescopts = CSSESC_QUOTE_OPTIONS[quoteMark];
+        let escaped = cssesc(this._value, cssescopts);
+        return escaped;
+    }
+
+    _determineQuoteMark (options) {
+        return (options.smart) ? this.smartQuoteMark(options) : this.preferredQuoteMark(options);
+    }
+
+    /**
+     * Set the unescaped value with the specified quotation options. The value
+     * provided must not include any wrapping quote marks -- those quotes will
+     * be interpreted as part of the value and escaped accordingly.
+     */
+    setValue (value, options = {}) {
+        this._value = value;
+        this.quoteMark = this._determineQuoteMark(options);
+    }
+
+    /**
+     * Intelligently select a quoteMark value based on the value's contents. If
+     * the value is a legal CSS ident, it will not be quoted. Otherwise a quote
+     * mark will be picked that minimizes the number of escapes.
+     *
+     * If there's no clear winner, the quote mark from these options is used,
+     * then the source quote mark (this is inverted if `preferSourceFormat` is
+     * true). If the quoteMark is unspecified, a double quote is used.
+     *
+     * @param options This takes the quoteMark and preferSourceFormat options
+     * from the quoteValue method.
+     */
+    smartQuoteMark (options) {
+        let v = this.value;
+        let numSingleQuotes = v.replace(/[^']/g, '').length;
+        let numDoubleQuotes = v.replace(/[^"]/g, '').length;
+        if (numSingleQuotes + numDoubleQuotes === 0) {
+            let escaped = cssesc(v, {isIdentifier: true});
+            if (escaped === v) {
+                return Attribute.NO_QUOTE;
+            } else {
+                return this.preferredQuoteMark(options);
+            }
+        } else if (numDoubleQuotes === numSingleQuotes) {
+            return this.preferredQuoteMark(options);
+        } else if ( numDoubleQuotes < numSingleQuotes) {
+            return Attribute.DOUBLE_QUOTE;
+        } else {
+            return Attribute.SINGLE_QUOTE;
+        }
+    }
+
+    /**
+     * Selects the preferred quote mark based on the options and the current quote mark value.
+     * If you want the quote mark to depend on the attribute value, call `smartQuoteMark(opts)`
+     * instead.
+     */
+    preferredQuoteMark (options) {
+        let quoteMark = (options.preferSourceFormat) ? this.quoteMark : options.quoteMark;
+
+        if (quoteMark === undefined) {
+            quoteMark = (options.preferSourceFormat) ? options.quoteMark : this.quoteMark;
+        }
+
+        if (quoteMark === undefined) {
+            quoteMark = Attribute.DOUBLE_QUOTE;
+        }
+
+        return quoteMark;
+    }
+
+    get quoted () {
+        let qm = this.quoteMark;
+        return qm === "'" || qm === '"';
+    }
+
+    set quoted (value) {
+        warnOfDeprecatedQuotedAssignment();
+    }
+
+    /**
+     * returns a single (`'`) or double (`"`) quote character if the value is quoted.
+     * returns `null` if the value is not quoted.
+     * returns `undefined` if the quotation state is unknown (this can happen when
+     * the attribute is constructed without specifying a quote mark.)
+     */
+    get quoteMark () {
+        return this._quoteMark;
+    }
+
+    /**
+     * Set the quote mark to be used by this attribute's value.
+     * If the quote mark changes, the raw (escaped) value at `attr.raws.value` of the attribute
+     * value is updated accordingly.
+     *
+     * @param {"'" | '"' | null} quoteMark The quote mark or `null` if the value should be unquoted.
+     */
+    set quoteMark (quoteMark) {
+        if (!this._constructed) {
+            this._quoteMark = quoteMark;
+            return;
+        }
+        if (this._quoteMark !== quoteMark) {
+            let rawValue = cssesc(this._value, CSSESC_QUOTE_OPTIONS[quoteMark]);
+            if (rawValue === this._value) {
+                delete this.raws.value;
+            } else {
+                this.raws.value = rawValue;
+            }
+            this._quoteMark = quoteMark;
+        }
     }
 
     get qualifiedAttribute () {
@@ -21,21 +221,40 @@ export default class Attribute extends Namespace {
         return this._value;
     }
 
+    /**
+     * Before 3.0, the value had to be set to an escaped value including any wrapped
+     * quote marks. In 3.0, the semantics of `Attribute.value` changed so that the value
+     * is unescaped during parsing and any quote marks are removed.
+     *
+     * Because the ambiguity of this semantic change, if you set `attr.value = newValue`,
+     * a deprecation warning is raised when the new value contains any characters that would
+     * require escaping (including if it contains wrapped quotes).
+     *
+     * Instead, you should call `attr.setValue(newValue, opts)` and pass options that describe
+     * how the new value is quoted.
+     */
     set value (v) {
-        this._value = v;
         if (this._constructed) {
-            delete this.raws.value;
-        }
-    }
-
-    get value () {
-        return this._value;
-    }
-
-    set value (v) {
-        this._value = v;
-        if (this._constructed) {
-            delete this.raws.value;
+            let {
+                deprecatedUsage,
+                unescaped,
+                quoteMark,
+            } = unescapeValue(v);
+            if (deprecatedUsage) {
+                warnOfDeprecatedValueAssignment();
+            }
+            if (unescaped === this._value && quoteMark === this._quoteMark) {
+                return;
+            }
+            this._value = unescaped;
+            this.quoteMark = quoteMark;
+            if (unescaped === this._value) {
+                delete this.raws.value;
+            } else {
+                this.raws.value = v;
+            }
+        } else {
+            this._value = v;
         }
     }
 
@@ -44,31 +263,34 @@ export default class Attribute extends Namespace {
     }
 
     set namespace (v) {
-        this._namespace = v;
-        if (this._constructed) {
-            delete this.raws.namespace;
+        if (v === "*") {
+            // Don't escape this special value for the namespace.
+            if (this._constructed) {
+                delete this.raws.namespace;
+            }
+        } else {
+            this._handleEscapes("namespace", v);
         }
-    }
-
-    get namespace () {
-        return this._namespace;
-    }
-
-    set namespace (v) {
         this._namespace = v;
-        if (this._constructed) {
-            delete this.raws.namespace;
-        }
     }
 
     get attribute () {
         return this._attribute;
     }
 
-    set attribute (v) {
-        this._attribute = v;
+    set attribute (name) {
+        this._handleEscapes("attribute", name);
+        this._attribute = name;
+    }
+
+    _handleEscapes (prop, value) {
         if (this._constructed) {
-            delete this.raws.attibute;
+            let escaped = cssesc(value, {isIdentifier: true});
+            if (escaped !== value) {
+                this.raws[prop] = escaped;
+            } else {
+                delete this.raws[prop];
+            }
         }
     }
 
@@ -175,6 +397,12 @@ export default class Attribute extends Namespace {
         return selector.join('');
     }
 }
+
+const CSSESC_QUOTE_OPTIONS = {
+    "'": {quotes: 'single', wrap: true},
+    '"': {quotes: 'double', wrap: true},
+    [null]: {isIdentifier: true},
+};
 
 function defaultAttrConcat (attrValue, attrSpaces) {
     return `${attrSpaces.before}${attrValue}${attrSpaces.after}`;

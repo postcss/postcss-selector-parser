@@ -19,6 +19,7 @@ export const space            = ` `.charCodeAt(0);
 export const singleQuote      = `'`.charCodeAt(0);
 export const doubleQuote      = `"`.charCodeAt(0);
 export const slash            = `/`.charCodeAt(0);
+export const bang             = `!`.charCodeAt(0);
 
 export const backslash        = '\\'.charCodeAt(0);
 export const cr               = '\r'.charCodeAt(0);

@@ -253,10 +253,20 @@ declare namespace parser {
     function isClassName(node: any): node is ClassName;
 
     type AttributeOperator = "=" | "~=" | "|=" | "^=" | "$=" | "*=";
+    type QuoteMark = '"' | "'" | null;
+    interface PreferredQuoteMarkOptions {
+        quoteMark?: QuoteMark;
+        preferSourceFormat?: boolean;
+    }
+    interface SmartQuoteMarkOptions extends PreferredQuoteMarkOptions {
+        smart?: boolean;
+    }
     interface AttributeOptions extends NamespaceOptions<string | undefined> {
         attribute: string;
         operator?: AttributeOperator;
         insensitive?: boolean;
+        quoteMark?: QuoteMark;
+        /** @deprecated Use quoteMark instead. */
         quoted?: boolean;
         spaces?: {
             before?: string;
@@ -285,6 +295,7 @@ declare namespace parser {
         attribute: string;
         operator?: AttributeOperator;
         insensitive?: boolean;
+        quoteMark: QuoteMark;
         quoted?: boolean;
         spaces: {
             before: string;
@@ -295,9 +306,11 @@ declare namespace parser {
             insensitive?: Partial<Spaces>;
         }
         raws: {
+            /** @deprecated The attribute value is unquoted, use that instead.. */
             unquoted?: string;
             attribute?: string;
             operator?: string;
+            /** The value of the attribute with quotes and escapes. */
             value?: string;
             insensitive?: string;
             spaces?: {
@@ -311,6 +324,51 @@ declare namespace parser {
          * The attribute name after having been qualified with a namespace.
          */
         readonly qualifiedAttribute: string;
+
+        /**
+         * The case insensitivity flag or an empty string depending on whether this
+         * attribute is case insensitive.
+         */
+        readonly insensitiveFlag : 'i' | '';
+
+        /**
+         * Returns the attribute's value quoted such that it would be legal to use
+         * in the value of a css file. The original value's quotation setting
+         * used for stringification is left unchanged. See `setValue(value, options)`
+         * if you want to control the quote settings of a new value for the attribute or
+         * `set quoteMark(mark)` if you want to change the quote settings of the current
+         * value.
+         *
+         * You can also change the quotation used for the current value by setting quoteMark.
+         **/
+        quoteValue(options?: SmartQuoteMarkOptions): string;
+
+        /**
+         * Set the unescaped value with the specified quotation options. The value
+         * provided must not include any wrapping quote marks -- those quotes will
+         * be interpreted as part of the value and escaped accordingly.
+         * @param value
+         */
+        setValue(value: string, options?: SmartQuoteMarkOptions): void;
+
+        /**
+         * Intelligently select a quoteMark value based on the value's contents. If
+         * the value is a legal CSS ident, it will not be quoted. Otherwise a quote
+         * mark will be picked that minimizes the number of escapes.
+         *
+         * If there's no clear winner, the quote mark from these options is used,
+         * then the source quote mark (this is inverted if `preferSourceFormat` is
+         * true). If the quoteMark is unspecified, a double quote is used.
+         **/
+        smartQuoteMark(options: PreferredQuoteMarkOptions): QuoteMark;
+
+        /**
+         * Selects the preferred quote mark based on the options and the current quote mark value.
+         * If you want the quote mark to depend on the attribute value, call `smartQuoteMark(opts)`
+         * instead.
+         */
+        preferredQuoteMark(options: PreferredQuoteMarkOptions): QuoteMark
+
         /**
          * returns the offset of the attribute part specified relative to the
          * start of the node of the output string.

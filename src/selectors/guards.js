@@ -67,5 +67,5 @@ export function isContainer (node) {
 }
 
 export function isNamespace (node) {
-    return isClassName(node) || isAttribute(node) || isTag(node);
+    return isAttribute(node) || isTag(node);
 }

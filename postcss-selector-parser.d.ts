@@ -221,7 +221,7 @@ declare namespace parser {
          */
         readonly namespaceString: string;
     }
-    function isNamespace(node: any): node is ClassName | Attribute | Tag;
+    function isNamespace(node: any): node is Attribute | Tag;
 
     interface Root extends Container<undefined> {
         type: "root";
@@ -246,7 +246,7 @@ declare namespace parser {
     function combinator(opts: NodeOptions): Combinator;
     function isCombinator(node: any): node is Combinator;
 
-    interface ClassName extends Namespace {
+    interface ClassName extends Base {
         type: "class";
     }
     function className(opts: NamespaceOptions): ClassName;

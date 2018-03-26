@@ -1,7 +1,7 @@
-import Namespace from './namespace';
+import Node from './node';
 import {CLASS} from './types';
 
-export default class ClassName extends Namespace {
+export default class ClassName extends Node {
     constructor (opts) {
         super(opts);
         this.type = CLASS;
@@ -10,7 +10,6 @@ export default class ClassName extends Namespace {
     toString () {
         return [
             this.spaces.before,
-            this.ns,
             String('.' + this.value),
             this.spaces.after,
         ].join('');

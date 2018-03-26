@@ -162,6 +162,33 @@ declare namespace parser {
         next(): Node;
         prev(): Node;
         clone(opts: {[override: string]:any}): Node;
+        /**
+         * Some non-standard syntax doesn't follow normal escaping rules for css,
+         * this allows the escaped value to be specified directly, allowing illegal characters to be
+         * directly inserted into css output.
+         * @param name the property to set
+         * @param value the unescaped value of the property
+         * @param valueEscaped optional. the escaped value of the property.
+         */
+        setPropertyAndEscape(name: string, value: any, valueEscaped: string);
+        /**
+         * When you want a value to passed through to CSS directly. This method
+         * deletes the corresponding raw value causing the stringifier to fallback
+         * to the unescaped value.
+         * @param name the property to set.
+         * @param value The value that is both escaped and unescaped.
+         */
+        setPropertyWithoutEscape(name: string, value: any);
+        /**
+         * Some non-standard syntax doesn't follow normal escaping rules for css.
+         * This allows non standard syntax to be appended to an existing property
+         * by specifying the escaped value. By specifying the escaped value,
+         * illegal characters are allowed to be directly inserted into css output.
+         * @param {string} name the property to set
+         * @param {any} value the unescaped value of the property
+         * @param {string} valueEscaped optional. the escaped value of the property.
+         */
+        appendToPropertyAndEscape(name, value, valueEscaped);
         toString(): string;
     }
     interface ContainerOptions extends NodeOptions {

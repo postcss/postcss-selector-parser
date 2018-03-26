@@ -18,7 +18,8 @@ test('qualified class', 'button.btn-primary', (t, tree) => {
 
 test('escaped numbers in class name', '.\\31\\ 0', (t, tree) => {
     t.deepEqual(tree.nodes[0].nodes[0].type, 'class');
-    t.deepEqual(tree.nodes[0].nodes[0].value, '\\31\\ 0');
+    t.deepEqual(tree.nodes[0].nodes[0].value, '1 0');
+    t.deepEqual(tree.nodes[0].nodes[0].raws.value, '\\31\\ 0');
 });
 
 test('extraneous non-combinating whitespace', '  .h1   ,  .h2   ', (t, tree) => {

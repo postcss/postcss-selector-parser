@@ -300,9 +300,6 @@ export default class Attribute extends Namespace {
         let rawSpaces = (this.raws.spaces && this.raws.spaces[name]) || {};
         return Object.assign(attrSpaces, spaces, rawSpaces);
     }
-    _valueFor (name) {
-        return this.raws[name] || this[name];
-    }
 
     _stringFor (name, spaceName = name, concat = defaultAttrConcat) {
         let attrSpaces = this._spacesFor(spaceName);

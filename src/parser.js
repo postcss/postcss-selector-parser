@@ -458,7 +458,7 @@ export default class Parser {
             }
             this.current = cache;
         } else {
-            last.value += '(';
+            last.appendToPropertyAndEscape("value", '(', '(');
             while (this.position < this.tokens.length && balanced) {
                 if (this.currToken[0] === tokens.openParenthesis) {
                     balanced ++;
@@ -466,7 +466,8 @@ export default class Parser {
                 if (this.currToken[0] === tokens.closeParenthesis) {
                     balanced --;
                 }
-                last.value += this.parseParenthesisToken(this.currToken);
+                let additionalValue = this.parseParenthesisToken(this.currToken);
+                last.appendToPropertyAndEscape("value", additionalValue, additionalValue);
                 this.position ++;
             }
         }
@@ -613,11 +614,17 @@ export default class Parser {
                 current[2] + (index - 1)
             );
             if (~hasClass.indexOf(ind)) {
-                node = new ClassName({
-                    value: value.slice(1),
+                let v = value.slice(1);
+                let u = unesc(v);
+                let classNameOpts = {
+                    value: u,
                     source,
                     sourceIndex,
-                });
+                };
+                if (v !== u) {
+                    classNameOpts.raws = {value: v};
+                }
+                node = new ClassName(classNameOpts);
             } else if (~hasId.indexOf(ind)) {
                 node = new ID({
                     value: value.slice(1),

@@ -46,6 +46,7 @@ function unescapeProp (node, prop) {
         }
         node[prop] = unesc(value);
     }
+    return node;
 }
 
 export default class Parser {
@@ -614,23 +615,19 @@ export default class Parser {
                 current[2] + (index - 1)
             );
             if (~hasClass.indexOf(ind)) {
-                let v = value.slice(1);
-                let u = unesc(v);
                 let classNameOpts = {
-                    value: u,
-                    source,
-                    sourceIndex,
-                };
-                if (v !== u) {
-                    classNameOpts.raws = {value: v};
-                }
-                node = new ClassName(classNameOpts);
-            } else if (~hasId.indexOf(ind)) {
-                node = new ID({
                     value: value.slice(1),
                     source,
                     sourceIndex,
-                });
+                };
+                node = new ClassName(unescapeProp(classNameOpts, "value"));
+            } else if (~hasId.indexOf(ind)) {
+                let idOpts = {
+                    value: value.slice(1),
+                    source,
+                    sourceIndex,
+                };
+                node = new ID(unescapeProp(idOpts, "value"));
             } else {
                 node = new Tag({
                     value,

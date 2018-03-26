@@ -30,7 +30,7 @@ export default class ClassName extends Node {
     toString () {
         return [
             this.spaces.before,
-            String('.' + this._valueFor("value")),
+            String('.' + this.stringifyProperty("value")),
             this.spaces.after,
         ].join('');
     }

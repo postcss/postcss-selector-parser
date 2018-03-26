@@ -22,7 +22,7 @@ export default class Namespace extends Node {
 
     get namespaceString () {
         if (this.namespace) {
-            let ns = this._valueFor("namespace");
+            let ns = this.stringifyProperty("namespace");
             if (ns === true) {
                 return '';
             } else {

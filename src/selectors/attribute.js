@@ -89,7 +89,7 @@ export default class Attribute extends Namespace {
      *     * `null` - the value will be unquoted and characters will be escaped as necessary.
      *     * `'` - the value will be quoted with a single quote and single quotes are escaped.
      *     * `"` - the value will be quoted with a double quote and double quotes are escaped.
-     *   * preferSourceFormat {boolean} - if true, prefer the source quote mark
+     *   * preferCurrentQuoteMark {boolean} - if true, prefer the source quote mark
      *     over the quoteMark option value.
      *   * smart {boolean} - if true, will select a quote mark based on the value
      *     and the other options specified here. See the `smartQuoteMark()`
@@ -122,10 +122,10 @@ export default class Attribute extends Namespace {
      * mark will be picked that minimizes the number of escapes.
      *
      * If there's no clear winner, the quote mark from these options is used,
-     * then the source quote mark (this is inverted if `preferSourceFormat` is
+     * then the source quote mark (this is inverted if `preferCurrentQuoteMark` is
      * true). If the quoteMark is unspecified, a double quote is used.
      *
-     * @param options This takes the quoteMark and preferSourceFormat options
+     * @param options This takes the quoteMark and preferCurrentQuoteMark options
      * from the quoteValue method.
      */
     smartQuoteMark (options) {
@@ -154,10 +154,10 @@ export default class Attribute extends Namespace {
      * instead.
      */
     preferredQuoteMark (options) {
-        let quoteMark = (options.preferSourceFormat) ? this.quoteMark : options.quoteMark;
+        let quoteMark = (options.preferCurrentQuoteMark) ? this.quoteMark : options.quoteMark;
 
         if (quoteMark === undefined) {
-            quoteMark = (options.preferSourceFormat) ? options.quoteMark : this.quoteMark;
+            quoteMark = (options.preferCurrentQuoteMark) ? options.quoteMark : this.quoteMark;
         }
 
         if (quoteMark === undefined) {
@@ -303,7 +303,7 @@ export default class Attribute extends Namespace {
 
     _stringFor (name, spaceName = name, concat = defaultAttrConcat) {
         let attrSpaces = this._spacesFor(spaceName);
-        return concat(this._valueFor(name), attrSpaces);
+        return concat(this.stringifyProperty(name), attrSpaces);
     }
 
     /**
@@ -339,11 +339,11 @@ export default class Attribute extends Namespace {
             return count;
         }
 
-        count += this._valueFor("attribute").length;
+        count += this.stringifyProperty("attribute").length;
         count += attributeSpaces.after.length;
         let operatorSpaces = this._spacesFor("operator");
         count += operatorSpaces.before.length;
-        let operator = this._valueFor("operator");
+        let operator = this.stringifyProperty("operator");
         if (name === "operator") {
             return operator ? count : -1;
         }
@@ -352,7 +352,7 @@ export default class Attribute extends Namespace {
         count += operatorSpaces.after.length;
         let valueSpaces = this._spacesFor("value");
         count += valueSpaces.before.length;
-        let value = this._valueFor("value");
+        let value = this.stringifyProperty("value");
         if (name === "value") {
             return value ? count : -1;
         }

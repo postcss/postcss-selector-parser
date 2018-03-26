@@ -121,14 +121,14 @@ export default class Node {
         }
     }
 
-    _valueFor (name) {
+    stringifyProperty (name) {
         return (this.raws && this.raws[name]) || this[name];
     }
 
     toString () {
         return [
             this.spaces.before,
-            String(this._valueFor("value")),
+            String(this.stringifyProperty("value")),
             this.spaces.after,
         ].join('');
     }

@@ -283,7 +283,7 @@ declare namespace parser {
     type QuoteMark = '"' | "'" | null;
     interface PreferredQuoteMarkOptions {
         quoteMark?: QuoteMark;
-        preferSourceFormat?: boolean;
+        preferCurrentQuoteMark?: boolean;
     }
     interface SmartQuoteMarkOptions extends PreferredQuoteMarkOptions {
         smart?: boolean;
@@ -384,7 +384,7 @@ declare namespace parser {
          * mark will be picked that minimizes the number of escapes.
          *
          * If there's no clear winner, the quote mark from these options is used,
-         * then the source quote mark (this is inverted if `preferSourceFormat` is
+         * then the source quote mark (this is inverted if `preferCurrentQuoteMark` is
          * true). If the quoteMark is unspecified, a double quote is used.
          **/
         smartQuoteMark(options: PreferredQuoteMarkOptions): QuoteMark;

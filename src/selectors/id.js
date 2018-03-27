@@ -1,7 +1,7 @@
-import Namespace from './namespace';
+import Node from './node';
 import {ID as IDType} from './types';
 
-export default class ID extends Namespace {
+export default class ID extends Node {
     constructor (opts) {
         super(opts);
         this.type = IDType;
@@ -10,8 +10,7 @@ export default class ID extends Namespace {
     toString () {
         return [
             this.spaces.before,
-            this.ns,
-            String('#' + this.value),
+            String('#' + this.stringifyProperty("value")),
             this.spaces.after,
         ].join('');
     }

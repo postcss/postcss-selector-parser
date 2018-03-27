@@ -18,7 +18,7 @@ test('className guard', '.foo', (t, tree) => {
     t.false(parser.isClassName(undefined));
     t.true(parser.isClassName(n));
     t.false(parser.isContainer(n));
-    t.true(parser.isNamespace(n));
+    t.false(parser.isNamespace(n));
 });
 
 test('combinator guard', '.foo > .bar', (t, tree) => {

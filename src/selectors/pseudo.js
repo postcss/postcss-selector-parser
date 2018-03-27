@@ -11,7 +11,7 @@ export default class Pseudo extends Container {
         let params = this.length ? '(' + this.map(String).join(',') + ')' : '';
         return [
             this.spaces.before,
-            String(this.value),
+            this.stringifyProperty("value"),
             params,
             this.spaces.after,
         ].join('');

@@ -52,7 +52,7 @@ ava('tag - extraneous whitespace', testLossy, '  h1   ,  h2   ', 'h1,h2');
 ava('tag - trailing comma', testLossy, 'h1, ', 'h1,');
 ava('tag - trailing comma (1)', testLossy, 'h1,', 'h1,');
 ava('tag - trailing comma (2)', testLossy, 'h1', 'h1');
-ava('tag - trailing slash (1)', testLossy, 'h1\\    ', 'h1\\');
+ava('tag - trailing slash (1)', testLossy, 'h1\\    ', 'h1\\ ');
 ava('tag - trailing slash (2)', testLossy, 'h1\\    h2\\', 'h1\\  h2\\');
 
 ava('universal - combinator', testLossy, ' * + * ', '*+*');

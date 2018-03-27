@@ -61,7 +61,8 @@ test('extra whitespace inside parentheses', 'a:not(   h2   )', (t, tree) => {
 
 test('escaped numbers in class name with pseudo', 'a:before.\\31\\ 0', (t, tree) => {
     t.deepEqual(tree.nodes[0].nodes[2].type, 'class');
-    t.deepEqual(tree.nodes[0].nodes[2].value, '\\31\\ 0');
+    t.deepEqual(tree.nodes[0].nodes[2].value, '1 0');
+    t.deepEqual(tree.nodes[0].nodes[2].raws.value, '\\31\\ 0');
 });
 
 test('nested pseudo', '.btn-group>.btn:last-child:not(:first-child)', (t, tree) => {

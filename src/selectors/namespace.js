@@ -44,7 +44,7 @@ export default class Namespace extends Node {
     toString () {
         return [
             this.spaces.before,
-            this.qualifiedName(this.value),
+            this.qualifiedName(this.stringifyProperty("value")),
             this.spaces.after,
         ].join('');
     }

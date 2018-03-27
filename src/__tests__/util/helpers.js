@@ -29,8 +29,8 @@ export function test (spec, input, callback, only = false) {
 
 test.only = (spec, input, callback) => test(spec, input, callback, true);
 
-export const throws = (spec, input) => {
+export const throws = (spec, input, validator) => {
     ava(`${spec} (throws)`, t => {
-        t.throws(() => parser().processSync(input));
+        t.throws(() => parser().processSync(input), validator);
     });
 };

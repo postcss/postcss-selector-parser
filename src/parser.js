@@ -427,7 +427,7 @@ export default class Parser {
     }
 
     parentheses () {
-        const last = this.current.last;
+        let last = this.current.last;
         let balanced = 1;
         this.position ++;
         if (last && last.type === types.PSEUDO) {
@@ -452,7 +452,11 @@ export default class Parser {
             }
             this.current = cache;
         } else {
-            last.appendToPropertyAndEscape("value", '(', '(');
+            // I think this case should be an error. It's used to implement a basic parse of media queries
+            // but I don't think it's a good idea.
+            let parenStart = this.currToken;
+            let parenValue = "(";
+            let parenEnd;
             while (this.position < this.tokens.length && balanced) {
                 if (this.currToken[TOKEN.TYPE] === tokens.openParenthesis) {
                     balanced ++;
@@ -460,9 +464,23 @@ export default class Parser {
                 if (this.currToken[TOKEN.TYPE] === tokens.closeParenthesis) {
                     balanced --;
                 }
-                let additionalValue = this.parseParenthesisToken(this.currToken);
-                last.appendToPropertyAndEscape("value", additionalValue, additionalValue);
+                parenEnd = this.currToken;
+                parenValue += this.parseParenthesisToken(this.currToken);
                 this.position ++;
+            }
+            if (last) {
+                last.appendToPropertyAndEscape("value", parenValue, parenValue);
+            } else {
+                this.newNode(new Str({
+                    value: parenValue,
+                    source: getSource(
+                        parenStart[TOKEN.START_LINE],
+                        parenStart[TOKEN.START_COL],
+                        parenEnd[TOKEN.END_LINE],
+                        parenEnd[TOKEN.END_COL],
+                    ),
+                    sourceIndex: parenStart[TOKEN.START_POS],
+                }));
             }
         }
         if (balanced) {
@@ -727,9 +745,9 @@ export default class Parser {
         const content = this.content(token);
         if (token[TOKEN.TYPE] === tokens.space) {
             return this.requiredSpace(content);
+        } else {
+            return content;
         }
-
-        return content;
     }
 
     newNode (node, namespace) {

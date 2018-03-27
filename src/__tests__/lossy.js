@@ -77,3 +77,4 @@ ava('@words - space before', testLossy, '  @media', '@media');
 ava('@words - space after', testLossy, '@media  ', '@media');
 ava('@words - maintains space between', testLossy, '@media (min-width: 700px) and (orientation: landscape)', '@media (min-width: 700px) and (orientation: landscape)');
 ava('@words - extraneous space between', testLossy, '@media  (min-width:  700px)  and   (orientation:   landscape)', '@media (min-width: 700px) and (orientation: landscape)');
+ava('@words - multiple', testLossy, '@media (min-width: 700px), (min-height: 400px)', '@media (min-width: 700px),(min-height: 400px)');

@@ -410,6 +410,13 @@ export default class Parser {
     }
 
     nesting () {
+        if (this.nextToken) {
+            let nextContent = this.content(this.nextToken);
+            if (nextContent === "|") {
+                this.position++;
+                return;
+            }
+        }
         const current = this.currToken;
         this.newNode(new Nesting({
             value: this.content(),

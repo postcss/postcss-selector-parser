@@ -34,3 +34,10 @@ test('&_foo', '&_foo', (t, tree) => {
     t.deepEqual(tree.nodes[0].nodes[1].value, '_foo');
     t.deepEqual(tree.nodes[0].nodes[1].type, 'tag');
 });
+
+test('&|foo', '&|foo', (t, tree) => {
+    let element = tree.nodes[0].nodes[0];
+    t.deepEqual(element.value, 'foo');
+    t.deepEqual(element.type, 'tag');
+    t.deepEqual(element.namespace, '&');
+});

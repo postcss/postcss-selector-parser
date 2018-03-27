@@ -247,9 +247,13 @@ export default class Parser {
                         node.raws.value = (oldRawValue || oldValue) + content;
                     }
                     lastAdded = 'value';
-                } else if (content === 'i') {
+                } else {
+                    let insensitive = (content === 'i');
                     if (node.value && (node.quoteMark || spaceAfterMeaningfulToken)) {
                         node.insensitive = true;
+                        if (!insensitive) {
+                            node.raws.insensitiveFlag = content;
+                        }
                         lastAdded = 'insensitive';
                         if (spaceBefore) {
                             ensureObject(node, 'spaces', 'insensitive');
@@ -264,9 +268,9 @@ export default class Parser {
                         }
                     } else if (node.value) {
                         lastAdded = 'value';
-                        node.value += 'i';
+                        node.value += content;
                         if (node.raws.value) {
-                            node.raws.value += 'i';
+                            node.raws.value += content;
                         }
                     }
                 }

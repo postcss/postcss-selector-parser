@@ -385,6 +385,6 @@ test('comments within attribute selectors (4)', '[ /*before*/ href /* after-attr
     t.is(attr.raws.value, undefined);
 });
 
-// test('attributes with escapes', '[ng\\:cloak]', (t, tree) => {
-//     t.deepEqual(tree.toString(), '[ng\\:cloak]');
-// });
+test('non standard modifiers', '[href="foo" y]', (t, tree) => {
+    t.deepEqual(tree.toString(), '[href="foo" y]');
+});

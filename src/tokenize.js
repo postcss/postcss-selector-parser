@@ -93,6 +93,16 @@ function consumeEscape (css, start) {
     return next;
 }
 
+export const FIELDS = {
+    TYPE: 0,
+    START_LINE: 1,
+    START_COL: 2,
+    END_LINE: 3,
+    END_COL: 4,
+    START_POS: 5,
+    END_POS: 6,
+};
+
 export default function tokenize (input) {
     const tokens   = [];
     let css        = input.css.valueOf();

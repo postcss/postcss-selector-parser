@@ -1,3 +1,5 @@
+import {ensureObject} from "../util";
+
 let cloneNode = function (obj, parent) {
     if (typeof obj !== 'object') {
         return obj;
@@ -125,11 +127,37 @@ export default class Node {
         return (this.raws && this.raws[name]) || this[name];
     }
 
+    get rawSpaceBefore () {
+        let rawSpace = this.raws && this.raws.spaces && this.raws.spaces.before;
+        if (rawSpace === undefined) {
+            rawSpace = this.spaces && this.spaces.before;
+        }
+        return rawSpace || "";
+    }
+
+    set rawSpaceBefore (raw) {
+        ensureObject(this, "raws", "spaces");
+        this.raws.spaces.before = raw;
+    }
+
+    get rawSpaceAfter () {
+        let rawSpace = this.raws && this.raws.spaces && this.raws.spaces.after;
+        if (rawSpace === undefined) {
+            rawSpace = this.spaces.after;
+        }
+        return rawSpace || "";
+    }
+
+    set rawSpaceAfter (raw) {
+        ensureObject(this, "raws", "spaces");
+        this.raws.spaces.after = raw;
+    }
+
     toString () {
         return [
-            this.spaces.before,
+            this.rawSpaceBefore,
             String(this.stringifyProperty("value")),
-            this.spaces.after,
+            this.rawSpaceAfter,
         ].join('');
     }
 }

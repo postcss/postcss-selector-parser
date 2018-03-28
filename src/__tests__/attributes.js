@@ -388,3 +388,9 @@ test('comments within attribute selectors (4)', '[ /*before*/ href /* after-attr
 test('non standard modifiers', '[href="foo" y]', (t, tree) => {
     t.deepEqual(tree.toString(), '[href="foo" y]');
 });
+
+// This is a test case that fails in prettier. Not sure how to support it because I don't know that the range of allowed syntax is.
+// And even then, I'm not sure it makes sense.
+// test.skip('[nonstandard] function as attribute value', "[id=func('foo')]", (t, tree) => {
+//     t.deepEqual(tree.toString(), '[href="foo" y]');
+// });

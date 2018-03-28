@@ -87,3 +87,21 @@ test('trailing combinator & spaces', 'p +        ', (t, tree) => {
     t.deepEqual(tree.nodes[0].nodes[0].value, 'p', 'should be a paragraph');
     t.deepEqual(tree.nodes[0].nodes[1].value, '+', 'should have a combinator');
 });
+test('ending in comment has no trailing combinator', ".bar /* comment 3 */", (t, tree) => {
+    let nodeTypes = tree.nodes[0].map(n => n.type);
+    t.deepEqual(nodeTypes, ["class"]);
+});
+test('with spaces and a comment has only one combinator', ".bar /* comment 3 */ > .foo", (t, tree) => {
+    let nodeTypes = tree.nodes[0].map(n => n.type);
+    t.deepEqual(nodeTypes, ["class", "combinator", "class"]);
+});
+
+test('with a meaningful comment in the middle of a compound selector', "div/* wtf */.foo", (t, tree) => {
+    let nodeTypes = tree.nodes[0].map(n => n.type);
+    t.deepEqual(nodeTypes, ["tag", "comment", "class"]);
+});
+
+test('with a comment in the middle of a descendant selector', "div/* wtf */ .foo", (t, tree) => {
+    let nodeTypes = tree.nodes[0].map(n => n.type);
+    t.deepEqual(nodeTypes, ["tag", "comment", "combinator", "class"]);
+});

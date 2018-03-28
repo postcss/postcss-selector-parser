@@ -157,6 +157,8 @@ declare namespace parser {
         spaces: Spaces;
         source?: NodeSource;
         sourceIndex: number;
+        rawSpaceBefore: string;
+        rawSpaceAfter: string;
         remove(): Node;
         replaceWith(...nodes: Node[]): Node;
         next(): Node;

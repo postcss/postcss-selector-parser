@@ -9,9 +9,9 @@ export default class ID extends Node {
 
     toString () {
         return [
-            this.spaces.before,
+            this.rawSpaceBefore,
             String('#' + this.stringifyProperty("value")),
-            this.spaces.after,
+            this.rawSpaceAfter,
         ].join('');
     }
 }

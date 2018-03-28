@@ -21,6 +21,19 @@ import * as tokens from './tokenTypes';
 import * as types from './selectors/types';
 import {unesc, getProp, ensureObject} from './util';
 
+const WHITESPACE_TOKENS = {
+    [tokens.space]: true,
+    [tokens.cr]: true,
+    [tokens.feed]: true,
+    [tokens.newline]: true,
+    [tokens.tab]: true,
+};
+
+const WHITESPACE_EQUIV_TOKENS = {
+    ...WHITESPACE_TOKENS,
+    [tokens.comment]: true,
+};
+
 function getSource (startLine, startColumn, endLine, endColumn) {
     return {
         start: {
@@ -56,6 +69,20 @@ function unescapeProp (node, prop) {
         node[prop] = unesc(value);
     }
     return node;
+}
+
+function convertWhitespaceNodesToSpace (nodes) {
+    let space = "";
+    let rawSpace = "";
+    nodes.forEach(n => {
+        space += n.spaces.before + n.spaces.after;
+        rawSpace += n.toString();
+    });
+    if (rawSpace === space) {
+        rawSpace = undefined;
+    }
+    let result = {space, rawSpace};
+    return result;
 }
 
 export default class Parser {
@@ -134,12 +161,12 @@ export default class Parser {
 
             switch (token[TOKEN.TYPE]) {
             case tokens.space:
-                if (
-                    len === 1 ||
-                    pos === 0 && this.content(next) === '|'
-                ) {
-                    return this.expected('attribute', token[TOKEN.START_POS], content);
-                }
+                // if (
+                //     len === 1 ||
+                //     pos === 0 && this.content(next) === '|'
+                // ) {
+                //     return this.expected('attribute', token[TOKEN.START_POS], content);
+                // }
                 spaceAfterMeaningfulToken = true;
                 if (this.options.lossy) {
                     break;
@@ -332,11 +359,99 @@ export default class Parser {
         this.position ++;
     }
 
+    /**
+     * return a node containing meaningless garbage up to (but not including) the specified token position.
+     * if the token position is negative, all remaining tokens are consumed.
+     *
+     * This returns an array containing a single string node if all whitespace,
+     * otherwise an array of comment nodes with space before and after.
+     *
+     * These tokens are not added to the current selector, the caller can add them or use them to amend
+     * a previous node's space metadata.
+     *
+     * In lossy mode, this returns only comments.
+     */
+    parseWhitespaceEquivalentTokens (stopPosition) {
+        if (stopPosition < 0) {
+            stopPosition = this.tokens.length;
+        }
+        let startPosition = this.position;
+        let nodes = [];
+        let space = "";
+        let lastComment = undefined;
+        do {
+            if (WHITESPACE_TOKENS[this.currToken[TOKEN.TYPE]]) {
+                if (!this.options.lossy) {
+                    space += this.content();
+                }
+            } else if (this.currToken[TOKEN.TYPE] === tokens.comment) {
+                let spaces = {};
+                if (space) {
+                    spaces.before = space;
+                    space = "";
+                }
+                lastComment = new Comment({
+                    value: this.content(),
+                    source: getTokenSource(this.currToken),
+                    sourceIndex: this.currToken[TOKEN.START_POS],
+                    spaces,
+                });
+                nodes.push(lastComment);
+            }
+        } while (++this.position < stopPosition);
+
+        if (space) {
+            if (lastComment) {
+                lastComment.spaces.after = space;
+            } else if (!this.options.lossy) {
+                let firstToken = this.tokens[startPosition];
+                let lastToken = this.tokens[this.position - 1];
+                nodes.push(new Str({
+                    value: '',
+                    source: getSource(
+                        firstToken[TOKEN.START_LINE],
+                        firstToken[TOKEN.START_COL],
+                        lastToken[TOKEN.END_LINE],
+                        lastToken[TOKEN.END_COL],
+                    ),
+                    sourceIndex: firstToken[TOKEN.START_POS],
+                    spaces: {before: space, after: ''},
+                }));
+            }
+        }
+        return nodes;
+    }
+
     combinator () {
-        const current = this.currToken;
         if (this.content() === '|') {
             return this.namespace();
         }
+        // We need to decide between a space that's a descendant combinator and meaningless whitespace at the end of a selector.
+        let nextSigTokenPos = this.locateNextMeaningfulToken(this.position);
+
+        if (nextSigTokenPos < 0 || this.tokens[nextSigTokenPos][TOKEN.TYPE] === tokens.comma) {
+            let nodes = this.parseWhitespaceEquivalentTokens(nextSigTokenPos);
+            if (nodes.length > 0) {
+                let last = this.current.last;
+                if (last) {
+                    let {space, rawSpace} = convertWhitespaceNodesToSpace(nodes);
+                    if (rawSpace !== undefined) {
+                        last.rawSpaceAfter += rawSpace;
+                    }
+                    last.spaces.after += space;
+                } else {
+                    nodes.forEach(n => this.newNode(n));
+                }
+            }
+            return;
+        }
+
+        let spaceBeforeCombinator = undefined;
+        if (nextSigTokenPos > this.position && this.tokens[nextSigTokenPos][TOKEN.TYPE] === tokens.combinator) {
+            spaceBeforeCombinator = convertWhitespaceNodesToSpace(this.parseWhitespaceEquivalentTokens(nextSigTokenPos));
+        }
+
+        const current = this.currToken;
         const node = new Combinator({
             value: '',
             source: getTokenSource(current),
@@ -358,6 +473,12 @@ export default class Parser {
                 node.value = this.requiredSpace(content);
             }
             this.position ++;
+        }
+        if (spaceBeforeCombinator) {
+            if (spaceBeforeCombinator.rawSpace !== undefined) {
+                node.rawSpaceBefore = spaceBeforeCombinator.rawSpace + node.rawSpaceBefore;
+            }
+            node.spaces.before = spaceBeforeCombinator.space + node.spaces.before;
         }
         return this.newNode(node);
     }
@@ -785,5 +906,22 @@ export default class Parser {
 
     get prevToken () {
         return this.tokens[this.position - 1];
+    }
+
+    /**
+     * returns the index of the next non-whitespace, non-comment token.
+     * returns -1 if no meaningful token is found.
+     */
+    locateNextMeaningfulToken (startPosition = this.position + 1) {
+        let searchPosition = startPosition;
+        while (searchPosition < this.tokens.length) {
+            if (WHITESPACE_EQUIV_TOKENS[this.tokens[searchPosition][TOKEN.TYPE]]) {
+                searchPosition++;
+                continue;
+            } else {
+                return searchPosition;
+            }
+        }
+        return -1;
     }
 }

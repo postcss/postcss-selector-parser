@@ -73,6 +73,9 @@ ava('pseudo - negated with combinators (1)', testLossy, 'h1:not(.heading > .titl
 ava('pseudo - negated with combinators (2)', testLossy, '.foo:nth-child(2n + 1)', '.foo:nth-child(2n+1)');
 ava('pseudo - extra whitespace', testLossy, 'a:not(   h2   )', 'a:not(h2)');
 
+ava('comments - comment inside descendant selector', testLossy, "div /* wtf */.foo", "div /* wtf */.foo");
+ava('comments - comment inside complex selector', testLossy, "div /* wtf */ > .foo", "div/* wtf */>.foo");
+ava('comments - comment inside compound selector with space', testLossy, "div    /* wtf */    .foo", "div /* wtf */ .foo");
 ava('@words - space before', testLossy, '  @media', '@media');
 ava('@words - space after', testLossy, '@media  ', '@media');
 ava('@words - maintains space between', testLossy, '@media (min-width: 700px) and (orientation: landscape)', '@media (min-width: 700px) and (orientation: landscape)');

@@ -369,7 +369,7 @@ export default class Attribute extends Namespace {
 
     toString () {
         let selector = [
-            this.spaces.before,
+            this.rawSpaceBefore,
             '[',
         ];
 
@@ -390,7 +390,7 @@ export default class Attribute extends Namespace {
         }
 
         selector.push(']');
-        selector.push(this.spaces.after);
+        selector.push(this.rawSpaceAfter);
         return selector.join('');
     }
 }

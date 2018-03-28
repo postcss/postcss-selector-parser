@@ -27,7 +27,6 @@ test('string after colon (incorrect pseudo)', showCode, 'a b:"wow" {}');
 
 // attribute selectors
 
-test('bad whitespace instead of namespace token', showCode, '[  |href=test] {}');
 test('bad string attribute', showCode, '["hello"] {}');
 test('bad string attribute with value', showCode, '["foo"=bar] {}');
 test('bad parentheses', showCode, '[foo=(bar)] {}');

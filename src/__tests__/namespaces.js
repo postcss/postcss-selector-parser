@@ -50,7 +50,12 @@ test('match namespace inside attribute selector (3)', '[*|href]', (t, tree) => {
     t.deepEqual(tree.nodes[0].nodes[0].attribute, 'href');
 });
 
-test('match namespace inside attribute selector (4)', '[|href]', (t, tree) => {
+test('match default namespace inside attribute selector', '[|href]', (t, tree) => {
+    t.deepEqual(tree.nodes[0].nodes[0].namespace, true);
+    t.deepEqual(tree.nodes[0].nodes[0].attribute, 'href');
+});
+
+test('match default namespace inside attribute selector with spaces', '[ |href ]', (t, tree) => {
     t.deepEqual(tree.nodes[0].nodes[0].namespace, true);
     t.deepEqual(tree.nodes[0].nodes[0].attribute, 'href');
 });

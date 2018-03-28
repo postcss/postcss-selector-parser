@@ -10,10 +10,10 @@ export default class Pseudo extends Container {
     toString () {
         let params = this.length ? '(' + this.map(String).join(',') + ')' : '';
         return [
-            this.spaces.before,
+            this.rawSpaceBefore,
             this.stringifyProperty("value"),
             params,
-            this.spaces.after,
+            this.rawSpaceAfter,
         ].join('');
     }
 }

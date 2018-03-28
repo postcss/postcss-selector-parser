@@ -13,3 +13,10 @@ test('multiple comments and other things', 'h1/*test*/h2/*test*/.test/*test*/', 
     t.deepEqual(tree.nodes[0].nodes[4].type, 'class', 'should have a class name');
     t.deepEqual(tree.nodes[0].nodes[5].type, 'comment', 'should have a comment');
 });
+
+test('ending in comment', ".bar /* comment 3 */", (t, tree) => {
+    let classname = tree.nodes[0].nodes[0];
+    t.deepEqual(classname.type, 'class', 'should have a tag');
+    t.deepEqual(classname.spaces.after, ' ');
+    t.deepEqual(classname.raws.spaces.after, ' /* comment 3 */');
+});

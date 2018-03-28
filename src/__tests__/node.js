@@ -20,3 +20,54 @@ test('node#replaceWith', (t) => {
     });
     t.deepEqual(out, '#test.test');
 });
+
+test('Node#appendToPropertyAndEscape', (t) => {
+    let out = parse('.fo\\o', (selectors) => {
+        let className = selectors.first.first;
+        t.deepEqual(className.raws, {value: "fo\\o"});
+        className.appendToPropertyAndEscape("value", "bar", "ba\\r");
+        t.deepEqual(className.raws, {value: "fo\\oba\\r"});
+    });
+    t.deepEqual(out, '.fo\\oba\\r');
+});
+
+test('Node#setPropertyAndEscape with existing raws', (t) => {
+    let out = parse('.fo\\o', (selectors) => {
+        let className = selectors.first.first;
+        t.deepEqual(className.raws, {value: "fo\\o"});
+        className.setPropertyAndEscape("value", "bar", "ba\\r");
+        t.deepEqual(className.raws, {value: "ba\\r"});
+    });
+    t.deepEqual(out, '.ba\\r');
+});
+
+test('Node#setPropertyAndEscape without existing raws', (t) => {
+    let out = parse('.foo', (selectors) => {
+        let className = selectors.first.first;
+        t.deepEqual(className.raws, undefined);
+        className.setPropertyAndEscape("value", "bar", "ba\\r");
+        t.deepEqual(className.raws, {value: "ba\\r"});
+    });
+    t.deepEqual(out, '.ba\\r');
+});
+
+test('Node#setPropertyWithoutEscape with existing raws', (t) => {
+    let out = parse('.fo\\o', (selectors) => {
+        let className = selectors.first.first;
+        t.deepEqual(className.raws, {value: "fo\\o"});
+        className.setPropertyWithoutEscape("value", "w+t+f");
+        t.deepEqual(className.raws, {});
+    });
+    t.deepEqual(out, '.w+t+f');
+});
+
+test('Node#setPropertyWithoutEscape without existing raws', (t) => {
+    let out = parse('.foo', (selectors) => {
+        let className = selectors.first.first;
+        t.deepEqual(className.raws, undefined);
+        className.setPropertyWithoutEscape("value", "w+t+f");
+        t.deepEqual(className.raws, {});
+        t.deepEqual(className.value, "w+t+f");
+    });
+    t.deepEqual(out, '.w+t+f');
+});

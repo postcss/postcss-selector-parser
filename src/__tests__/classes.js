@@ -36,3 +36,13 @@ test('Less interpolation within a class', '.foo@{bar}', (t, tree) => {
     t.deepEqual(tree.nodes[0].nodes[0].type, 'class');
     t.deepEqual(tree.nodes[0].nodes[0].value, 'foo@{bar}');
 });
+
+test('ClassName#set value', (t) => {
+    let out = parse('.fo\\o', (selectors) => {
+        let className = selectors.first.first;
+        t.deepEqual(className.raws, {value: "fo\\o"});
+        className.value = "bar";
+        t.deepEqual(className.raws, {});
+    });
+    t.deepEqual(out, '.bar');
+});

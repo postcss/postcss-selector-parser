@@ -99,7 +99,7 @@ export default class Node {
      * characters to be directly inserted into css output.
      * @param {string} name the property to set
      * @param {any} value the unescaped value of the property
-     * @param {string} valueEscaped optional. the escaped value of the property.
+     * @param {string} valueEscaped the escaped value of the property.
      */
     setPropertyAndEscape (name, value, valueEscaped) {
         if (!this.raws) {

@@ -370,7 +370,7 @@ declare namespace parser {
          *
          * You can also change the quotation used for the current value by setting quoteMark.
          **/
-        quoteValue(options?: SmartQuoteMarkOptions): string;
+        getQuotedValue(options?: SmartQuoteMarkOptions): string;
 
         /**
          * Set the unescaped value with the specified quotation options. The value

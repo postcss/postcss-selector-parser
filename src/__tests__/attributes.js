@@ -73,15 +73,15 @@ test('attribute selector with quoted value', '[name="james"]', (t, tree) => {
     t.deepEqual(attr.value, 'james');
     t.deepEqual(attr.quoteMark, '"');
     t.truthy(attr.quoted);
-    t.deepEqual(attr.quoteValue(), '"james"');
+    t.deepEqual(attr.getQuotedValue(), '"james"');
 });
 
 test('attribute selector with escaped quote', '[title="Something \\"weird\\""]', (t, tree) => {
     let attr = tree.nodes[0].nodes[0];
     t.deepEqual(attr.value, 'Something "weird"');
-    t.deepEqual(attr.quoteValue(), '\"Something \\"weird\\"\"');
-    t.deepEqual(attr.quoteValue({smart: true}), '\'Something "weird"\'');
-    t.deepEqual(attr.quoteValue({quoteMark: null}), 'Something\\ \\"weird\\"');
+    t.deepEqual(attr.getQuotedValue(), '\"Something \\"weird\\"\"');
+    t.deepEqual(attr.getQuotedValue({smart: true}), '\'Something "weird"\'');
+    t.deepEqual(attr.getQuotedValue({quoteMark: null}), 'Something\\ \\"weird\\"');
     t.deepEqual(attr.quoteMark, '"');
     t.truthy(attr.quoted);
     t.deepEqual(attr.raws.value, '"Something \\"weird\\""');
@@ -169,7 +169,7 @@ test('attribute selector with quoted value containing "="', '[data-weird-attr="S
     t.deepEqual(tree.nodes[0].nodes[0].operator, '=');
     t.deepEqual(tree.nodes[0].nodes[0].value, 'Something=weird');
     t.is(tree.nodes[0].nodes[0].quoteMark, '"');
-    t.deepEqual(tree.nodes[0].nodes[0].quoteValue(), '"Something=weird"');
+    t.deepEqual(tree.nodes[0].nodes[0].getQuotedValue(), '"Something=weird"');
 });
 
 let selector = '[data-weird-attr*="Something=weird"],' +
@@ -377,7 +377,7 @@ test('comments within attribute selectors (4)', '[ /*before*/ href /* after-attr
     let attr = tree.nodes[0].nodes[0];
     t.deepEqual(attr.attribute, 'href');
     t.deepEqual(attr.value, 'test');
-    t.deepEqual(attr.quoteValue(), 'test');
+    t.deepEqual(attr.getQuotedValue(), 'test');
     t.deepEqual(attr.raws.value, 'te/*inside-value*/st');
     t.deepEqual(attr.raws.spaces.value.after, '/* wow */ /*omg*/');
     t.truthy(attr.insensitive);

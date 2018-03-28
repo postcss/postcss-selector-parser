@@ -275,10 +275,11 @@ export default class Parser {
                     }
                     lastAdded = 'value';
                 } else {
-                    let insensitive = (content === 'i');
+                    let insensitive = (content === 'i' || content === "I");
                     if (node.value && (node.quoteMark || spaceAfterMeaningfulToken)) {
-                        node.insensitive = true;
-                        if (!insensitive) {
+                        node.insensitive = insensitive;
+                        if (!insensitive || content === "I") {
+                            ensureObject(node, 'raws');
                             node.raws.insensitiveFlag = content;
                         }
                         lastAdded = 'insensitive';

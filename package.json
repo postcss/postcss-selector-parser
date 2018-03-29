@@ -34,6 +34,7 @@
   "scripts": {
     "pretest": "eslint src",
     "prepublish": "del-cli dist && BABEL_ENV=publish babel src --out-dir dist --ignore /__tests__/",
+    "lintfix": "eslint --fix src",
     "report": "nyc report --reporter=html",
     "test": "nyc ava src/__tests__/*.js",
     "testone": "ava"

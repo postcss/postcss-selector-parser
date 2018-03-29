@@ -67,3 +67,12 @@ test('namespace with qualified id selector', 'ns|h1#foo', (t, tree) => {
 test('namespace with qualified class selector', 'ns|h1.foo', (t, tree) => {
     t.deepEqual(tree.nodes[0].nodes[0].namespace, 'ns');
 });
+
+test('ns alias for namespace', 'f\\oo|h1.foo', (t, tree) => {
+    let tag = tree.nodes[0].nodes[0];
+    t.deepEqual(tag.namespace, 'foo');
+    t.deepEqual(tag.ns, 'foo');
+    tag.ns = "bar";
+    t.deepEqual(tag.namespace, 'bar');
+    t.deepEqual(tag.ns, 'bar');
+});

@@ -273,22 +273,6 @@ export default class Attribute extends Namespace {
         }
     }
 
-    get namespace () {
-        return this._namespace;
-    }
-
-    set namespace (v) {
-        if (v === "*") {
-            // Don't escape this special value for the namespace.
-            if (this._constructed) {
-                delete this.raws.namespace;
-            }
-        } else {
-            this._handleEscapes("namespace", v);
-        }
-        this._namespace = v;
-    }
-
     get attribute () {
         return this._attribute;
     }

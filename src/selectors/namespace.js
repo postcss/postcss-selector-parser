@@ -1,3 +1,5 @@
+import cssesc from 'cssesc';
+import {ensureObject} from '../util';
 import Node from './node';
 
 export default class Namespace extends Node {
@@ -5,8 +7,20 @@ export default class Namespace extends Node {
         return this._namespace;
     }
     set namespace (namespace) {
+        if (namespace === true || namespace === "*" || namespace === "&") {
+            this._namespace = namespace;
+            if (this.raws) {
+                delete this.raws.namespace;
+            }
+            return;
+        }
+
+        let escaped = cssesc(namespace, {isIdentifier: true});
         this._namespace = namespace;
-        if (this.raws) {
+        if (escaped !== namespace) {
+            ensureObject(this, "raws");
+            this.raws.namespace = escaped;
+        } else if (this.raws) {
             delete this.raws.namespace;
         }
     }
@@ -14,10 +28,7 @@ export default class Namespace extends Node {
         return this._namespace;
     }
     set ns (namespace) {
-        this._namespace = namespace;
-        if (this.raws) {
-            delete this.raws.namespace;
-        }
+        this.namespace = namespace;
     }
 
     get namespaceString () {

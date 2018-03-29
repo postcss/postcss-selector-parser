@@ -63,10 +63,10 @@ function unescapeProp (node, prop) {
     }
     if (value.indexOf("\\") !== -1) {
         ensureObject(node, 'raws');
+        node[prop] = unesc(value);
         if (node.raws[prop] === undefined) {
             node.raws[prop] = value;
         }
-        node[prop] = unesc(value);
     }
     return node;
 }
@@ -761,7 +761,8 @@ export default class Parser {
                     source,
                     sourceIndex,
                 };
-                node = new Tag(unescapeProp(tagOpts, "value"));
+                unescapeProp(tagOpts, "value");
+                node = new Tag(tagOpts);
             }
             this.newNode(node, namespace);
             // Ensure that the namespace is used only once
@@ -885,6 +886,7 @@ export default class Parser {
                 namespace = true;
             }
             node.namespace = namespace;
+            unescapeProp(node, "namespace");
         }
         if (this.spaces) {
             node.spaces.before = this.spaces;

@@ -1,5 +1,7 @@
+import process from 'process';
 import util from 'util';
 import ava from 'ava';
+import semver from 'semver';
 import parser from '../../index';
 
 export const parse = (input, transform) => {
@@ -34,3 +36,11 @@ export const throws = (spec, input, validator) => {
         t.throws(() => parser().processSync(input), validator);
     });
 };
+
+export function nodeVersionAtLeast (version) {
+    return semver.gte(process.versions.node, version);
+}
+
+export function nodeVersionBefore (version) {
+    return semver.lt(process.versions.node, version);
+}

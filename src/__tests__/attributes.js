@@ -1,6 +1,6 @@
 import process from "process";
 import Attribute from '../selectors/attribute';
-import {test} from './util/helpers';
+import {test, nodeVersionAtLeast, nodeVersionBefore} from './util/helpers';
 
 process.throwDeprecation = true;
 
@@ -397,7 +397,9 @@ test('non standard modifiers', '[href="foo" y]', (t, tree) => {
     t.deepEqual(tree.toString(), '[href="foo" y]');
 });
 
-test('deprecated constructor', '', (t) => {
+const testDeprecation = nodeVersionAtLeast('7.0.0') || nodeVersionBefore('6.0.0') ? test : test.skip;
+
+testDeprecation('deprecated constructor', '', (t) => {
     t.throws(
         () => {
             return new Attribute({value: '"foo"', attribute: "data-bar"});
@@ -406,7 +408,7 @@ test('deprecated constructor', '', (t) => {
     );
 });
 
-test('deprecated get of raws.unquoted ', '', (t) => {
+testDeprecation('deprecated get of raws.unquoted ', '', (t) => {
     t.throws(
         () => {
             let attr = new Attribute({value: 'foo', quoteMark: '"', attribute: "data-bar"});
@@ -416,7 +418,7 @@ test('deprecated get of raws.unquoted ', '', (t) => {
     );
 });
 
-test('deprecated set of raws.unquoted ', '', (t) => {
+testDeprecation('deprecated set of raws.unquoted ', '', (t) => {
     t.throws(
         () => {
             let attr = new Attribute({value: 'foo', quoteMark: '"', attribute: "data-bar"});
@@ -426,7 +428,7 @@ test('deprecated set of raws.unquoted ', '', (t) => {
     );
 });
 
-test('smart quotes', '[data-foo=bar]', (t, tree) => {
+testDeprecation('smart quotes', '[data-foo=bar]', (t, tree) => {
     let attr = tree.nodes[0].nodes[0];
     attr.setValue('changed', {quoteMark: '"'});
     t.deepEqual(attr.toString(), '[data-foo="changed"]');

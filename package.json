@@ -20,7 +20,8 @@
     "glob": "^7.0.3",
     "minimist": "^1.2.0",
     "nyc": "^11.4.1",
-    "postcss": "^6.0.6"
+    "postcss": "^6.0.6",
+    "semver": "^5.5.0"
   },
   "main": "dist/index.js",
   "types": "postcss-selector-parser.d.ts",

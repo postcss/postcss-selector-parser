@@ -95,7 +95,7 @@ export default class Attribute extends Namespace {
      *     and the other options specified here. See the `smartQuoteMark()`
      *     method.
      **/
-    quoteValue (options = {}) {
+    getQuotedValue (options = {}) {
         let quoteMark = this._determineQuoteMark(options);
         let cssescopts = CSSESC_QUOTE_OPTIONS[quoteMark];
         let escaped = cssesc(this._value, cssescopts);

@@ -6,21 +6,16 @@ export const parse = (input, transform) => {
     return parser(transform).processSync(input);
 };
 
-export function test (spec, input, callback, only = false, disabled = false) {
+export function test (spec, input, callback, only = false, disabled = false, serial = false) {
     let tester = only ? ava.only : ava;
-    if (disabled) {
-        tester = ava.skip;
-    }
-    if (only) {
-        let e = new Error();
-        console.error(e);
-    }
+    tester = disabled ? tester.skip : tester;
+    tester = serial ? tester.serial : tester;
 
     if (callback) {
         tester(`${spec} (tree)`, t => {
             let tree = parser().astSync(input);
             let debug = util.inspect(tree, false, null);
-            callback.call(this, t, tree, debug);
+            return callback.call(this, t, tree, debug);
         });
     }
 
@@ -32,6 +27,7 @@ export function test (spec, input, callback, only = false, disabled = false) {
 
 test.only = (spec, input, callback) => test(spec, input, callback, true);
 test.skip = (spec, input, callback) => test(spec, input, callback, false, true);
+test.serial = (spec, input, callback) => test(spec, input, callback, false, false, true);
 
 export const throws = (spec, input, validator) => {
     ava(`${spec} (throws)`, t => {

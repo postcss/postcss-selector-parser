@@ -113,7 +113,8 @@ export default class Attribute extends Namespace {
      */
     setValue (value, options = {}) {
         this._value = value;
-        this.quoteMark = this._determineQuoteMark(options);
+        this._quoteMark = this._determineQuoteMark(options);
+        this._syncRawValue();
     }
 
     /**
@@ -137,7 +138,17 @@ export default class Attribute extends Namespace {
             if (escaped === v) {
                 return Attribute.NO_QUOTE;
             } else {
-                return this.preferredQuoteMark(options);
+                let pref = this.preferredQuoteMark(options);
+                if (pref === Attribute.NO_QUOTE) {
+                    // pick a quote mark that isn't none and see if it's smaller
+                    let quote = this.quoteMark || options.quoteMark || Attribute.DOUBLE_QUOTE;
+                    let opts = CSSESC_QUOTE_OPTIONS[quote];
+                    let quoteValue = cssesc(v, opts);
+                    if (quoteValue.length < escaped.length) {
+                        return quote;
+                    }
+                }
+                return pref;
             }
         } else if (numDoubleQuotes === numSingleQuotes) {
             return this.preferredQuoteMark(options);
@@ -199,13 +210,17 @@ export default class Attribute extends Namespace {
             return;
         }
         if (this._quoteMark !== quoteMark) {
-            let rawValue = cssesc(this._value, CSSESC_QUOTE_OPTIONS[quoteMark]);
-            if (rawValue === this._value) {
-                delete this.raws.value;
-            } else {
-                this.raws.value = rawValue;
-            }
             this._quoteMark = quoteMark;
+            this._syncRawValue();
+        }
+    }
+
+    _syncRawValue () {
+        let rawValue = cssesc(this._value, CSSESC_QUOTE_OPTIONS[this.quoteMark]);
+        if (rawValue === this._value) {
+            delete this.raws.value;
+        } else {
+            this.raws.value = rawValue;
         }
     }
 

@@ -1,4 +1,8 @@
+import process from "process";
+import Attribute from '../selectors/attribute';
 import {test} from './util/helpers';
+
+process.throwDeprecation = true;
 
 test('attribute selector', '[href]', (t, tree) => {
     t.deepEqual(tree.nodes[0].nodes[0].attribute, 'href');
@@ -393,8 +397,51 @@ test('non standard modifiers', '[href="foo" y]', (t, tree) => {
     t.deepEqual(tree.toString(), '[href="foo" y]');
 });
 
-// This is a test case that fails in prettier. Not sure how to support it because I don't know that the range of allowed syntax is.
-// And even then, I'm not sure it makes sense.
-// test.skip('[nonstandard] function as attribute value', "[id=func('foo')]", (t, tree) => {
-//     t.deepEqual(tree.toString(), '[href="foo" y]');
-// });
+test('deprecated constructor', '', (t) => {
+    t.throws(
+        () => {
+            return new Attribute({value: '"foo"', attribute: "data-bar"});
+        },
+        "Constructing an Attribute selector with a value without specifying quoteMark is deprecated. Note: The value should be unescaped now."
+    );
+});
+
+test('deprecated get of raws.unquoted ', '', (t) => {
+    t.throws(
+        () => {
+            let attr = new Attribute({value: 'foo', quoteMark: '"', attribute: "data-bar"});
+            return attr.raws.unquoted;
+        },
+        "attr.raws.unquoted is deprecated. Call attr.value instead."
+    );
+});
+
+test('deprecated set of raws.unquoted ', '', (t) => {
+    t.throws(
+        () => {
+            let attr = new Attribute({value: 'foo', quoteMark: '"', attribute: "data-bar"});
+            attr.raws.unquoted = 'fooooo';
+        },
+        "Setting attr.raws.unquoted is deprecated and has no effect. attr.value is unescaped by default now."
+    );
+});
+
+test('smart quotes', '[data-foo=bar]', (t, tree) => {
+    let attr = tree.nodes[0].nodes[0];
+    attr.setValue('changed', {quoteMark: '"'});
+    t.deepEqual(attr.toString(), '[data-foo="changed"]');
+    attr.setValue('changed again', {quoteMark: "'", preferCurrentQuoteMark: true});
+    t.deepEqual(attr.toString(), '[data-foo="changed again"]');
+    attr.setValue('smart-ident', {smart: true});
+    t.deepEqual(attr.toString(), '[data-foo=smart-ident]');
+    attr.setValue('smart quoted', {smart: true});
+    t.deepEqual(attr.toString(), '[data-foo=smart\\ quoted]');
+    attr.setValue('smart quoted three spaces', {smart: true});
+    t.deepEqual(attr.toString(), '[data-foo="smart quoted three spaces"]');
+    attr.setValue('smart quoted three spaces', {smart: true, quoteMark: "'"});
+    t.deepEqual(attr.toString(), "[data-foo='smart quoted three spaces']");
+    attr.setValue("smart with 'single quotes'", {smart: true});
+    t.deepEqual(attr.toString(), "[data-foo=\"smart with 'single quotes'\"]");
+    attr.setValue('smart with "double quotes"', {smart: true});
+    t.deepEqual(attr.toString(), "[data-foo='smart with \"double quotes\"']");
+});

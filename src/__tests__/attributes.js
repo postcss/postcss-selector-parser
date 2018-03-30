@@ -447,3 +447,17 @@ testDeprecation('smart quotes', '[data-foo=bar]', (t, tree) => {
     attr.setValue('smart with "double quotes"', {smart: true});
     t.deepEqual(attr.toString(), "[data-foo='smart with \"double quotes\"']");
 });
+
+testDeprecation('set Attribute#quoteMark', '[data-foo=bar]', (t, tree) => {
+    let attr = tree.nodes[0].nodes[0];
+    attr.quoteMark = '"';
+    t.deepEqual(attr.toString(), '[data-foo="bar"]');
+    attr.quoteMark = "'";
+    t.deepEqual(attr.toString(), "[data-foo='bar']");
+    attr.quoteMark = null;
+    t.deepEqual(attr.toString(), "[data-foo=bar]");
+    attr.value = "has space";
+    t.deepEqual(attr.toString(), "[data-foo=has\\ space]");
+    attr.quoteMark = '"';
+    t.deepEqual(attr.toString(), '[data-foo="has space"]');
+});

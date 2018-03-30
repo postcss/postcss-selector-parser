@@ -218,7 +218,9 @@ export default class Attribute extends Namespace {
     _syncRawValue () {
         let rawValue = cssesc(this._value, CSSESC_QUOTE_OPTIONS[this.quoteMark]);
         if (rawValue === this._value) {
-            delete this.raws.value;
+            if (this.raws) {
+                delete this.raws.value;
+            }
         } else {
             this.raws.value = rawValue;
         }
@@ -262,12 +264,8 @@ export default class Attribute extends Namespace {
                 return;
             }
             this._value = unescaped;
-            this.quoteMark = quoteMark;
-            if (unescaped === this._value) {
-                delete this.raws.value;
-            } else {
-                this.raws.value = v;
-            }
+            this._quoteMark = quoteMark;
+            this._syncRawValue();
         } else {
             this._value = v;
         }

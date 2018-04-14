@@ -11,6 +11,15 @@ test('node#clone', (t) => {
     });
 });
 
+test('node#clone of attribute', (t) => {
+    parse('[href=test]', (selectors) => {
+        let selector = selectors.first.first;
+        let clone = selector.clone();
+        delete selector.parent;
+        t.deepEqual(clone, selectors.first.first);
+    });
+});
+
 test('node#replaceWith', (t) => {
     let out = parse('[href="test"]', (selectors) => {
         let attr = selectors.first.first;

@@ -1,7 +1,7 @@
 import {ensureObject} from "../util";
 
 let cloneNode = function (obj, parent) {
-    if (typeof obj !== 'object') {
+    if (typeof obj !== 'object' || obj === null) {
         return obj;
     }
 

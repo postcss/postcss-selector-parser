@@ -172,7 +172,7 @@ declare namespace parser {
          * @param value the unescaped value of the property
          * @param valueEscaped optional. the escaped value of the property.
          */
-        setPropertyAndEscape(name: string, value: any, valueEscaped: string);
+        setPropertyAndEscape(name: string, value: any, valueEscaped: string): void;
         /**
          * When you want a value to passed through to CSS directly. This method
          * deletes the corresponding raw value causing the stringifier to fallback
@@ -180,7 +180,7 @@ declare namespace parser {
          * @param name the property to set.
          * @param value The value that is both escaped and unescaped.
          */
-        setPropertyWithoutEscape(name: string, value: any);
+        setPropertyWithoutEscape(name: string, value: any): void;
         /**
          * Some non-standard syntax doesn't follow normal escaping rules for css.
          * This allows non standard syntax to be appended to an existing property
@@ -190,7 +190,7 @@ declare namespace parser {
          * @param {any} value the unescaped value of the property
          * @param {string} valueEscaped optional. the escaped value of the property.
          */
-        appendToPropertyAndEscape(name, value, valueEscaped);
+        appendToPropertyAndEscape(name: string, value: any, valueEscaped: string): void;
         toString(): string;
     }
     interface ContainerOptions extends NodeOptions {

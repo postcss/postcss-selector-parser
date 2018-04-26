@@ -1,0 +1,3 @@
+[submodule "integration/stylelint"]
+	path = integration/stylelint
+	url = https://github.com/stylelint/stylelint.git

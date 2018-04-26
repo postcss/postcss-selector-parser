@@ -524,6 +524,10 @@ export default class Parser {
         return this.expected('opening square bracket', this.currToken[TOKEN.START_POS]);
     }
 
+    unexpected () {
+        return this.error(`Unexpected '${this.content()}'. Escaping special characters with \\ may help.`, this.currToken[TOKEN.START_POS]);
+    }
+
     namespace () {
         const before = this.prevToken && this.content(this.prevToken) || true;
         if (this.nextToken[TOKEN.TYPE] === tokens.word) {
@@ -835,6 +839,8 @@ export default class Parser {
             this.missingSquareBracket();
         case tokens.semicolon:
             this.missingBackslash();
+        default:
+            this.unexpected();
         }
     }
 

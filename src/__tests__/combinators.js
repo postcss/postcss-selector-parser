@@ -1,8 +1,10 @@
+import {COMBINATOR} from '../selectors/types';
 import {test} from './util/helpers';
 
 test('multiple combinating spaces', 'h1         h2', (t, tree) => {
     t.deepEqual(tree.nodes[0].nodes[0].value, 'h1');
-    t.deepEqual(tree.nodes[0].nodes[1].value, '         ');
+    t.deepEqual(tree.nodes[0].nodes[1].value, ' ');
+    t.deepEqual(tree.nodes[0].nodes[1].toString(), '         ');
     t.deepEqual(tree.nodes[0].nodes[2].value, 'h2');
 });
 
@@ -66,6 +68,23 @@ test('adjacent sibling combinator (5)', 'h1~h2~h3', (t, tree) => {
     t.deepEqual(tree.nodes[0].nodes[2].value, 'h2');
     t.deepEqual(tree.nodes[0].nodes[3].value, '~');
     t.deepEqual(tree.nodes[0].nodes[4].value, 'h3');
+});
+
+test('piercing combinator', '.a >>> .b', (t, tree) => {
+    t.deepEqual(tree.nodes[0].nodes[0].value, 'a');
+    t.deepEqual(tree.nodes[0].nodes[1].spaces.before, ' ');
+    t.deepEqual(tree.nodes[0].nodes[1].value, '>>>');
+    t.deepEqual(tree.nodes[0].nodes[1].spaces.after, ' ');
+    t.deepEqual(tree.nodes[0].nodes[2].value, 'b');
+});
+
+test('named combinators', 'a /deep/ b', (t, tree) => {
+    let nodes = tree.nodes[0].nodes;
+    t.deepEqual(nodes[0].value, 'a');
+    t.deepEqual(nodes[1].type, COMBINATOR);
+    t.deepEqual(nodes[1].toString(), ' /deep/ ');
+    t.deepEqual(nodes[1].value, '/deep/');
+    t.deepEqual(nodes[2].value, 'b');
 });
 
 test('multiple combinators', 'h1~h2>h3', (t, tree) => {

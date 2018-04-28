@@ -71,20 +71,6 @@ function unescapeProp (node, prop) {
     return node;
 }
 
-function convertWhitespaceNodesToSpace (nodes) {
-    let space = "";
-    let rawSpace = "";
-    nodes.forEach(n => {
-        space += n.spaces.before + n.spaces.after;
-        rawSpace += n.toString();
-    });
-    if (rawSpace === space) {
-        rawSpace = undefined;
-    }
-    let result = {space, rawSpace};
-    return result;
-}
-
 export default class Parser {
     constructor (rule, options = {}) {
         this.rule = rule;
@@ -423,6 +409,58 @@ export default class Parser {
         return nodes;
     }
 
+    /**
+     * 
+     * @param {*} nodes 
+     */
+    convertWhitespaceNodesToSpace (nodes, requiredSpace = false) {
+        let space = "";
+        let rawSpace = "";
+        nodes.forEach(n => {
+            let spaceBefore = this.lossySpace(n.spaces.before, requiredSpace);
+            let rawSpaceBefore = this.lossySpace(n.rawSpaceBefore, requiredSpace);
+            space += spaceBefore + this.lossySpace(n.spaces.after, requiredSpace && spaceBefore.length === 0);
+            rawSpace += spaceBefore + n.value + this.lossySpace(n.rawSpaceAfter, requiredSpace && rawSpaceBefore.length === 0);
+        });
+        if (rawSpace === space) {
+            rawSpace = undefined;
+        }
+        let result = {space, rawSpace};
+        return result;
+    }
+
+    isNamedCombinator (position = this.position) {
+        return this.tokens[position + 0] && this.tokens[position + 0][TOKEN.TYPE] === tokens.slash &&
+               this.tokens[position + 1] && this.tokens[position + 1][TOKEN.TYPE] === tokens.word &&
+               this.tokens[position + 2] && this.tokens[position + 2][TOKEN.TYPE] === tokens.slash;
+
+    }
+    namedCombinator () {
+        if (this.isNamedCombinator()) {
+            let nameRaw = this.content(this.tokens[this.position + 1]);
+            let name = unesc(nameRaw);
+            let raws = {};
+            if (name !== nameRaw) {
+                raws.value = `/${nameRaw}/`;
+            }
+            let node = new Combinator({
+                value: `/${name}/`,
+                source: getSource(
+                    this.currToken[TOKEN.START_LINE],
+                    this.currToken[TOKEN.START_COL],
+                    this.tokens[this.position + 2][TOKEN.END_LINE],
+                    this.tokens[this.position + 2][TOKEN.END_COL],
+                ),
+                sourceIndex: this.currToken[TOKEN.START_POS],
+                raws,
+            });
+            this.position = this.position + 3;
+            return node;
+        } else {
+            this.unexpected();
+        }
+    }
+
     combinator () {
         if (this.content() === '|') {
             return this.namespace();
@@ -435,7 +473,7 @@ export default class Parser {
             if (nodes.length > 0) {
                 let last = this.current.last;
                 if (last) {
-                    let {space, rawSpace} = convertWhitespaceNodesToSpace(nodes);
+                    let {space, rawSpace} = this.convertWhitespaceNodesToSpace(nodes);
                     if (rawSpace !== undefined) {
                         last.rawSpaceAfter += rawSpace;
                     }
@@ -447,40 +485,55 @@ export default class Parser {
             return;
         }
 
-        let spaceBeforeCombinator = undefined;
-        if (nextSigTokenPos > this.position && this.tokens[nextSigTokenPos][TOKEN.TYPE] === tokens.combinator) {
-            spaceBeforeCombinator = convertWhitespaceNodesToSpace(this.parseWhitespaceEquivalentTokens(nextSigTokenPos));
+        let firstToken = this.currToken;
+        let spaceOrDescendantSelectorNodes = undefined;
+        if (nextSigTokenPos > this.position) {
+            spaceOrDescendantSelectorNodes = this.parseWhitespaceEquivalentTokens(nextSigTokenPos);
         }
 
-        const current = this.currToken;
-        const node = new Combinator({
-            value: '',
-            source: getTokenSource(current),
-            sourceIndex: current[TOKEN.START_POS],
-        });
-        while ( this.position < this.tokens.length && this.currToken &&
-                (this.currToken[TOKEN.TYPE] === tokens.space ||
-                this.currToken[TOKEN.TYPE] === tokens.combinator)) {
-            const content = this.content();
-            if (this.nextToken && this.nextToken[TOKEN.TYPE] === tokens.combinator) {
-                node.spaces.before = this.optionalSpace(content);
-                node.source = getTokenSource(this.nextToken);
-                node.sourceIndex = this.nextToken[TOKEN.START_POS];
-            } else if (this.prevToken && this.prevToken[TOKEN.TYPE] === tokens.combinator) {
-                node.spaces.after = this.optionalSpace(content);
-            } else if (this.currToken[TOKEN.TYPE] === tokens.combinator) {
-                node.value = content;
-            } else if (this.currToken[TOKEN.TYPE] === tokens.space) {
-                node.value = this.requiredSpace(content);
-            }
-            this.position ++;
+        let node;
+        if (this.isNamedCombinator()) {
+            node = this.namedCombinator();
+        } else if (this.currToken[TOKEN.TYPE] === tokens.combinator) {
+            node = new Combinator({
+                value: this.content(),
+                source: getTokenSource(this.currToken),
+                sourceIndex: this.currToken[TOKEN.START_POS],
+            });
+            this.position++;
+        } else if (WHITESPACE_TOKENS[this.currToken[TOKEN.TYPE]]) {
+            // pass
+        } else if (!spaceOrDescendantSelectorNodes) {
+            this.unexpected();
         }
-        if (spaceBeforeCombinator) {
-            if (spaceBeforeCombinator.rawSpace !== undefined) {
-                node.rawSpaceBefore = spaceBeforeCombinator.rawSpace + node.rawSpaceBefore;
+
+        if (node) {
+            if (spaceOrDescendantSelectorNodes) {
+                let {space, rawSpace} = this.convertWhitespaceNodesToSpace(spaceOrDescendantSelectorNodes);
+                node.spaces.before = space;
+                node.rawSpaceBefore = rawSpace;
             }
-            node.spaces.before = spaceBeforeCombinator.space + node.spaces.before;
+        } else {
+            // descendant combinator
+            let {space, rawSpace} = this.convertWhitespaceNodesToSpace(spaceOrDescendantSelectorNodes, true);
+            if (!rawSpace) {
+                rawSpace = space;
+            }
+            node = new Combinator({
+                value: ' ',
+                source: getTokenSource(firstToken),
+                sourceIndex: firstToken[TOKEN.START_POS],
+                raws: {
+                    value: rawSpace || space,
+                },
+            });
         }
+
+        if (this.currToken[TOKEN.TYPE] === tokens.space) {
+            node.spaces.after = this.optionalSpace(this.content());
+            this.position++;
+        }
+
         return this.newNode(node);
     }
 
@@ -828,6 +881,7 @@ export default class Parser {
         case tokens.ampersand:
             this.nesting();
             break;
+        case tokens.slash:
         case tokens.combinator:
             this.combinator();
             break;
@@ -872,6 +926,14 @@ export default class Parser {
 
     optionalSpace (space) {
         return this.options.lossy ? '' : space;
+    }
+
+    lossySpace (space, required) {
+        if (this.options.lossy) {
+            return required ? ' ' : '';
+        } else {
+            return space;
+        }
     }
 
     parseParenthesisToken (token) {

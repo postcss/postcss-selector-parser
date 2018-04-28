@@ -519,13 +519,23 @@ export default class Parser {
             if (!rawSpace) {
                 rawSpace = space;
             }
+            let spaces = {};
+            let raws = {spaces: {}};
+            if (space.endsWith(' ') && rawSpace.endsWith(' ')) {
+                spaces.before = space.slice(0, space.length - 1);
+                raws.spaces.before = rawSpace.slice(0, rawSpace.length - 1);
+            }            else if (space.startsWith(' ') && rawSpace.startsWith(' ')) {
+                spaces.after = space.slice(1);
+                raws.spaces.after = rawSpace.slice(1);
+            }            else {
+                raws.value = rawSpace;
+            }
             node = new Combinator({
                 value: ' ',
                 source: getTokenSource(firstToken),
                 sourceIndex: firstToken[TOKEN.START_POS],
-                raws: {
-                    value: rawSpace || space,
-                },
+                spaces,
+                raws,
             });
         }
 

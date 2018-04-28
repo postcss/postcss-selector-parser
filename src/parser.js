@@ -438,7 +438,7 @@ export default class Parser {
     namedCombinator () {
         if (this.isNamedCombinator()) {
             let nameRaw = this.content(this.tokens[this.position + 1]);
-            let name = unesc(nameRaw);
+            let name = unesc(nameRaw).toLowerCase();
             let raws = {};
             if (name !== nameRaw) {
                 raws.value = `/${nameRaw}/`;

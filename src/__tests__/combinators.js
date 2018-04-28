@@ -96,6 +96,15 @@ test('named combinators with escapes', 'a /dee\\p/ b', (t, tree) => {
     t.deepEqual(nodes[2].value, 'b');
 });
 
+test('named combinators with escapes and uppercase', 'a /DeE\\p/ b', (t, tree) => {
+    let nodes = tree.nodes[0].nodes;
+    t.deepEqual(nodes[0].value, 'a');
+    t.deepEqual(nodes[1].type, COMBINATOR);
+    t.deepEqual(nodes[1].toString(), ' /DeE\\p/ ');
+    t.deepEqual(nodes[1].value, '/deep/');
+    t.deepEqual(nodes[2].value, 'b');
+});
+
 test('multiple combinators', 'h1~h2>h3', (t, tree) => {
     t.deepEqual(tree.nodes[0].nodes[1].value, '~', 'should have a combinator');
     t.deepEqual(tree.nodes[0].nodes[3].value, '>', 'should have a combinator');

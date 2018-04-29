@@ -1,3 +1,174 @@
+# 4.0.1
+
+This release has **BREAKING CHANGES** that were required to fix regressions in 4.0.0. Please read carefully.
+
+* Combinators
+   - **Descendant Combinators** The value of descendant combinators used to be all of the spaces found between the selectors.
+     This made it hard to check for a descendant combinator in comparison to other types of combinators.
+     In 4.0.1 this changed to being just a single space (`" "`). For descendant selectors with no comments,
+     additional space is now stored in `node.spaces.before`. Depending on the location of comments,
+     additional spaces are stored in `node.raws.spaces.before`, `node.raws.spaces.after`,
+     or `node.raws.value`.
+     Upgrade hints:
+       * `node.type === "combinator" && / /.test(node.value)` => `node.type === "combinator" && node.value === " "`
+       * `node.type === "combinator" && / /.test(node.value)` => `node.type === "combinator" && / /.test(node.toString())`
+  - **Named Combinators** Although, nonstandard and unlikely to ever become a standard, named combinators
+    like `/deep/` and `/for/` are now properly parsed as combinators. The value is unescaped and normalized as lowercase.
+    The original value for the combinator name is stored in `node.raws.value`.
+
+# 4.0.0
+
+This release has **BREAKING CHANGES** that were required to fix bugs regarding values with escape sequences. Please read carefully.
+
+* **Identifiers with escapes** - CSS escape sequences are now hidden from the public API by default.
+  The normal value of a node like a class name or ID, or an aspect of a node such as attribute
+  selector's value, is unescaped. Escapes representing Non-ascii characters are unescaped into
+  unicode characters. For example: `bu\tton, .\31 00, #i\2764\FE0Fu, [attr="value is \"quoted\""]`
+  will parse respectively to the values `button`, `100`, `i❤️u`, `value is "quoted"`.
+  The original escape sequences for these values can be found in the corresponding property name
+  in `node.raws`. Where possible, deprecation warnings were added, but the nature
+  of escape handling makes it impossible to detect what is escaped or not. Our expectation is
+  that most users are neither expecting nor handling escape sequences in their use of this library,
+  and so for them, this is a bug fix. Users who are taking care to handle escapes correctly can
+  now update their code to remove the escape handling and let us do it for them.
+
+* **Mutating values with escapes** - When you make an update to a node property that has escape handling
+  The value is assumed to be unescaped, and any special characters are escaped automatically and
+  the corresponding `raws` value is immediately updated. This can result in changes to the original
+  escape format. Where the exact value of the escape sequence is important there are methods that
+  allow both values to be set in conjunction. There are a number of new convenience methods for
+  manipulating values that involve escapes, especially for attributes values where the quote mark
+  is involved. See https://github.com/postcss/postcss-selector-parser/pull/133 for an extensive
+  write-up on these changes.
+
+
+**Upgrade/API Example**
+
+In `3.x` there was no unescape handling and internal consistency of several properties was the caller's job to maintain. It was very easy for the developer
+to create a CSS file that did not parse correctly when some types of values
+were in use.
+
+```js
+const selectorParser = require("postcss-selector-parser");
+let attr = selectorParser.attribute({attribute: "id", operator: "=", value: "a-value"});
+attr.value; // => "a-value"
+attr.toString(); // => [id=a-value]
+// Add quotes to an attribute's value.
+// All these values have to be set by the caller to be consistent:
+// no internal consistency is maintained.
+attr.raws.unquoted = attr.value
+attr.value = "'" + attr.value + "'";
+attr.value; // => "'a-value'"
+attr.quoted = true;
+attr.toString();  // => "[id='a-value']"
+```
+
+In `4.0` there is a convenient API for setting and mutating values
+that may need escaping. Especially for attributes.
+
+```js
+const selectorParser = require("postcss-selector-parser");
+
+// The constructor requires you specify the exact escape sequence
+let className = selectorParser.className({value: "illegal class name", raws: {value: "illegal\\ class\\ name"}});
+className.toString(); // => '.illegal\\ class\\ name'
+
+// So it's better to set the value as a property
+className = selectorParser.className();
+// Most properties that deal with identifiers work like this
+className.value = "escape for me";
+className.value; // => 'escape for me'
+className.toString(); // => '.escape\\ for\\ me'
+
+// emoji and all non-ascii are escaped to ensure it works in every css file.
+className.value = "😱🦄😍";
+className.value; // => '😱🦄😍'
+className.toString(); // => '.\\1F631\\1F984\\1F60D'
+
+// you can control the escape sequence if you want, or do bad bad things
+className.setPropertyAndEscape('value', 'xxxx', 'yyyy');
+className.value; // => "xxxx"
+className.toString(); // => ".yyyy"
+
+// Pass a value directly through to the css output without escaping it. 
+className.setPropertyWithoutEscape('value', '$REPLACE_ME$');
+className.value; // => "$REPLACE_ME$"
+className.toString(); // => ".$REPLACE_ME$"
+
+// The biggest changes are to the Attribute class
+// passing quoteMark explicitly is required to avoid a deprecation warning.
+let attr = selectorParser.attribute({attribute: "id", operator: "=", value: "a-value", quoteMark: null});
+attr.toString(); // => "[id=a-value]"
+// Get the value with quotes on it and any necessary escapes.
+// This is the same as reading attr.value in 3.x.
+attr.getQuotedValue(); // => "a-value";
+attr.quoteMark; // => null
+
+// Add quotes to an attribute's value.
+attr.quoteMark = "'"; // This is all that's required.
+attr.toString(); // => "[id='a-value']"
+attr.quoted; // => true
+// The value is still the same, only the quotes have changed.
+attr.value; // => a-value
+attr.getQuotedValue(); // => "'a-value'";
+
+// deprecated assignment, no warning because there's no escapes
+attr.value = "new-value";
+// no quote mark is needed so it is removed
+attr.getQuotedValue(); // => "new-value";
+
+// deprecated assignment, 
+attr.value = "\"a 'single quoted' value\"";
+// > (node:27859) DeprecationWarning: Assigning an attribute a value containing characters that might need to be escaped is deprecated. Call attribute.setValue() instead.
+attr.getQuotedValue(); // => '"a \'single quoted\' value"';
+// quote mark inferred from first and last characters.
+attr.quoteMark; // => '"'
+
+// setValue takes options to make manipulating the value simple.
+attr.setValue('foo', {smart: true});
+// foo doesn't require any escapes or quotes.
+attr.toString(); // => '[id=foo]'
+attr.quoteMark; // => null 
+
+// An explicit quote mark can be specified
+attr.setValue('foo', {quoteMark: '"'});
+attr.toString(); // => '[id="foo"]'
+
+// preserves quote mark by default
+attr.setValue('bar');
+attr.toString(); // => '[id="bar"]'
+attr.quoteMark = null;
+attr.toString(); // => '[id=bar]'
+
+// with no arguments, it preserves quote mark even when it's not a great idea
+attr.setValue('a value \n that should be quoted');
+attr.toString(); // => '[id=a\\ value\\ \\A\\ that\\ should\\ be\\ quoted]'
+
+// smart preservation with a specified default
+attr.setValue('a value \n that should be quoted', {smart: true, preferCurrentQuoteMark: true, quoteMark: "'"});
+// => "[id='a value \\A  that should be quoted']"
+attr.quoteMark = '"';
+// => '[id="a value \\A  that should be quoted"]'
+
+// this keeps double quotes because it wants to quote the value and the existing value has double quotes.
+attr.setValue('this should be quoted', {smart: true, preferCurrentQuoteMark: true, quoteMark: "'"});
+// => '[id="this should be quoted"]'
+
+// picks single quotes because the value has double quotes
+attr.setValue('a "double quoted" value', {smart: true, preferCurrentQuoteMark: true, quoteMark: "'"});
+// => "[id='a "double quoted" value']"
+
+// setPropertyAndEscape lets you do anything you want. Even things that are a bad idea and illegal.
+attr.setPropertyAndEscape('value', 'xxxx', 'the password is 42');
+attr.value; // => "xxxx"
+attr.toString(); // => "[id=the password is 42]"
+
+// Pass a value directly through to the css output without escaping it. 
+attr.setPropertyWithoutEscape('value', '$REPLACEMENT$');
+attr.value; // => "$REPLACEMENT$"
+attr.toString(); // => "[id=$REPLACEMENT$]"
+```
+
 # 3.1.2
 
 * Fix: Removed dot-prop dependency since it's no longer written in es5.

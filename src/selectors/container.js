@@ -108,6 +108,52 @@ export default class Container extends Node {
         return this;
     }
 
+    _findChildAtPosition (line, col) {
+        let found = undefined;
+        this.each(node => {
+            if (node.atPosition) {
+                let foundChild = node.atPosition(line, col);
+                if (foundChild) {
+                    found = foundChild;
+                    return false;
+                }
+            } else if (node.isAtPosition(line, col)) {
+                found = node;
+                return false;
+            }
+        });
+        return found;
+    }
+
+    /**
+     * Return the most specific node at the line and column number given.
+     * The source location is based on the original parsed location, locations aren't
+     * updated as selector nodes are mutated.
+     * 
+     * Note that this location is relative to the location of the first character
+     * of the selector, and not the location of the selector in the overall document
+     * when used in conjunction with postcss.
+     *
+     * If not found, returns undefined.
+     * @param {number} line The line number of the node to find. (1-based index)
+     * @param {number} col  The column number of the node to find. (1-based index)
+     */
+    atPosition (line, col) {
+        if (this.isAtPosition(line, col)) {
+            return this._findChildAtPosition(line, col) || this;
+        } else {
+            return undefined;
+        }
+    }
+
+    _inferEndPosition () {
+        if (this.last && this.last.source && this.last.source.end) {
+            this.source = this.source || {};
+            this.source.end = this.source.end || {};
+            Object.assign(this.source.end, this.last.source.end);
+        }
+    }
+
     each (callback) {
         if (!this.lastEach) {
             this.lastEach = 0;

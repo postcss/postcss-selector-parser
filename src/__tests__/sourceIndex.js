@@ -6,16 +6,16 @@ test('universal selector', '*', (t, tree) => {
     t.deepEqual(tree.nodes[0].nodes[0].sourceIndex, 0);
 });
 
-test('lobotomized owl selector', '* + *', (t, tree) => {
-    t.deepEqual(tree.nodes[0].nodes[0].source.start.column, 1);
-    t.deepEqual(tree.nodes[0].nodes[0].source.end.column, 1);
-    t.deepEqual(tree.nodes[0].nodes[0].sourceIndex, 0);
-    t.deepEqual(tree.nodes[0].nodes[1].source.start.column, 3);
-    t.deepEqual(tree.nodes[0].nodes[1].source.end.column, 3);
-    t.deepEqual(tree.nodes[0].nodes[1].sourceIndex, 2);
-    t.deepEqual(tree.nodes[0].nodes[2].source.start.column, 5);
-    t.deepEqual(tree.nodes[0].nodes[2].source.end.column, 5);
-    t.deepEqual(tree.nodes[0].nodes[2].sourceIndex, 4);
+test('lobotomized owl selector', ' * + * ', (t, tree) => {
+    t.deepEqual(tree.nodes[0].nodes[0].source.start.column, 2);
+    t.deepEqual(tree.nodes[0].nodes[0].source.end.column, 2);
+    t.deepEqual(tree.nodes[0].nodes[0].sourceIndex, 1);
+    t.deepEqual(tree.nodes[0].nodes[1].source.start.column, 4);
+    t.deepEqual(tree.nodes[0].nodes[1].source.end.column, 4);
+    t.deepEqual(tree.nodes[0].nodes[1].sourceIndex, 3);
+    t.deepEqual(tree.nodes[0].nodes[2].source.start.column, 6);
+    t.deepEqual(tree.nodes[0].nodes[2].source.end.column, 6);
+    t.deepEqual(tree.nodes[0].nodes[2].sourceIndex, 5);
 });
 
 test('comment', '/**\n * Hello!\n */', (t, tree) => {
@@ -184,7 +184,7 @@ test('combinators surrounded by superfluous spaces', 'div   >  h1 ~   span   a',
 
     t.deepEqual(tree.nodes[0].nodes[5].source.start.line, 1, "' ' start line");
     t.deepEqual(tree.nodes[0].nodes[5].source.start.column, 21, "' ' start column");
-    t.deepEqual(tree.nodes[0].nodes[5].source.end.column, 21, "' ' end column");
+    t.deepEqual(tree.nodes[0].nodes[5].source.end.column, 23, "' ' end column");
     t.deepEqual(tree.nodes[0].nodes[5].sourceIndex, 20, "' ' sourceIndex");
 });
 

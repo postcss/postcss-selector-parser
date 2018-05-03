@@ -80,3 +80,43 @@ test('Node#setPropertyWithoutEscape without existing raws', (t) => {
     });
     t.deepEqual(out, '.w+t+f');
 });
+
+test('Node#isAtPosition', (t) => {
+    parse(':not(.foo),\n#foo > :matches(ol, ul)', (root) => {
+        t.deepEqual(root.isAtPosition(1, 1), true);
+        t.deepEqual(root.isAtPosition(1, 10), true);
+        t.deepEqual(root.isAtPosition(2, 23), true);
+        t.deepEqual(root.isAtPosition(2, 24), false);
+        let selector = root.first;
+        t.deepEqual(selector.isAtPosition(1, 1), true);
+        t.deepEqual(selector.isAtPosition(1, 10), true);
+        t.deepEqual(selector.isAtPosition(1, 11), false);
+        let pseudoNot = selector.first;
+        t.deepEqual(pseudoNot.isAtPosition(1, 1), true);
+        t.deepEqual(pseudoNot.isAtPosition(1, 7), true);
+        t.deepEqual(pseudoNot.isAtPosition(1, 10), true);
+        t.deepEqual(pseudoNot.isAtPosition(1, 11), false);
+        let notSelector = pseudoNot.first;
+        t.deepEqual(notSelector.isAtPosition(1, 1), false);
+        t.deepEqual(notSelector.isAtPosition(1, 4), false);
+        t.deepEqual(notSelector.isAtPosition(1, 5), true);
+        t.deepEqual(notSelector.isAtPosition(1, 6), true);
+        t.deepEqual(notSelector.isAtPosition(1, 9), true);
+        t.deepEqual(notSelector.isAtPosition(1, 10), true);
+        t.deepEqual(notSelector.isAtPosition(1, 11), false);
+        let notClass = notSelector.first;
+        t.deepEqual(notClass.isAtPosition(1, 5), false);
+        t.deepEqual(notClass.isAtPosition(1, 6), true);
+        t.deepEqual(notClass.isAtPosition(1, 9), true);
+        t.deepEqual(notClass.isAtPosition(1, 10), false);
+        let secondSel = root.at(1);
+        t.deepEqual(secondSel.isAtPosition(1, 11), false);
+        t.deepEqual(secondSel.isAtPosition(2, 1), true);
+        t.deepEqual(secondSel.isAtPosition(2, 23), true);
+        t.deepEqual(secondSel.isAtPosition(2, 24), false);
+        let combinator = secondSel.at(1);
+        t.deepEqual(combinator.isAtPosition(2, 5), false);
+        t.deepEqual(combinator.isAtPosition(2, 6), true);
+        t.deepEqual(combinator.isAtPosition(2, 7), false);
+    });
+});

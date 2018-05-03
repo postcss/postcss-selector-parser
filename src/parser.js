@@ -34,6 +34,21 @@ const WHITESPACE_EQUIV_TOKENS = {
     [tokens.comment]: true,
 };
 
+function tokenStart (token) {
+    return {
+        line: token[TOKEN.START_LINE],
+        column: token[TOKEN.START_COL],
+    };
+}
+
+function tokenEnd (token) {
+    return {
+        line: token[TOKEN.END_LINE],
+        column: token[TOKEN.END_COL],
+    };
+}
+
+
 function getSource (startLine, startColumn, endLine, endColumn) {
     return {
         start: {
@@ -53,6 +68,18 @@ function getTokenSource (token) {
         token[TOKEN.START_COL],
         token[TOKEN.END_LINE],
         token[TOKEN.END_COL]
+    );
+}
+
+function getTokenSourceSpan (startToken, endToken) {
+    if (!startToken) {
+        return undefined;
+    }
+    return getSource(
+        startToken[TOKEN.START_LINE],
+        startToken[TOKEN.START_COL],
+        endToken[TOKEN.END_LINE],
+        endToken[TOKEN.END_COL]
     );
 }
 
@@ -76,13 +103,6 @@ export default class Parser {
         this.rule = rule;
         this.options = Object.assign({lossy: false, safe: false}, options);
         this.position = 0;
-        this.root = new Root();
-        this.root.errorGenerator = this._errorGenerator();
-
-
-        const selector = new Selector();
-        this.root.append(selector);
-        this.current = selector;
 
         this.css = typeof this.rule === 'string' ? this.rule : this.rule.selector;
 
@@ -91,6 +111,16 @@ export default class Parser {
             error: this._errorGenerator(),
             safe: this.options.safe,
         });
+
+        let rootSource = getTokenSourceSpan(this.tokens[0], this.tokens[this.tokens.length - 1]);
+        this.root = new Root({source: rootSource});
+        this.root.errorGenerator = this._errorGenerator();
+
+
+        const selector = new Selector({source: {start: {line: 1, column: 1}}});
+        this.root.append(selector);
+        this.current = selector;
+
 
         this.loop();
     }
@@ -524,15 +554,15 @@ export default class Parser {
             if (space.endsWith(' ') && rawSpace.endsWith(' ')) {
                 spaces.before = space.slice(0, space.length - 1);
                 raws.spaces.before = rawSpace.slice(0, rawSpace.length - 1);
-            }            else if (space.startsWith(' ') && rawSpace.startsWith(' ')) {
+            } else if (space.startsWith(' ') && rawSpace.startsWith(' ')) {
                 spaces.after = space.slice(1);
                 raws.spaces.after = rawSpace.slice(1);
-            }            else {
+            } else {
                 raws.value = rawSpace;
             }
             node = new Combinator({
                 value: ' ',
-                source: getTokenSource(firstToken),
+                source: getTokenSourceSpan(firstToken, this.tokens[this.position - 1]),
                 sourceIndex: firstToken[TOKEN.START_POS],
                 spaces,
                 raws,
@@ -553,7 +583,8 @@ export default class Parser {
             this.position ++;
             return;
         }
-        const selector = new Selector();
+        this.current._inferEndPosition();
+        const selector = new Selector({source: {start: tokenStart(this.tokens[this.position + 1])}});
         this.current.parent.append(selector);
         this.current = selector;
         this.position ++;
@@ -621,25 +652,25 @@ export default class Parser {
 
     parentheses () {
         let last = this.current.last;
-        let balanced = 1;
+        let unbalanced = 1;
         this.position ++;
         if (last && last.type === types.PSEUDO) {
-            const selector = new Selector();
+            const selector = new Selector({source: {start: tokenStart(this.tokens[this.position - 1])}});
             const cache = this.current;
             last.append(selector);
             this.current = selector;
-            while (this.position < this.tokens.length && balanced) {
+            while (this.position < this.tokens.length && unbalanced) {
                 if (this.currToken[TOKEN.TYPE] === tokens.openParenthesis) {
-                    balanced ++;
+                    unbalanced ++;
                 }
                 if (this.currToken[TOKEN.TYPE] === tokens.closeParenthesis) {
-                    balanced --;
+                    unbalanced --;
                 }
-                if (balanced) {
+                if (unbalanced) {
                     this.parse();
                 } else {
-                    selector.parent.source.end.line = this.currToken[3];
-                    selector.parent.source.end.column = this.currToken[4];
+                    this.current.source.end = tokenEnd(this.currToken);
+                    this.current.parent.source.end = tokenEnd(this.currToken);
                     this.position ++;
                 }
             }
@@ -650,12 +681,12 @@ export default class Parser {
             let parenStart = this.currToken;
             let parenValue = "(";
             let parenEnd;
-            while (this.position < this.tokens.length && balanced) {
+            while (this.position < this.tokens.length && unbalanced) {
                 if (this.currToken[TOKEN.TYPE] === tokens.openParenthesis) {
-                    balanced ++;
+                    unbalanced ++;
                 }
                 if (this.currToken[TOKEN.TYPE] === tokens.closeParenthesis) {
-                    balanced --;
+                    unbalanced --;
                 }
                 parenEnd = this.currToken;
                 parenValue += this.parseParenthesisToken(this.currToken);
@@ -676,7 +707,7 @@ export default class Parser {
                 }));
             }
         }
-        if (balanced) {
+        if (unbalanced) {
             return this.expected('closing parenthesis', this.currToken[TOKEN.START_POS]);
         }
     }
@@ -696,12 +727,7 @@ export default class Parser {
                 pseudoStr += first;
                 this.newNode(new Pseudo({
                     value: pseudoStr,
-                    source: getSource(
-                        startingToken[1],
-                        startingToken[2],
-                        this.currToken[3],
-                        this.currToken[4]
-                    ),
+                    source: getTokenSourceSpan(startingToken, this.currToken),
                     sourceIndex: startingToken[TOKEN.START_POS],
                 }));
                 if (
@@ -851,6 +877,7 @@ export default class Parser {
         while (this.position < this.tokens.length) {
             this.parse(true);
         }
+        this.current._inferEndPosition();
         return this.root;
     }
 

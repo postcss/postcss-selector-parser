@@ -287,6 +287,17 @@ String(cloned);
 // => #search
 ```
 
+### `node.isAtPosition(line, column)`
+
+Return a `boolean` indicating whether this node includes the character at the
+position of the given line and column. Returns `undefined` if the nodes lack
+sufficient source metadata to determine the position.
+
+Arguments:
+
+* `line`: 1-index based line number relative to the start of the selector.
+* `column`: 1-index based column number relative to the start of the selector.
+
 ### `node.spaces`
 
 Extra whitespaces around the node will be moved into `node.spaces.before` and
@@ -371,6 +382,19 @@ selector.last === selector.nodes[selector.nodes.length - 1];
 ### `container.at(index)`
 
 Returns the node at position `index`.
+
+```js
+selector.at(0) === selector.first;
+selector.at(0) === selector.nodes[0];
+```
+
+Arguments:
+
+* `index`: The index of the node to return.
+
+### `container.atPosition(line, column)`
+
+Returns the node at the source position `index`.
 
 ```js
 selector.at(0) === selector.first;

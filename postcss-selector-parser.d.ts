@@ -165,6 +165,13 @@ declare namespace parser {
         prev(): Node;
         clone(opts: {[override: string]:any}): Node;
         /**
+         * Return whether this node includes the character at the position of the given line and column.
+         * Returns undefined if the nodes lack sufficient source metadata to determine the position.
+         * @param line 1-index based line number relative to the start of the selector.
+         * @param column 1-index based column number relative to the start of the selector.
+         */
+        isAtPosition(line: number, column: number): boolean | undefined;
+        /**
          * Some non-standard syntax doesn't follow normal escaping rules for css,
          * this allows the escaped value to be specified directly, allowing illegal characters to be
          * directly inserted into css output.
@@ -201,6 +208,20 @@ declare namespace parser {
         append(selector: Selector): Container;
         prepend(selector: Selector): Container;
         at(index: number): Node;
+        /**
+         * Return the most specific node at the line and column number given.
+         * The source location is based on the original parsed location, locations aren't
+         * updated as selector nodes are mutated.
+         *
+         * Note that this location is relative to the location of the first character
+         * of the selector, and not the location of the selector in the overall document
+         * when used in conjunction with postcss.
+         *
+         * If not found, returns undefined.
+         * @param line The line number of the node to find. (1-based index)
+         * @param col  The column number of the node to find. (1-based index)
+         */
+        atPosition(line: number, column: number): Node;
         index(child: Node): number;
         readonly first: Node;
         readonly last: Node;
@@ -259,6 +280,7 @@ declare namespace parser {
          * a postcss Rule node, a better error message is raised.
          */
         error(message: string, options?: ErrorOptions): Error;
+        nodeAt(line: number, column: number): Node
     }
     function root(opts: ContainerOptions): Root;
     function isRoot(node: any): node is Root;

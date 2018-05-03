@@ -349,3 +349,55 @@ test('container#insertAfter (during iteration)', (t) => {
     });
     t.deepEqual(out, 'h1[class], h2[class], h3[class]');
 });
+
+test('Container#atPosition first pseudo', (t) => {
+    parse(':not(.foo),\n#foo > :matches(ol, ul)', (root) => {
+        let node = root.atPosition(1, 1);
+        t.deepEqual(node.type, "pseudo");
+        t.deepEqual(node.toString(), ":not(.foo)");
+    });
+});
+
+test('Container#atPosition class in pseudo', (t) => {
+    parse(':not(.foo),\n#foo > :matches(ol, ul)', (root) => {
+        let node = root.atPosition(1, 6);
+        t.deepEqual(node.type, "class");
+        t.deepEqual(node.toString(), ".foo");
+    });
+});
+
+test('Container#atPosition id in second selector', (t) => {
+    parse(':not(.foo),\n#foo > :matches(ol, ul)', (root) => {
+        let node = root.atPosition(2, 1);
+        t.deepEqual(node.type, "id");
+        t.deepEqual(node.toString(), "\n#foo");
+    });
+});
+
+test('Container#atPosition combinator in second selector', (t) => {
+    parse(':not(.foo),\n#foo > :matches(ol, ul)', (root) => {
+        let node = root.atPosition(2, 6);
+        t.deepEqual(node.type, "combinator");
+        t.deepEqual(node.toString(), " > ");
+
+        let nodeSpace = root.atPosition(2, 5);
+        t.deepEqual(nodeSpace.type, "selector");
+        t.deepEqual(nodeSpace.toString(), "\n#foo > :matches(ol, ul)");
+    });
+});
+
+test('Container#atPosition tag in second selector pseudo', (t) => {
+    parse(':not(.foo),\n#foo > :matches(ol, ul)', (root) => {
+        let node = root.atPosition(2, 17);
+        t.deepEqual(node.type, "tag");
+        t.deepEqual(node.toString(), "ol");
+    });
+});
+
+test('Container#atPosition comma in second selector pseudo', (t) => {
+    parse(':not(.foo),\n#foo > :matches(ol, ul)', (root) => {
+        let node = root.atPosition(2, 19);
+        t.deepEqual(node.type, "pseudo");
+        t.deepEqual(node.toString(), ":matches(ol, ul)");
+    });
+});

@@ -1,20 +1,72 @@
-# 4.0.1
+# 5.0.0-rc.0
 
 This release has **BREAKING CHANGES** that were required to fix regressions in 4.0.0. Please read carefully.
 
-* Combinators
-   - **Descendant Combinators** The value of descendant combinators used to be all of the spaces found between the selectors.
-     This made it hard to check for a descendant combinator in comparison to other types of combinators.
-     In 4.0.1 this changed to being just a single space (`" "`). For descendant selectors with no comments,
-     additional space is now stored in `node.spaces.before`. Depending on the location of comments,
-     additional spaces are stored in `node.raws.spaces.before`, `node.raws.spaces.after`,
-     or `node.raws.value`.
-     Upgrade hints:
-       * `node.type === "combinator" && / /.test(node.value)` => `node.type === "combinator" && node.value === " "`
-       * `node.type === "combinator" && / /.test(node.value)` => `node.type === "combinator" && / /.test(node.toString())`
-  - **Named Combinators** Although, nonstandard and unlikely to ever become a standard, named combinators
-    like `/deep/` and `/for/` are now properly parsed as combinators. The value is unescaped and normalized as lowercase.
-    The original value for the combinator name is stored in `node.raws.value`.
+## Summary of Changes
+
+* The way a descendent combinator that isn't a single space character (E.g. `.a  .b`) is stored in the AST has changed.
+* Named Combinators (E.g. `.a /for/ .b`) are now properly parsed as a combinator.
+* It is now possible to look up a node based on the source location of a character in that node and to query nodes if they contain some character.
+* Several bug fixes that caused the parser to hang and run out of memory when a `/` was encountered have been fixed.
+
+### Changes to the Descendent Combinator
+
+In prior releases, the value of a descendant combinator with multiple spaces included all the spaces.
+
+* `.a   .b`: Extra spaces are now stored as space before.
+  - 3.x: `combinator.value === "   "`
+  - 4.0: `combinator.value === " " && combinator.spaces.before === "  "`
+* `.a   /*comment*/.b`: A comment at the end of the combinator causes extra space to become after space.
+  - 3.x: `combinator.value === "   "`
+  - 3.x: `combinator.raws.value === "   /*comment/"`
+  - 4.0: `combinator.value === " "`
+  - 4.0: `combinator.spaces.after === "  "`
+  - 4.0: `combinator.raws.spaces.after === "  /*comment*/"`
+* `.a<newline>.b`: whitespace that doesn't start or end with a single space character is stored as a raw value.
+  - 3.x: `combinator.value === "\n"`
+  - 3.x: `combinator.raws.value === undefined`
+  - 4.0: `combinator.value === " "`
+  - 3.x: `combinator.raws.value === "\n"`
+
+### Support for "Named Combinators"
+
+Although, nonstandard and unlikely to ever become a standard, combinators like `/deep/` and `/for/` are now properly supported.
+
+Because they've been taken off the standardization track, there is no spec-official name for combinators of the form `/<ident>/`. However, I talked to [Tab Atkins](https://twitter.com/tabatkins) and we agreed to call them "named combinators" so now they are called that.
+
+Before this release such named combinators were parsed without intention and generated three nodes of type `"tag"` where the first and last nodes had a value of `"/"`.
+
+* `.a /for/ .b` is parsed as a combinator.
+  - In prior releases:
+    - `root.nodes[0].nodes[1].type === "tag"`
+    - `root.nodes[0].nodes[1].value === "/"`
+  - New hotness:
+    - `root.nodes[0].nodes[1].type === "combinator"`
+    - `root.nodes[0].nodes[1].value === "/for/"`
+* `.a /F\6fR/ .b` escapes are handled and uppercase is normalized.
+  - In prior releases:
+    - `root.nodes[0].nodes[2].type === "tag"`
+    - `root.nodes[0].nodes[2].value === "F\\6fR"`
+  - New hotness:
+    - `root.nodes[0].nodes[1].type === "combinator"`
+    - `root.nodes[0].nodes[1].value === "/for/"`
+    - `root.nodes[0].nodes[1].raws.value === "/F\\6fR/"`
+
+### Source position checks and lookups
+
+A new API was added to look up a node based on the source location.
+
+```js
+const selectorParser = require("postcss-selector-parser");
+// You can find the most specific node for any given character
+let combinator = selectorParser.astSync(".a > .b").atPosition(1,4);
+combinator.toString() === " > ";
+// You can check if a node includes a specific character
+// Whitespace surrounding the node that is owned by that node
+// is included in the check.
+[2,3,4,5,6].map(column => combinator.isAtPosition(1, column));
+// => [false, true, true, true, false]
+```
 
 # 4.0.0
 

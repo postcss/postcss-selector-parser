@@ -128,6 +128,12 @@ test('ending in comment has no trailing combinator', ".bar /* comment 3 */", (t,
     let nodeTypes = tree.nodes[0].map(n => n.type);
     t.deepEqual(nodeTypes, ["class"]);
 });
+test('The combinating space is not a space character', ".bar\n.baz", (t, tree) => {
+    let nodeTypes = tree.nodes[0].map(n => n.type);
+    t.deepEqual(nodeTypes, ["class", "combinator", "class"]);
+    t.deepEqual(tree.nodes[0].nodes[1].value, ' ', 'should have a combinator');
+    t.deepEqual(tree.nodes[0].nodes[1].raws.value, '\n', 'should have a raw combinator value');
+});
 test('with spaces and a comment has only one combinator', ".bar /* comment 3 */ > .foo", (t, tree) => {
     let nodeTypes = tree.nodes[0].map(n => n.type);
     t.deepEqual(nodeTypes, ["class", "combinator", "class"]);

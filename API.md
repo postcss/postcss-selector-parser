@@ -308,15 +308,13 @@ no semantic meaning:
       h1     ,     h2   {}
 ```
 
-However, *combinating* spaces will form a `combinator` node:
+For descendent selectors, the value is always a single space.
 
 ```css
 h1        h2 {}
 ```
 
-A `combinator` node may only have the `spaces` property set if the combinator
-value is a non-whitespace character, such as `+`, `~` or `>`. Otherwise, the
-combinator value will contain all of the spaces between selectors.
+Additional whitespace is found in either the `node.spaces.before` and `node.spaces.after` depending on the presence of comments or other whitespace characters. If the actual whitespace does not start or end with a single space, the node's raw value is set to the actual space(s) found in the source.
 
 ### `node.source`
 
@@ -587,7 +585,7 @@ support parsing of legacy CSS hacks.
 
 ## Selector nodes
 
-A selector node represents a single compound selector. For example, this
+A selector node represents a single complex selector. For example, this
 selector string `h1 h2 h3, [href] > p`, is represented as two selector nodes.
 It has no special functionality of its own.
 

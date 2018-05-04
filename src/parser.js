@@ -34,6 +34,21 @@ const WHITESPACE_EQUIV_TOKENS = {
     [tokens.comment]: true,
 };
 
+function tokenStart (token) {
+    return {
+        line: token[TOKEN.START_LINE],
+        column: token[TOKEN.START_COL],
+    };
+}
+
+function tokenEnd (token) {
+    return {
+        line: token[TOKEN.END_LINE],
+        column: token[TOKEN.END_COL],
+    };
+}
+
+
 function getSource (startLine, startColumn, endLine, endColumn) {
     return {
         start: {
@@ -56,6 +71,18 @@ function getTokenSource (token) {
     );
 }
 
+function getTokenSourceSpan (startToken, endToken) {
+    if (!startToken) {
+        return undefined;
+    }
+    return getSource(
+        startToken[TOKEN.START_LINE],
+        startToken[TOKEN.START_COL],
+        endToken[TOKEN.END_LINE],
+        endToken[TOKEN.END_COL]
+    );
+}
+
 function unescapeProp (node, prop) {
     let value = node[prop];
     if (typeof value !== "string") {
@@ -71,32 +98,11 @@ function unescapeProp (node, prop) {
     return node;
 }
 
-function convertWhitespaceNodesToSpace (nodes) {
-    let space = "";
-    let rawSpace = "";
-    nodes.forEach(n => {
-        space += n.spaces.before + n.spaces.after;
-        rawSpace += n.toString();
-    });
-    if (rawSpace === space) {
-        rawSpace = undefined;
-    }
-    let result = {space, rawSpace};
-    return result;
-}
-
 export default class Parser {
     constructor (rule, options = {}) {
         this.rule = rule;
         this.options = Object.assign({lossy: false, safe: false}, options);
         this.position = 0;
-        this.root = new Root();
-        this.root.errorGenerator = this._errorGenerator();
-
-
-        const selector = new Selector();
-        this.root.append(selector);
-        this.current = selector;
 
         this.css = typeof this.rule === 'string' ? this.rule : this.rule.selector;
 
@@ -105,6 +111,16 @@ export default class Parser {
             error: this._errorGenerator(),
             safe: this.options.safe,
         });
+
+        let rootSource = getTokenSourceSpan(this.tokens[0], this.tokens[this.tokens.length - 1]);
+        this.root = new Root({source: rootSource});
+        this.root.errorGenerator = this._errorGenerator();
+
+
+        const selector = new Selector({source: {start: {line: 1, column: 1}}});
+        this.root.append(selector);
+        this.current = selector;
+
 
         this.loop();
     }
@@ -423,6 +439,58 @@ export default class Parser {
         return nodes;
     }
 
+    /**
+     * 
+     * @param {*} nodes 
+     */
+    convertWhitespaceNodesToSpace (nodes, requiredSpace = false) {
+        let space = "";
+        let rawSpace = "";
+        nodes.forEach(n => {
+            let spaceBefore = this.lossySpace(n.spaces.before, requiredSpace);
+            let rawSpaceBefore = this.lossySpace(n.rawSpaceBefore, requiredSpace);
+            space += spaceBefore + this.lossySpace(n.spaces.after, requiredSpace && spaceBefore.length === 0);
+            rawSpace += spaceBefore + n.value + this.lossySpace(n.rawSpaceAfter, requiredSpace && rawSpaceBefore.length === 0);
+        });
+        if (rawSpace === space) {
+            rawSpace = undefined;
+        }
+        let result = {space, rawSpace};
+        return result;
+    }
+
+    isNamedCombinator (position = this.position) {
+        return this.tokens[position + 0] && this.tokens[position + 0][TOKEN.TYPE] === tokens.slash &&
+               this.tokens[position + 1] && this.tokens[position + 1][TOKEN.TYPE] === tokens.word &&
+               this.tokens[position + 2] && this.tokens[position + 2][TOKEN.TYPE] === tokens.slash;
+
+    }
+    namedCombinator () {
+        if (this.isNamedCombinator()) {
+            let nameRaw = this.content(this.tokens[this.position + 1]);
+            let name = unesc(nameRaw).toLowerCase();
+            let raws = {};
+            if (name !== nameRaw) {
+                raws.value = `/${nameRaw}/`;
+            }
+            let node = new Combinator({
+                value: `/${name}/`,
+                source: getSource(
+                    this.currToken[TOKEN.START_LINE],
+                    this.currToken[TOKEN.START_COL],
+                    this.tokens[this.position + 2][TOKEN.END_LINE],
+                    this.tokens[this.position + 2][TOKEN.END_COL],
+                ),
+                sourceIndex: this.currToken[TOKEN.START_POS],
+                raws,
+            });
+            this.position = this.position + 3;
+            return node;
+        } else {
+            this.unexpected();
+        }
+    }
+
     combinator () {
         if (this.content() === '|') {
             return this.namespace();
@@ -435,7 +503,7 @@ export default class Parser {
             if (nodes.length > 0) {
                 let last = this.current.last;
                 if (last) {
-                    let {space, rawSpace} = convertWhitespaceNodesToSpace(nodes);
+                    let {space, rawSpace} = this.convertWhitespaceNodesToSpace(nodes);
                     if (rawSpace !== undefined) {
                         last.rawSpaceAfter += rawSpace;
                     }
@@ -447,40 +515,65 @@ export default class Parser {
             return;
         }
 
-        let spaceBeforeCombinator = undefined;
-        if (nextSigTokenPos > this.position && this.tokens[nextSigTokenPos][TOKEN.TYPE] === tokens.combinator) {
-            spaceBeforeCombinator = convertWhitespaceNodesToSpace(this.parseWhitespaceEquivalentTokens(nextSigTokenPos));
+        let firstToken = this.currToken;
+        let spaceOrDescendantSelectorNodes = undefined;
+        if (nextSigTokenPos > this.position) {
+            spaceOrDescendantSelectorNodes = this.parseWhitespaceEquivalentTokens(nextSigTokenPos);
         }
 
-        const current = this.currToken;
-        const node = new Combinator({
-            value: '',
-            source: getTokenSource(current),
-            sourceIndex: current[TOKEN.START_POS],
-        });
-        while ( this.position < this.tokens.length && this.currToken &&
-                (this.currToken[TOKEN.TYPE] === tokens.space ||
-                this.currToken[TOKEN.TYPE] === tokens.combinator)) {
-            const content = this.content();
-            if (this.nextToken && this.nextToken[TOKEN.TYPE] === tokens.combinator) {
-                node.spaces.before = this.optionalSpace(content);
-                node.source = getTokenSource(this.nextToken);
-                node.sourceIndex = this.nextToken[TOKEN.START_POS];
-            } else if (this.prevToken && this.prevToken[TOKEN.TYPE] === tokens.combinator) {
-                node.spaces.after = this.optionalSpace(content);
-            } else if (this.currToken[TOKEN.TYPE] === tokens.combinator) {
-                node.value = content;
-            } else if (this.currToken[TOKEN.TYPE] === tokens.space) {
-                node.value = this.requiredSpace(content);
-            }
-            this.position ++;
+        let node;
+        if (this.isNamedCombinator()) {
+            node = this.namedCombinator();
+        } else if (this.currToken[TOKEN.TYPE] === tokens.combinator) {
+            node = new Combinator({
+                value: this.content(),
+                source: getTokenSource(this.currToken),
+                sourceIndex: this.currToken[TOKEN.START_POS],
+            });
+            this.position++;
+        } else if (WHITESPACE_TOKENS[this.currToken[TOKEN.TYPE]]) {
+            // pass
+        } else if (!spaceOrDescendantSelectorNodes) {
+            this.unexpected();
         }
-        if (spaceBeforeCombinator) {
-            if (spaceBeforeCombinator.rawSpace !== undefined) {
-                node.rawSpaceBefore = spaceBeforeCombinator.rawSpace + node.rawSpaceBefore;
+
+        if (node) {
+            if (spaceOrDescendantSelectorNodes) {
+                let {space, rawSpace} = this.convertWhitespaceNodesToSpace(spaceOrDescendantSelectorNodes);
+                node.spaces.before = space;
+                node.rawSpaceBefore = rawSpace;
             }
-            node.spaces.before = spaceBeforeCombinator.space + node.spaces.before;
+        } else {
+            // descendant combinator
+            let {space, rawSpace} = this.convertWhitespaceNodesToSpace(spaceOrDescendantSelectorNodes, true);
+            if (!rawSpace) {
+                rawSpace = space;
+            }
+            let spaces = {};
+            let raws = {spaces: {}};
+            if (space.endsWith(' ') && rawSpace.endsWith(' ')) {
+                spaces.before = space.slice(0, space.length - 1);
+                raws.spaces.before = rawSpace.slice(0, rawSpace.length - 1);
+            } else if (space.startsWith(' ') && rawSpace.startsWith(' ')) {
+                spaces.after = space.slice(1);
+                raws.spaces.after = rawSpace.slice(1);
+            } else {
+                raws.value = rawSpace;
+            }
+            node = new Combinator({
+                value: ' ',
+                source: getTokenSourceSpan(firstToken, this.tokens[this.position - 1]),
+                sourceIndex: firstToken[TOKEN.START_POS],
+                spaces,
+                raws,
+            });
         }
+
+        if (this.currToken[TOKEN.TYPE] === tokens.space) {
+            node.spaces.after = this.optionalSpace(this.content());
+            this.position++;
+        }
+
         return this.newNode(node);
     }
 
@@ -490,7 +583,8 @@ export default class Parser {
             this.position ++;
             return;
         }
-        const selector = new Selector();
+        this.current._inferEndPosition();
+        const selector = new Selector({source: {start: tokenStart(this.tokens[this.position + 1])}});
         this.current.parent.append(selector);
         this.current = selector;
         this.position ++;
@@ -524,6 +618,10 @@ export default class Parser {
         return this.expected('opening square bracket', this.currToken[TOKEN.START_POS]);
     }
 
+    unexpected () {
+        return this.error(`Unexpected '${this.content()}'. Escaping special characters with \\ may help.`, this.currToken[TOKEN.START_POS]);
+    }
+
     namespace () {
         const before = this.prevToken && this.content(this.prevToken) || true;
         if (this.nextToken[TOKEN.TYPE] === tokens.word) {
@@ -554,25 +652,25 @@ export default class Parser {
 
     parentheses () {
         let last = this.current.last;
-        let balanced = 1;
+        let unbalanced = 1;
         this.position ++;
         if (last && last.type === types.PSEUDO) {
-            const selector = new Selector();
+            const selector = new Selector({source: {start: tokenStart(this.tokens[this.position - 1])}});
             const cache = this.current;
             last.append(selector);
             this.current = selector;
-            while (this.position < this.tokens.length && balanced) {
+            while (this.position < this.tokens.length && unbalanced) {
                 if (this.currToken[TOKEN.TYPE] === tokens.openParenthesis) {
-                    balanced ++;
+                    unbalanced ++;
                 }
                 if (this.currToken[TOKEN.TYPE] === tokens.closeParenthesis) {
-                    balanced --;
+                    unbalanced --;
                 }
-                if (balanced) {
+                if (unbalanced) {
                     this.parse();
                 } else {
-                    selector.parent.source.end.line = this.currToken[3];
-                    selector.parent.source.end.column = this.currToken[4];
+                    this.current.source.end = tokenEnd(this.currToken);
+                    this.current.parent.source.end = tokenEnd(this.currToken);
                     this.position ++;
                 }
             }
@@ -583,12 +681,12 @@ export default class Parser {
             let parenStart = this.currToken;
             let parenValue = "(";
             let parenEnd;
-            while (this.position < this.tokens.length && balanced) {
+            while (this.position < this.tokens.length && unbalanced) {
                 if (this.currToken[TOKEN.TYPE] === tokens.openParenthesis) {
-                    balanced ++;
+                    unbalanced ++;
                 }
                 if (this.currToken[TOKEN.TYPE] === tokens.closeParenthesis) {
-                    balanced --;
+                    unbalanced --;
                 }
                 parenEnd = this.currToken;
                 parenValue += this.parseParenthesisToken(this.currToken);
@@ -609,7 +707,7 @@ export default class Parser {
                 }));
             }
         }
-        if (balanced) {
+        if (unbalanced) {
             return this.expected('closing parenthesis', this.currToken[TOKEN.START_POS]);
         }
     }
@@ -629,12 +727,7 @@ export default class Parser {
                 pseudoStr += first;
                 this.newNode(new Pseudo({
                     value: pseudoStr,
-                    source: getSource(
-                        startingToken[1],
-                        startingToken[2],
-                        this.currToken[3],
-                        this.currToken[4]
-                    ),
+                    source: getTokenSourceSpan(startingToken, this.currToken),
                     sourceIndex: startingToken[TOKEN.START_POS],
                 }));
                 if (
@@ -784,6 +877,7 @@ export default class Parser {
         while (this.position < this.tokens.length) {
             this.parse(true);
         }
+        this.current._inferEndPosition();
         return this.root;
     }
 
@@ -824,6 +918,7 @@ export default class Parser {
         case tokens.ampersand:
             this.nesting();
             break;
+        case tokens.slash:
         case tokens.combinator:
             this.combinator();
             break;
@@ -835,6 +930,8 @@ export default class Parser {
             this.missingSquareBracket();
         case tokens.semicolon:
             this.missingBackslash();
+        default:
+            this.unexpected();
         }
     }
 
@@ -866,6 +963,14 @@ export default class Parser {
 
     optionalSpace (space) {
         return this.options.lossy ? '' : space;
+    }
+
+    lossySpace (space, required) {
+        if (this.options.lossy) {
+            return required ? ' ' : '';
+        } else {
+            return space;
+        }
     }
 
     parseParenthesisToken (token) {

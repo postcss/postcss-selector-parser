@@ -167,7 +167,7 @@ export default function tokenize (input) {
 
             tokenType = t.space;
             endLine = line;
-            endColumn = start - offset;
+            endColumn = next - offset - 1;
             end = next;
             break;
 
@@ -258,6 +258,12 @@ export default function tokenize (input) {
                 line   = nextLine;
                 endLine = nextLine;
                 endColumn = next - nextOffset;
+            } else if (code === t.slash) {
+                next = start;
+                tokenType = code;
+                endLine = line;
+                endColumn = start - offset;
+                end = next + 1;
             } else {
                 next = consumeWord(css, start);
                 tokenType = t.word;

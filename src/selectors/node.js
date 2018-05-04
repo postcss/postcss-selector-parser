@@ -123,6 +123,30 @@ export default class Node {
         }
     }
 
+    /**
+     * 
+     * @param {number} line The number (starting with 1)
+     * @param {number} column The column number (starting with 1)
+     */
+    isAtPosition (line, column) {
+        if (this.source && this.source.start && this.source.end) {
+            if (this.source.start.line > line) {
+                return false;
+            }
+            if (this.source.end.line < line) {
+                return false;
+            }
+            if (this.source.start.line === line && this.source.start.column > column) {
+                return false;
+            }
+            if (this.source.end.line === line && this.source.end.column < column) {
+                return false;
+            }
+            return true;
+        }
+        return undefined;
+    }
+
     stringifyProperty (name) {
         return (this.raws && this.raws[name]) || this[name];
     }

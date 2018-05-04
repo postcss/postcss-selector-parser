@@ -1,6 +1,6 @@
 {
   "name": "postcss-selector-parser",
-  "version": "4.0.0",
+  "version": "5.0.0-rc.0",
   "devDependencies": {
     "ava": "^0.24.0",
     "babel-cli": "^6.4.0",
@@ -34,7 +34,7 @@
   ],
   "scripts": {
     "pretest": "eslint src",
-    "prepublish": "del-cli dist && BABEL_ENV=publish babel src --out-dir dist --ignore /__tests__/",
+    "prepare": "del-cli dist && BABEL_ENV=publish babel src --out-dir dist --ignore /__tests__/",
     "lintfix": "eslint --fix src",
     "report": "nyc report --reporter=html",
     "test": "nyc ava src/__tests__/*.js",
@@ -47,7 +47,7 @@
   },
   "license": "MIT",
   "engines": {
-    "node": ">=4"
+    "node": ">=6"
   },
   "homepage": "https://github.com/postcss/postcss-selector-parser",
   "contributors": [

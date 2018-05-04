@@ -9,10 +9,6 @@ matrix:
       env: INTEGRATION=true
     - node_js: '6'
       env: INTEGRATION=false
-    - node_js: '5'
-      env: INTEGRATION=false
-    - node_js: '4'
-      env: INTEGRATION=false
 install:
   - npm install -g npm@latest
   - npm ci

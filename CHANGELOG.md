@@ -8,6 +8,7 @@ This release has **BREAKING CHANGES** that were required to fix regressions in 4
 * Named Combinators (E.g. `.a /for/ .b`) are now properly parsed as a combinator.
 * It is now possible to look up a node based on the source location of a character in that node and to query nodes if they contain some character.
 * Several bug fixes that caused the parser to hang and run out of memory when a `/` was encountered have been fixed.
+* The minimum supported version of Node is now v6.0.
 
 ### Changes to the Descendent Combinator
 

@@ -1,6 +1,8 @@
 # 5.0.0-rc.0
 
-This release has **BREAKING CHANGES** that were required to fix regressions in 4.0.0. Please read carefully.
+This release has **BREAKING CHANGES** that were required to fix regressions
+in 4.0.0 and to make the Combinator Node API consistent for all combinator
+types. Please read carefully.
 
 ## Summary of Changes
 
@@ -8,26 +10,32 @@ This release has **BREAKING CHANGES** that were required to fix regressions in 4
 * Named Combinators (E.g. `.a /for/ .b`) are now properly parsed as a combinator.
 * It is now possible to look up a node based on the source location of a character in that node and to query nodes if they contain some character.
 * Several bug fixes that caused the parser to hang and run out of memory when a `/` was encountered have been fixed.
-* The minimum supported version of Node is now v6.0.
+* The minimum supported version of Node is now `v6.0.0`.
 
 ### Changes to the Descendent Combinator
 
 In prior releases, the value of a descendant combinator with multiple spaces included all the spaces.
 
 * `.a   .b`: Extra spaces are now stored as space before.
-  - 3.x: `combinator.value === "   "`
-  - 4.0: `combinator.value === " " && combinator.spaces.before === "  "`
+  - Old & Busted:
+    - `combinator.value === "   "`
+  - New hotness:
+    - `combinator.value === " " && combinator.spaces.before === "  "`
 * `.a   /*comment*/.b`: A comment at the end of the combinator causes extra space to become after space.
-  - 3.x: `combinator.value === "   "`
-  - 3.x: `combinator.raws.value === "   /*comment/"`
-  - 4.0: `combinator.value === " "`
-  - 4.0: `combinator.spaces.after === "  "`
-  - 4.0: `combinator.raws.spaces.after === "  /*comment*/"`
+  - Old & Busted:
+    - `combinator.value === "   "`
+    - `combinator.raws.value === "   /*comment/"`
+  - New hotness:
+    - `combinator.value === " "`
+    - `combinator.spaces.after === "  "`
+    - `combinator.raws.spaces.after === "  /*comment*/"`
 * `.a<newline>.b`: whitespace that doesn't start or end with a single space character is stored as a raw value.
-  - 3.x: `combinator.value === "\n"`
-  - 3.x: `combinator.raws.value === undefined`
-  - 4.0: `combinator.value === " "`
-  - 3.x: `combinator.raws.value === "\n"`
+  - Old & Busted:
+    - `combinator.value === "\n"`
+    - `combinator.raws.value === undefined`
+  - New hotness:
+    - `combinator.value === " "`
+    - `combinator.raws.value === "\n"`
 
 ### Support for "Named Combinators"
 
@@ -38,14 +46,14 @@ Because they've been taken off the standardization track, there is no spec-offic
 Before this release such named combinators were parsed without intention and generated three nodes of type `"tag"` where the first and last nodes had a value of `"/"`.
 
 * `.a /for/ .b` is parsed as a combinator.
-  - In prior releases:
+  - Old & Busted:
     - `root.nodes[0].nodes[1].type === "tag"`
     - `root.nodes[0].nodes[1].value === "/"`
   - New hotness:
     - `root.nodes[0].nodes[1].type === "combinator"`
     - `root.nodes[0].nodes[1].value === "/for/"`
 * `.a /F\6fR/ .b` escapes are handled and uppercase is normalized.
-  - In prior releases:
+  - Old & Busted:
     - `root.nodes[0].nodes[2].type === "tag"`
     - `root.nodes[0].nodes[2].value === "F\\6fR"`
   - New hotness:

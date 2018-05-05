@@ -1,3 +1,10 @@
+# 5.0.0-rc.1
+
+To ease adoption of the v5.0 release, we have relaxed the node version
+check performed by npm at installation time to allow for node 4, which
+remains officially unsupported, but likely to continue working for the
+time being.
+
 # 5.0.0-rc.0
 
 This release has **BREAKING CHANGES** that were required to fix regressions

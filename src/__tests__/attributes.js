@@ -394,6 +394,10 @@ test('comments within attribute selectors (4)', '[ /*before*/ href /* after-attr
 });
 
 test('non standard modifiers', '[href="foo" y]', (t, tree) => {
+    let attr = tree.atPosition(1, 13);
+    t.deepEqual(attr.insensitive, false);
+    t.deepEqual(attr.insensitiveFlag, '');
+    t.deepEqual(attr.raws.insensitiveFlag, 'y');
     t.deepEqual(tree.toString(), '[href="foo" y]');
 });
 

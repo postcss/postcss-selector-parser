@@ -124,6 +124,12 @@ test('trailing combinator & spaces', 'p +        ', (t, tree) => {
     t.deepEqual(tree.nodes[0].nodes[0].value, 'p', 'should be a paragraph');
     t.deepEqual(tree.nodes[0].nodes[1].value, '+', 'should have a combinator');
 });
+
+test('trailing sibling combinator', 'p ~', (t, tree) => {
+    t.deepEqual(tree.nodes[0].nodes[0].value, 'p', 'should be a paragraph');
+    t.deepEqual(tree.nodes[0].nodes[1].value, '~', 'should have a combinator');
+});
+
 test('ending in comment has no trailing combinator', ".bar /* comment 3 */", (t, tree) => {
     let nodeTypes = tree.nodes[0].map(n => n.type);
     t.deepEqual(nodeTypes, ["class"]);

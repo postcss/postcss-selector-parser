@@ -121,7 +121,6 @@ export default class Parser {
         this.root.append(selector);
         this.current = selector;
 
-
         this.loop();
     }
 
@@ -578,7 +577,7 @@ export default class Parser {
             });
         }
 
-        if (this.currToken[TOKEN.TYPE] === tokens.space) {
+        if (this.currToken && this.currToken[TOKEN.TYPE] === tokens.space) {
             node.spaces.after = this.optionalSpace(this.content());
             this.position++;
         }

@@ -23,3 +23,4 @@ throws('bad syntax', '-moz-osx-font-smoothing: grayscale');
 throws('missing backslash for semicolon', '.;');
 throws('missing backslash for semicolon', '.\;');
 throws('unexpected / foo', '-Option\/root', "Unexpected '/'. Escaping special characters with \\ may help.");
+throws('bang in selector', '.foo !optional', "Unexpected '!'. Escaping special characters with \\ may help.");

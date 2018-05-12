@@ -18,3 +18,18 @@ test('leading combinator', '> *', (t, tree) => {
     t.deepEqual(tree.nodes[0].nodes[0].value, '>');
     t.deepEqual(tree.nodes[0].nodes[1].value, '*');
 });
+
+test('sass escapes', '.#{$classname}', (t, tree) => {
+    t.deepEqual(tree.nodes[0].nodes.map(n => n.type), ["class"]);
+    t.deepEqual(tree.nodes[0].nodes[0].value, "#{$classname}");
+});
+
+test('sass escapes', '[lang=#{$locale}]', (t, tree) => {
+    t.deepEqual(tree.nodes[0].nodes.map(n => n.type), ["attribute"]);
+    t.deepEqual(tree.nodes[0].nodes[0].value, "#{$locale}");
+});
+
+test('placeholder', '%foo', (t, tree) => {
+    t.deepEqual(tree.nodes[0].nodes.map(n => n.type), ["tag"]);
+    t.deepEqual(tree.nodes[0].nodes[0].value, "%foo");
+});

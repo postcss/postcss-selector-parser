@@ -227,6 +227,15 @@ export default class Parser {
                 spaceAfterMeaningfulToken = false;
                 break;
             case tokens.dollar:
+                if (lastAdded === "value") {
+                    let oldRawValue = getProp(node, 'raws', 'value');
+                    node.value += "$";
+                    if (oldRawValue) {
+                        node.raws.value = oldRawValue + "$";
+                    }
+                    break;
+                }
+                // Falls through
             case tokens.caret:
                 if (next[TOKEN.TYPE] === tokens.equals) {
                     node.operator = content;

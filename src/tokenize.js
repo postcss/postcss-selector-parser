@@ -195,6 +195,7 @@ export default function tokenize (input) {
         // Consume these characters as single tokens.
         case t.asterisk:
         case t.ampersand:
+        case t.bang:
         case t.comma:
         case t.equals:
         case t.dollar:

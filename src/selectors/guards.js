@@ -53,7 +53,7 @@ export function isPseudoElement (node) {
     return isPseudo(node)
            && node.value
            && (
-             node.value.startsWith("::")
+               node.value.startsWith("::")
              || node.value === ":before"
              || node.value === ":after"
            );

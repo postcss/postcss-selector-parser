@@ -1,9 +1,9 @@
 {
   "name": "postcss-selector-parser",
-  "version": "5.0.0-rc.2",
+  "version": "5.0.0-rc.3",
   "devDependencies": {
-    "ava": "^0.24.0",
-    "babel-cli": "^6.4.0",
+    "ava": "^0.25.0",
+    "babel-cli": "^6.26.0",
     "babel-core": "^6.4.0",
     "babel-plugin-add-module-exports": "^0.2.0",
     "babel-plugin-precompile-charcodes": "^1.0.0",
@@ -13,13 +13,12 @@
     "babel-register": "^6.9.0",
     "coveralls": "^2.11.6",
     "del-cli": "^0.2.0",
-    "eslint": "^3.0.0",
-    "eslint-config-cssnano": "^3.0.0",
+    "eslint": "^4.19.1",
     "eslint-plugin-babel": "^3.3.0",
-    "eslint-plugin-import": "^1.10.2",
+    "eslint-plugin-import": "^2.11.0",
     "glob": "^7.0.3",
     "minimist": "^1.2.0",
-    "nyc": "^11.4.1",
+    "nyc": "^11.7.3",
     "postcss": "^6.0.6",
     "semver": "^5.5.0"
   },
@@ -41,6 +40,7 @@
     "testone": "ava"
   },
   "dependencies": {
+    "babel-eslint": "^8.2.3",
     "cssesc": "^1.0.1",
     "indexes-of": "^1.0.1",
     "uniq": "^1.0.1"
@@ -72,8 +72,5 @@
       "node_modules",
       "**/__tests__"
     ]
-  },
-  "eslintConfig": {
-    "extends": "cssnano"
   }
 }

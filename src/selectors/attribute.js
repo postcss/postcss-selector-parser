@@ -67,9 +67,9 @@ export default class Attribute extends Namespace {
         this.raws = this.raws || {};
         Object.defineProperty(this.raws, 'unquoted', {
             get: deprecate(() => this.value,
-                           "attr.raws.unquoted is deprecated. Call attr.value instead."),
+                "attr.raws.unquoted is deprecated. Call attr.value instead."),
             set: deprecate(() => this.value,
-                           "Setting attr.raws.unquoted is deprecated and has no effect. attr.value is unescaped by default now."),
+                "Setting attr.raws.unquoted is deprecated and has no effect. attr.value is unescaped by default now."),
         });
         this._constructed = true;
     }

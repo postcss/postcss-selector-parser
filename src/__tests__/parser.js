@@ -113,10 +113,10 @@ test('Passing a rule works async', (t) => {
             res();
         }, 1);
     })).process(rule)
-    .then(newSel => {
-        t.deepEqual(newSel, ".bar");
-        t.deepEqual(rule.selector, ".bar");
-    });
+        .then(newSel => {
+            t.deepEqual(newSel, ".bar");
+            t.deepEqual(rule.selector, ".bar");
+        });
 });
 
 test('Passing a rule with mutation disabled works async', (t) => {
@@ -129,10 +129,10 @@ test('Passing a rule with mutation disabled works async', (t) => {
             res();
         }, 1);
     })).process(rule, {updateSelector: false})
-    .then(newSel => {
-        t.deepEqual(newSel, ".bar");
-        t.deepEqual(rule.selector, ".foo");
-    });
+        .then(newSel => {
+            t.deepEqual(newSel, ".bar");
+            t.deepEqual(rule.selector, ".foo");
+        });
 });
 
 test('Passing a rule with mutation works sync', (t) => {

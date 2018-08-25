@@ -401,6 +401,32 @@ test('non standard modifiers', '[href="foo" y]', (t, tree) => {
     t.deepEqual(tree.toString(), '[href="foo" y]');
 });
 
+test('comment after insensitive(non space)', '[href="foo" i/**/]', (t, tree) => {
+    // https://github.com/postcss/postcss-selector-parser/issues/150
+    let attr = tree.atPosition(1, 13);
+    t.deepEqual(attr.insensitive, true);
+    t.deepEqual(attr.insensitiveFlag, 'i');
+    t.is(attr.raws.insensitiveFlag, undefined);
+    t.deepEqual(attr.raws.spaces.insensitive.after, '/**/');
+    t.deepEqual(tree.toString(), '[href="foo" i/**/]');
+});
+
+test('comment after insensitive(space after)', '[href="foo" i/**/ ]', (t, tree) => {
+    let attr = tree.atPosition(1, 13);
+    t.deepEqual(attr.insensitive, true);
+    t.deepEqual(attr.insensitiveFlag, 'i');
+    t.deepEqual(attr.raws.spaces.insensitive.after, '/**/ ');
+    t.deepEqual(tree.toString(), '[href="foo" i/**/ ]');
+});
+
+test('comment after insensitive(space before)', '[href="foo" i /**/]', (t, tree) => {
+    let attr = tree.atPosition(1, 13);
+    t.deepEqual(attr.insensitive, true);
+    t.deepEqual(attr.insensitiveFlag, 'i');
+    t.deepEqual(attr.raws.spaces.insensitive.after, ' /**/');
+    t.deepEqual(tree.toString(), '[href="foo" i /**/]');
+});
+
 const testDeprecation = nodeVersionAtLeast('7.0.0') || nodeVersionBefore('6.0.0') ? test : test.skip;
 
 testDeprecation('deprecated constructor', '', (t) => {

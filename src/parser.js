@@ -357,7 +357,9 @@ export default class Parser {
                 break;
             case tokens.comment:
                 if (lastAdded) {
-                    if (spaceAfterMeaningfulToken || (next && next[TOKEN.TYPE] === tokens.space)) {
+                    if (spaceAfterMeaningfulToken || (next && next[TOKEN.TYPE] === tokens.space) ||
+                        lastAdded === 'insensitive'
+                    ) {
                         const lastComment = getProp(node, 'spaces', lastAdded, 'after') || '';
                         const rawLastComment = getProp(node, 'raws', 'spaces', lastAdded, 'after') || lastComment;
 

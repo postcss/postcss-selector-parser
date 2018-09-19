@@ -5,6 +5,7 @@
     "ava": "^0.25.0",
     "babel-cli": "^6.26.0",
     "babel-core": "^6.4.0",
+    "babel-eslint": "^8.2.3",
     "babel-plugin-add-module-exports": "^0.2.0",
     "babel-plugin-precompile-charcodes": "^1.0.0",
     "babel-preset-es2015": "^6.3.13",
@@ -40,7 +41,6 @@
     "testone": "ava"
   },
   "dependencies": {
-    "babel-eslint": "^8.2.3",
     "cssesc": "^1.0.1",
     "indexes-of": "^1.0.1",
     "uniq": "^1.0.1"

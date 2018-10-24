@@ -1,4 +1,0 @@
-[submodule "integration/stylelint"]
-	path = integration/stylelint
-	url = https://github.com/chriseppstein/stylelint.git
-	branch = selector-parser-4.0

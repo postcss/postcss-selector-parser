@@ -13,7 +13,7 @@
     "babel-preset-stage-0": "^6.24.1",
     "babel-register": "^6.26.0",
     "coveralls": "^3.0.2",
-    "del-cli": "^0.2.0",
+    "del-cli": "^1.1.0",
     "eslint": "^4.19.1",
     "eslint-plugin-babel": "^3.3.0",
     "eslint-plugin-import": "^2.14.0",
@@ -21,7 +21,7 @@
     "minimist": "^1.2.0",
     "nyc": "^11.7.3",
     "postcss": "^7.0.5",
-    "semver": "^5.5.1"
+    "semver": "^5.6.0"
   },
   "main": "dist/index.js",
   "types": "postcss-selector-parser.d.ts",
@@ -41,7 +41,7 @@
     "testone": "ava"
   },
   "dependencies": {
-    "cssesc": "^1.0.1",
+    "cssesc": "^2.0.0",
     "indexes-of": "^1.0.1",
     "uniq": "^1.0.1"
   },

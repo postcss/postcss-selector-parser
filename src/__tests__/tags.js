@@ -26,3 +26,13 @@ test('tag with trailing comma', 'h1,', (t, tree) => {
 test('tag with trailing slash', 'h1\\', (t, tree) => {
     t.deepEqual(tree.nodes[0].nodes[0].value, 'h1\\');
 });
+
+test('tag with attribute', 'label[for="email"]', (t, tree) => {
+    t.deepEqual(tree.nodes[0].nodes[0].value, 'label');
+    t.deepEqual(tree.nodes[0].nodes[0].type, 'tag');
+    t.deepEqual(tree.nodes[0].nodes[1].value, 'email');
+    t.deepEqual(tree.nodes[0].nodes[1].attribute, 'for');
+    t.deepEqual(tree.nodes[0].nodes[1].operator, '=');
+    t.deepEqual(tree.nodes[0].nodes[1].type, 'attribute');
+    t.deepEqual(tree.nodes[0].nodes[1].quoteMark, '"');
+});

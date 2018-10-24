@@ -25,3 +25,10 @@ test('qualified universal selector', '*[href] *:not(*.green)', (t, tree) => {
     t.deepEqual(tree.nodes[0].nodes[3].value, '*');
     t.deepEqual(tree.nodes[0].nodes[4].nodes[0].nodes[0].value, '*');
 });
+
+test('universal selector with pseudo', '*::--webkit-media-controls-play-button', (t, tree) => {
+    t.deepEqual(tree.nodes[0].nodes[0].value, '*');
+    t.deepEqual(tree.nodes[0].nodes[0].type, 'universal');
+    t.deepEqual(tree.nodes[0].nodes[1].value, '::--webkit-media-controls-play-button');
+    t.deepEqual(tree.nodes[0].nodes[1].type, 'pseudo');
+});

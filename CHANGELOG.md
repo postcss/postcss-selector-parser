@@ -1,3 +1,12 @@
+# 5.0.0-rc.4
+
+- Fixed and issue where comments immediately after an insensitive
+  (in attribute) were not parsed correctly.
+- Updated `cssesc` to 2.0.0 (major).
+- Removed outdated integration tests.
+- Added tests for custom selectors, tags with attributes, the universal
+  selector with pseudos, and tokens after combinators.
+
 # 5.0.0-rc.1
 
 To ease adoption of the v5.0 release, we have relaxed the node version

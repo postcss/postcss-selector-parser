@@ -3,20 +3,18 @@ sudo: false
 language: node_js
 matrix:
   include:
+    - node_js: '11'
     - node_js: '10'
-      env: INTEGRATION=false
     - node_js: '8'
-      env: INTEGRATION=true
     - node_js: '6'
-      env: INTEGRATION=false
 install:
   - npm install -g npm@latest
   - npm ci
 script:
   - npm test
-  - ./integration_test.sh
 cache:
   directories:
     - ~/.npm
+    - node_modules
 after_success:
   - './node_modules/.bin/nyc report --reporter=text-lcov | ./node_modules/.bin/coveralls'

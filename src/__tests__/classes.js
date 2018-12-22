@@ -43,3 +43,9 @@ test('ClassName#set value', ".fo\\o", (t, selectors) => {
     className.value = "bar";
     t.deepEqual(className.raws, {});
 });
+
+test('escaped dot in class name', '.foo\\.bar', (t, tree) => {
+    t.deepEqual(tree.nodes[0].nodes[0].type, 'class');
+    t.deepEqual(tree.nodes[0].nodes[0].value, 'foo.bar');
+    t.deepEqual(tree.nodes[0].nodes[0].raws.value, 'foo\\.bar');
+});

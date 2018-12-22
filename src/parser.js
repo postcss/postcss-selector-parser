@@ -821,7 +821,7 @@ export default class Parser {
             }
             nextToken = this.nextToken;
         }
-        const hasClass = indexesOf(word, '.');
+        const hasClass = indexesOf(word, '.').filter(i => word[i - 1] !== '\\');
         let hasId = indexesOf(word, '#');
         // Eliminate Sass interpolations from the list of id indexes
         const interpolations = indexesOf(word, '#{');

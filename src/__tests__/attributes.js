@@ -116,9 +116,9 @@ test('attribute selector with hex escape', '[ng\\00003acloak]', (t, tree) => {
 test('assign attribute name requiring escape', '[ng\\:cloak]', (t, tree) => {
     let attr = tree.nodes[0].nodes[0];
     attr.attribute = "ng:foo";
-    t.deepEqual(attr.raws.attribute, 'ng\\3A foo');
+    t.deepEqual(attr.raws.attribute, 'ng\\:foo');
     t.deepEqual(attr.attribute, 'ng:foo');
-    t.deepEqual(tree.toString(), '[ng\\3A foo]');
+    t.deepEqual(tree.toString(), '[ng\\:foo]');
 });
 
 test('multiple attribute selectors + combinator', '[href][class][name] h1 > h2', (t, tree) => {

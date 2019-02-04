@@ -41,7 +41,7 @@
     "testone": "ava"
   },
   "dependencies": {
-    "cssesc": "^2.0.0",
+    "cssesc": "^3.0.0",
     "indexes-of": "^1.0.1",
     "uniq": "^1.0.1"
   },

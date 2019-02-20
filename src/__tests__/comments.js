@@ -5,7 +5,7 @@ test('comments', '/*test comment*/h2', (t, tree) => {
     t.deepEqual(tree.nodes[0].nodes[1].value, 'h2');
 });
 
-test('comments', '.a  /*test comment*/label', (t, tree) => {
+test('comments (2)', '.a  /*test comment*/label', (t, tree) => {
     t.deepEqual(tree.nodes[0].nodes[0].type, 'class');
     t.deepEqual(tree.nodes[0].nodes[1].type, 'combinator');
     t.deepEqual(tree.nodes[0].nodes[1].value, ' ');
@@ -14,7 +14,7 @@ test('comments', '.a  /*test comment*/label', (t, tree) => {
     t.deepEqual(tree.nodes[0].nodes[2].type, 'tag');
 });
 
-test('comments', '.a  /*test comment*/  label', (t, tree) => {
+test('comments (3)', '.a  /*test comment*/  label', (t, tree) => {
     t.deepEqual(tree.nodes[0].nodes[0].type, 'class');
     t.deepEqual(tree.nodes[0].nodes[1].type, 'combinator');
     t.deepEqual(tree.nodes[0].nodes[1].value, ' ');

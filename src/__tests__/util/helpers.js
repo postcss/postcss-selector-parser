@@ -33,7 +33,7 @@ test.serial = (spec, input, callback) => test(spec, input, callback, false, fals
 
 export const throws = (spec, input, validator) => {
     ava(`${spec} (throws)`, t => {
-        t.throws(() => parser().processSync(input), validator);
+        t.throws(() => parser().processSync(input), validator || Error);
     });
 };
 

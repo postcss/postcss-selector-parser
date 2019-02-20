@@ -24,7 +24,7 @@ test('sass escapes', '.#{$classname}', (t, tree) => {
     t.deepEqual(tree.nodes[0].nodes[0].value, "#{$classname}");
 });
 
-test('sass escapes', '[lang=#{$locale}]', (t, tree) => {
+test('sass escapes (2)', '[lang=#{$locale}]', (t, tree) => {
     t.deepEqual(tree.nodes[0].nodes.map(n => n.type), ["attribute"]);
     t.deepEqual(tree.nodes[0].nodes[0].value, "#{$locale}");
 });

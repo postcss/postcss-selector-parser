@@ -2,25 +2,23 @@
   "name": "postcss-selector-parser",
   "version": "5.0.0",
   "devDependencies": {
-    "ava": "^0.25.0",
-    "babel-cli": "^6.26.0",
-    "babel-core": "^6.26.3",
-    "babel-eslint": "^8.2.3",
-    "babel-plugin-add-module-exports": "^0.2.0",
-    "babel-plugin-precompile-charcodes": "^1.1.0",
-    "babel-preset-es2015": "^6.24.1",
-    "babel-preset-es2015-loose": "^7.0.0",
-    "babel-preset-stage-0": "^6.24.1",
-    "babel-register": "^6.26.0",
+    "@babel/cli": "^7.2.3",
+    "@babel/core": "^7.3.3",
+    "@babel/plugin-proposal-class-properties": "^7.3.3",
+    "@babel/preset-env": "^7.3.1",
+    "@babel/register": "^7.0.0",
+    "ava": "^1.2.1",
+    "babel-eslint": "^10.0.1",
+    "babel-plugin-add-module-exports": "^1.0.0",
     "coveralls": "^3.0.2",
     "del-cli": "^1.1.0",
-    "eslint": "^4.19.1",
-    "eslint-plugin-babel": "^3.3.0",
+    "eslint": "^5.14.1",
+    "eslint-plugin-babel": "^5.3.0",
     "eslint-plugin-import": "^2.14.0",
     "glob": "^7.1.3",
     "minimist": "^1.2.0",
-    "nyc": "^11.7.3",
-    "postcss": "^7.0.7",
+    "nyc": "^13.3.0",
+    "postcss": "^7.0.14",
     "semver": "^5.6.0"
   },
   "main": "dist/index.js",
@@ -64,7 +62,9 @@
   ],
   "repository": "postcss/postcss-selector-parser",
   "ava": {
-    "require": "babel-register",
+    "require": [
+      "@babel/register"
+    ],
     "concurrency": 5
   },
   "nyc": {

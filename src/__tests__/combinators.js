@@ -115,7 +115,7 @@ test('multiple combinators with whitespaces', 'h1 + h2 > h3', (t, tree) => {
     t.deepEqual(tree.nodes[0].nodes[3].value, '>', 'should have a combinator');
 });
 
-test('multiple combinators with whitespaces', 'h1+ h2 >h3', (t, tree) => {
+test('multiple combinators with whitespaces (2)', 'h1+ h2 >h3', (t, tree) => {
     t.deepEqual(tree.nodes[0].nodes[1].value, '+', 'should have a combinator');
     t.deepEqual(tree.nodes[0].nodes[3].value, '>', 'should have a combinator');
 });

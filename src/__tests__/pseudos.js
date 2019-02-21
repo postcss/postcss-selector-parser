@@ -93,6 +93,11 @@ test('Issue #116', "svg:not(:root)", (t, tree) => {
     t.deepEqual(tree.nodes[0].nodes[1].nodes[0].nodes[0].value, ':root');
 });
 
+test('alone pseudo class', ':root', (t, tree) => {
+    t.deepEqual(tree.nodes[0].nodes[0].type, 'pseudo');
+    t.deepEqual(tree.nodes[0].nodes[0].value, ':root');
+});
+
 test('non standard pseudo (@custom-selector)', ":--foobar, a", (t, tree) => {
     t.deepEqual(tree.nodes[0].nodes[0].value, ':--foobar');
     t.deepEqual(tree.nodes[0].nodes[0].type, 'pseudo');

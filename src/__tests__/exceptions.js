@@ -19,6 +19,7 @@ throws('bad pseudo element', 'button::"after"');
 throws('missing closing parenthesis in pseudo', ':not([attr="test"]:not([attr="test"])');
 
 throws('bad syntax', '-moz-osx-font-smoothing: grayscale');
+throws('bad syntax (2)', '! .body');
 
 throws('missing backslash for semicolon', '.;');
 throws('missing backslash for semicolon', '.\;');

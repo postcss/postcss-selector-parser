@@ -246,3 +246,9 @@ test('class selector with escaping (33)', '.f\\+o\\+o', (t, tree) => {
     t.deepEqual(tree.nodes[0].nodes[0].type, 'class');
     t.deepEqual(tree.nodes[0].nodes[0].raws.value, 'f\\+o\\+o');
 });
+
+test('class selector with escaping (34)', '.\\1D306', (t, tree) => {
+    t.deepEqual(tree.nodes[0].nodes[0].value, '𝌆');
+    t.deepEqual(tree.nodes[0].nodes[0].type, 'class');
+    t.deepEqual(tree.nodes[0].nodes[0].raws.value, '\\1D306');
+});

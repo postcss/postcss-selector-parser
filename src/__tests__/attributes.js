@@ -63,6 +63,13 @@ test('namespace with escapes', '[\\31 \\#\\32 |href]', (t, tree) => {
     t.deepEqual(attr.raws.namespace, '\\31');
 });
 
+test('attribute selector with a empty value', '[href=""]', (t, tree) => {
+    t.deepEqual(tree.nodes[0].nodes[0].attribute, 'href');
+    t.deepEqual(tree.nodes[0].nodes[0].operator, '=');
+    t.deepEqual(tree.nodes[0].nodes[0].value, '');
+    t.true(tree.nodes[0].nodes[0].quoted);
+});
+
 test('attribute selector with a value', '[name=james]', (t, tree) => {
     t.deepEqual(tree.nodes[0].nodes[0].attribute, 'name');
     t.deepEqual(tree.nodes[0].nodes[0].operator, '=');
@@ -325,6 +332,14 @@ test('insensitive attribute selector 1', '[href="test" i]', (t, tree) => {
     t.deepEqual(tree.nodes[0].nodes[0].value, 'test');
     t.deepEqual(tree.nodes[0].nodes[0].insensitive, true);
     t.deepEqual(tree.nodes[0].nodes[0].insensitive, true);
+});
+
+test('insensitive attribute selector with a empty value', '[href="" i]', (t, tree) => {
+    t.deepEqual(tree.nodes[0].nodes[0].attribute, 'href');
+    t.deepEqual(tree.nodes[0].nodes[0].operator, '=');
+    t.deepEqual(tree.nodes[0].nodes[0].value, '');
+    t.deepEqual(tree.nodes[0].nodes[0].insensitive, true);
+    t.true(tree.nodes[0].nodes[0].quoted);
 });
 
 test('insensitive attribute selector 2', '[href=TEsT i  ]', (t, tree) => {

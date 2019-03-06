@@ -287,7 +287,7 @@ export default class Parser {
                         node.raws.attribute += content;
                     }
                     lastAdded = 'attribute';
-                } else if (!node.value || (lastAdded === "value" && !spaceAfterMeaningfulToken)) {
+                } else if ((!node.value && node.value !== "") || (lastAdded === "value" && !spaceAfterMeaningfulToken)) {
                     let unescaped = unesc(content);
                     let oldRawValue = getProp(node, 'raws', 'value') || '';
                     let oldValue = node.value || '';
@@ -300,7 +300,7 @@ export default class Parser {
                     lastAdded = 'value';
                 } else {
                     let insensitive = (content === 'i' || content === "I");
-                    if (node.value && (node.quoteMark || spaceAfterMeaningfulToken)) {
+                    if ((node.value || node.value === '') && (node.quoteMark || spaceAfterMeaningfulToken)) {
                         node.insensitive = insensitive;
                         if (!insensitive || content === "I") {
                             ensureObject(node, 'raws');
@@ -318,7 +318,7 @@ export default class Parser {
                             node.raws.spaces.insensitive.before = commentBefore;
                             commentBefore = '';
                         }
-                    } else if (node.value) {
+                    } else if (node.value || node.value === '') {
                         lastAdded = 'value';
                         node.value += content;
                         if (node.raws.value) {

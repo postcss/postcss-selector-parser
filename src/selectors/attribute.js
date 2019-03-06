@@ -372,7 +372,7 @@ export default class Attribute extends Namespace {
 
         selector.push(this._stringFor('qualifiedAttribute', 'attribute'));
 
-        if (this.operator && this.value) {
+        if (this.operator && (this.value || this.value === '')) {
             selector.push(this._stringFor('operator'));
             selector.push(this._stringFor('value'));
             selector.push(this._stringFor('insensitiveFlag', 'insensitive', (attrValue, attrSpaces) => {
@@ -380,6 +380,7 @@ export default class Attribute extends Namespace {
                     && !this.quoted
                     && attrSpaces.before.length === 0
                     && !(this.spaces.value && this.spaces.value.after)) {
+
                     attrSpaces.before = " ";
                 }
                 return defaultAttrConcat(attrValue, attrSpaces);

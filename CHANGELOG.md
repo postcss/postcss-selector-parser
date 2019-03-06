@@ -1,3 +1,7 @@
+# 6.0.2
+
+- Fixed an issue with parsing and stringifying an empty attribute value
+
 # 6.0.1
 
 - Fixed an issue with unicode surrogate pair parsing

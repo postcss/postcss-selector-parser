@@ -111,3 +111,16 @@ test('non standard pseudo (@custom-selector) (1)', "a, :--foobar", (t, tree) => 
     t.deepEqual(tree.nodes[1].nodes[0].value, ':--foobar');
     t.deepEqual(tree.nodes[1].nodes[0].type, 'pseudo');
 });
+
+test('nested pseudo classes', "section:not( :has(h1, h2 ) )", (t, tree) => {
+    t.deepEqual(tree.nodes[0].nodes[0].type, 'tag');
+    t.deepEqual(tree.nodes[0].nodes[0].value, 'section');
+    t.deepEqual(tree.nodes[0].nodes[1].type, 'pseudo');
+    t.deepEqual(tree.nodes[0].nodes[1].value, ':not');
+    t.deepEqual(tree.nodes[0].nodes[1].nodes[0].nodes[0].type, 'pseudo');
+    t.deepEqual(tree.nodes[0].nodes[1].nodes[0].nodes[0].value, ':has');
+    t.deepEqual(tree.nodes[0].nodes[1].nodes[0].nodes[0].nodes[0].nodes[0].type, 'tag');
+    t.deepEqual(tree.nodes[0].nodes[1].nodes[0].nodes[0].nodes[0].nodes[0].value, 'h1');
+    t.deepEqual(tree.nodes[0].nodes[1].nodes[0].nodes[0].nodes[1].nodes[0].type, 'tag');
+    t.deepEqual(tree.nodes[0].nodes[1].nodes[0].nodes[0].nodes[1].nodes[0].value, 'h2');
+});

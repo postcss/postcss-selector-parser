@@ -5,6 +5,13 @@ test('id selector', '#one', (t, tree) => {
     t.deepEqual(tree.nodes[0].nodes[0].type, 'id');
 });
 
+test('id selector with universal', '*#z98y ', (t, tree) => {
+    t.deepEqual(tree.nodes[0].nodes[0].value, '*');
+    t.deepEqual(tree.nodes[0].nodes[0].type, 'universal');
+    t.deepEqual(tree.nodes[0].nodes[1].value, 'z98y');
+    t.deepEqual(tree.nodes[0].nodes[1].type, 'id');
+});
+
 test('id hack', '#one#two', (t, tree) => {
     t.deepEqual(tree.nodes[0].nodes[0].type, 'id');
     t.deepEqual(tree.nodes[0].nodes[1].type, 'id');

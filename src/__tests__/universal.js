@@ -11,6 +11,18 @@ test('lobotomized owl', '* + *', (t, tree) => {
     t.deepEqual(tree.nodes[0].nodes[2].type, 'universal');
 });
 
+test('universal selector with descendant combinator', '* *', (t, tree) => {
+    t.deepEqual(tree.nodes[0].nodes[0].type, 'universal');
+    t.deepEqual(tree.nodes[0].nodes[1].type, 'combinator');
+    t.deepEqual(tree.nodes[0].nodes[2].type, 'universal');
+});
+
+test('universal selector with descendant combinator and extraneous non-combinating whitespace', '*         *', (t, tree) => {
+    t.deepEqual(tree.nodes[0].nodes[0].type, 'universal');
+    t.deepEqual(tree.nodes[0].nodes[1].type, 'combinator');
+    t.deepEqual(tree.nodes[0].nodes[2].type, 'universal');
+});
+
 test('extraneous non-combinating whitespace', '  *   ,  *   ', (t, tree) => {
     t.deepEqual(tree.nodes[0].nodes[0].value, '*');
     t.deepEqual(tree.nodes[0].nodes[0].spaces.before, '  ');

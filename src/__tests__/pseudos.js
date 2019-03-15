@@ -170,6 +170,7 @@ test('where pseudo class', 'a:where(:not(:hover))', (t, tree) => {
     t.deepEqual(tree.nodes[0].nodes[1].nodes[0].nodes[0].value, ':not');
     t.deepEqual(tree.nodes[0].nodes[1].nodes[0].nodes[0].nodes[0].nodes[0].type, 'pseudo');
     t.deepEqual(tree.nodes[0].nodes[1].nodes[0].nodes[0].nodes[0].nodes[0].value, ':hover');
+});
 
 test('nested pseudo classes', "section:not( :has(h1, h2 ) )", (t, tree) => {
     t.deepEqual(tree.nodes[0].nodes[0].type, 'tag');

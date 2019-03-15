@@ -38,3 +38,50 @@ test('ending in comment', ".bar /* comment 3 */", (t, tree) => {
     t.deepEqual(classname.spaces.after, ' ');
     t.deepEqual(classname.raws.spaces.after, ' /* comment 3 */');
 });
+
+test('comments in selector list', 'h2, /*test*/ h4', (t, tree) => {
+    t.deepEqual(tree.nodes[0].nodes[0].type, 'tag');
+    t.deepEqual(tree.nodes[0].nodes[0].value, 'h2');
+    t.deepEqual(tree.nodes[1].nodes[0].rawSpaceBefore, ' ');
+    t.deepEqual(tree.nodes[1].nodes[0].type, 'comment');
+    t.deepEqual(tree.nodes[1].nodes[0].value, '/*test*/');
+    t.deepEqual(tree.nodes[1].nodes[1].rawSpaceBefore, ' ');
+    t.deepEqual(tree.nodes[1].nodes[1].type, 'tag');
+    t.deepEqual(tree.nodes[1].nodes[1].value, 'h4');
+});
+
+test('comments in selector list (2)', 'h2,/*test*/h4', (t, tree) => {
+    t.deepEqual(tree.nodes[0].nodes[0].type, 'tag');
+    t.deepEqual(tree.nodes[0].nodes[0].value, 'h2');
+    t.deepEqual(tree.nodes[1].nodes[0].rawSpaceBefore, '');
+    t.deepEqual(tree.nodes[1].nodes[0].type, 'comment');
+    t.deepEqual(tree.nodes[1].nodes[0].value, '/*test*/');
+    t.deepEqual(tree.nodes[1].nodes[1].type, 'tag');
+    t.deepEqual(tree.nodes[1].nodes[1].value, 'h4');
+    t.deepEqual(tree.nodes[1].nodes[1].rawSpaceBefore, '');
+});
+
+test('comments in selector list (3)', 'h2/*test*/, h4', (t, tree) => {
+    t.deepEqual(tree.nodes[0].nodes[0].type, 'tag');
+    t.deepEqual(tree.nodes[0].nodes[0].value, 'h2');
+    t.deepEqual(tree.nodes[0].nodes[1].rawSpaceBefore, '');
+    t.deepEqual(tree.nodes[0].nodes[1].type, 'comment');
+    t.deepEqual(tree.nodes[0].nodes[1].value, '/*test*/');
+    t.deepEqual(tree.nodes[1].nodes[0].type, 'tag');
+    t.deepEqual(tree.nodes[1].nodes[0].value, 'h4');
+    t.deepEqual(tree.nodes[1].nodes[0].rawSpaceBefore, ' ');
+});
+
+test('comments in selector list (4)', 'h2, /*test*/ /*test*/ h4', (t, tree) => {
+    t.deepEqual(tree.nodes[0].nodes[0].type, 'tag');
+    t.deepEqual(tree.nodes[0].nodes[0].value, 'h2');
+    t.deepEqual(tree.nodes[1].nodes[0].rawSpaceBefore, ' ');
+    t.deepEqual(tree.nodes[1].nodes[0].type, 'comment');
+    t.deepEqual(tree.nodes[1].nodes[0].value, '/*test*/');
+    t.deepEqual(tree.nodes[1].nodes[1].rawSpaceBefore, ' ');
+    t.deepEqual(tree.nodes[1].nodes[1].type, 'comment');
+    t.deepEqual(tree.nodes[1].nodes[1].value, '/*test*/');
+    t.deepEqual(tree.nodes[1].nodes[2].rawSpaceBefore, ' ');
+    t.deepEqual(tree.nodes[1].nodes[2].type, 'tag');
+    t.deepEqual(tree.nodes[1].nodes[2].value, 'h4');
+});

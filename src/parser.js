@@ -761,7 +761,8 @@ export default class Parser {
         if (
             this.position === 0 ||
             this.prevToken[TOKEN.TYPE] === tokens.comma ||
-            this.prevToken[TOKEN.TYPE] === tokens.openParenthesis
+            this.prevToken[TOKEN.TYPE] === tokens.openParenthesis ||
+            (this.current.nodes.every((node) => node.type === 'comment'))
         ) {
             this.spaces = this.optionalSpace(content);
             this.position ++;

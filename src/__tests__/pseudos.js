@@ -111,3 +111,63 @@ test('non standard pseudo (@custom-selector) (1)', "a, :--foobar", (t, tree) => 
     t.deepEqual(tree.nodes[1].nodes[0].value, ':--foobar');
     t.deepEqual(tree.nodes[1].nodes[0].type, 'pseudo');
 });
+
+test('current pseudo class', ':current(p, li, dt, dd)', (t, tree) => {
+    t.deepEqual(tree.nodes[0].nodes[0].type, 'pseudo');
+    t.deepEqual(tree.nodes[0].nodes[0].value, ':current');
+    t.deepEqual(tree.nodes[0].nodes[0].nodes[0].nodes[0].type, 'tag');
+    t.deepEqual(tree.nodes[0].nodes[0].nodes[0].nodes[0].value, 'p');
+    t.deepEqual(tree.nodes[0].nodes[0].nodes[1].nodes[0].type, 'tag');
+    t.deepEqual(tree.nodes[0].nodes[0].nodes[1].nodes[0].value, 'li');
+    t.deepEqual(tree.nodes[0].nodes[0].nodes[2].nodes[0].type, 'tag');
+    t.deepEqual(tree.nodes[0].nodes[0].nodes[2].nodes[0].value, 'dt');
+    t.deepEqual(tree.nodes[0].nodes[0].nodes[3].nodes[0].type, 'tag');
+    t.deepEqual(tree.nodes[0].nodes[0].nodes[3].nodes[0].value, 'dd');
+});
+
+test('is pseudo class', ':is(p, li, dt, dd)', (t, tree) => {
+    t.deepEqual(tree.nodes[0].nodes[0].type, 'pseudo');
+    t.deepEqual(tree.nodes[0].nodes[0].value, ':is');
+    t.deepEqual(tree.nodes[0].nodes[0].nodes[0].nodes[0].type, 'tag');
+    t.deepEqual(tree.nodes[0].nodes[0].nodes[0].nodes[0].value, 'p');
+    t.deepEqual(tree.nodes[0].nodes[0].nodes[1].nodes[0].type, 'tag');
+    t.deepEqual(tree.nodes[0].nodes[0].nodes[1].nodes[0].value, 'li');
+    t.deepEqual(tree.nodes[0].nodes[0].nodes[2].nodes[0].type, 'tag');
+    t.deepEqual(tree.nodes[0].nodes[0].nodes[2].nodes[0].value, 'dt');
+    t.deepEqual(tree.nodes[0].nodes[0].nodes[3].nodes[0].type, 'tag');
+    t.deepEqual(tree.nodes[0].nodes[0].nodes[3].nodes[0].value, 'dd');
+});
+
+test('is pseudo class with namespace', '*|*:is(:hover, :focus) ', (t, tree) => {
+    t.deepEqual(tree.nodes[0].nodes[0].type, 'universal');
+    t.deepEqual(tree.nodes[0].nodes[0].namespace, '*');
+    t.deepEqual(tree.nodes[0].nodes[0].value, '*');
+    t.deepEqual(tree.nodes[0].nodes[1].type, 'pseudo');
+    t.deepEqual(tree.nodes[0].nodes[1].value, ':is');
+    t.deepEqual(tree.nodes[0].nodes[1].nodes[0].nodes[0].type, 'pseudo');
+    t.deepEqual(tree.nodes[0].nodes[1].nodes[0].nodes[0].value, ':hover');
+    t.deepEqual(tree.nodes[0].nodes[1].nodes[1].nodes[0].type, 'pseudo');
+    t.deepEqual(tree.nodes[0].nodes[1].nodes[1].nodes[0].value, ':focus');
+});
+
+test('has pseudo class', 'a:has(> img)', (t, tree) => {
+    t.deepEqual(tree.nodes[0].nodes[0].type, 'tag');
+    t.deepEqual(tree.nodes[0].nodes[0].value, 'a');
+    t.deepEqual(tree.nodes[0].nodes[1].type, 'pseudo');
+    t.deepEqual(tree.nodes[0].nodes[1].value, ':has');
+    t.deepEqual(tree.nodes[0].nodes[1].nodes[0].nodes[0].type, 'combinator');
+    t.deepEqual(tree.nodes[0].nodes[1].nodes[0].nodes[0].value, '>');
+    t.deepEqual(tree.nodes[0].nodes[1].nodes[0].nodes[1].type, 'tag');
+    t.deepEqual(tree.nodes[0].nodes[1].nodes[0].nodes[1].value, 'img');
+});
+
+test('where pseudo class', 'a:where(:not(:hover))', (t, tree) => {
+    t.deepEqual(tree.nodes[0].nodes[0].type, 'tag');
+    t.deepEqual(tree.nodes[0].nodes[0].value, 'a');
+    t.deepEqual(tree.nodes[0].nodes[1].type, 'pseudo');
+    t.deepEqual(tree.nodes[0].nodes[1].value, ':where');
+    t.deepEqual(tree.nodes[0].nodes[1].nodes[0].nodes[0].type, 'pseudo');
+    t.deepEqual(tree.nodes[0].nodes[1].nodes[0].nodes[0].value, ':not');
+    t.deepEqual(tree.nodes[0].nodes[1].nodes[0].nodes[0].nodes[0].nodes[0].type, 'pseudo');
+    t.deepEqual(tree.nodes[0].nodes[1].nodes[0].nodes[0].nodes[0].nodes[0].value, ':hover');
+});

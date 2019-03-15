@@ -54,8 +54,8 @@ export function isPseudoElement (node) {
            && node.value
            && (
                node.value.startsWith("::")
-             || node.value === ":before"
-             || node.value === ":after"
+             || node.value.toLowerCase() === ":before"
+             || node.value.toLowerCase() === ":after"
            );
 }
 export function isPseudoClass (node) {

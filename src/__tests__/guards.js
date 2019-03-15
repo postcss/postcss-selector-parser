@@ -89,6 +89,16 @@ test('special pseudo element guard', ':before:after', (t, tree) => {
     });
 });
 
+test('special pseudo element guard (uppercase)', ':BEFORE:AFTER', (t, tree) => {
+    [node(tree), node(tree, 1)].forEach((n) => {
+        t.true(parser.isPseudo(n));
+        t.false(parser.isPseudoClass(n));
+        t.true(parser.isPseudoElement(n));
+        t.true(parser.isContainer(n));
+        t.false(parser.isNamespace(n));
+    });
+});
+
 test('string guard', '"string"', (t, tree) => {
     let n = node(tree);
     t.true(parser.isNode(n));

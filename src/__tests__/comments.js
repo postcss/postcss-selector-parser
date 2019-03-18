@@ -85,3 +85,43 @@ test('comments in selector list (4)', 'h2, /*test*/ /*test*/ h4', (t, tree) => {
     t.deepEqual(tree.nodes[1].nodes[2].type, 'tag');
     t.deepEqual(tree.nodes[1].nodes[2].value, 'h4');
 });
+
+test.only('comments inside pseudo class', ':has( /**/ h1, h2 /**/ )', (t, tree) => {
+    t.deepEqual(tree.nodes[0].nodes[0].type, 'pseudo');
+    t.deepEqual(tree.nodes[0].nodes[0].value, ':has');
+    t.deepEqual(tree.nodes[0].nodes[0].nodes[0].nodes[0].rawSpaceBefore, ' ');
+    t.deepEqual(tree.nodes[0].nodes[0].nodes[0].nodes[0].type, 'comment');
+    t.deepEqual(tree.nodes[0].nodes[0].nodes[0].nodes[0].value, '/**/');
+    t.deepEqual(tree.nodes[0].nodes[0].nodes[0].nodes[1].rawSpaceBefore, ' ');
+    t.deepEqual(tree.nodes[0].nodes[0].nodes[0].nodes[1].type, 'tag');
+    t.deepEqual(tree.nodes[0].nodes[0].nodes[0].nodes[1].value, 'h1');
+    t.deepEqual(tree.nodes[0].nodes[0].nodes[1].nodes[0].rawSpaceBefore, ' ');
+    t.deepEqual(tree.nodes[0].nodes[0].nodes[1].nodes[0].type, 'tag');
+    t.deepEqual(tree.nodes[0].nodes[0].nodes[1].nodes[0].value, 'h2');
+    // Need fix in next major release https://github.com/postcss/postcss-selector-parser/issues/189
+    t.deepEqual(tree.nodes[0].nodes[0].nodes[1].nodes[0].rawSpaceAfter, ' /**/ ');
+});
+
+test.only('comments inside pseudo class (1)', ':not( /**/ :has( /**/ h1, h2 /**/ ) /**/ )', (t, tree) => {
+    t.deepEqual(tree.nodes[0].nodes[0].type, 'pseudo');
+    t.deepEqual(tree.nodes[0].nodes[0].value, ':not');
+    t.deepEqual(tree.nodes[0].nodes[0].nodes[0].nodes[0].rawSpaceBefore, ' ');
+    t.deepEqual(tree.nodes[0].nodes[0].nodes[0].nodes[0].type, 'comment');
+    t.deepEqual(tree.nodes[0].nodes[0].nodes[0].nodes[0].value, '/**/');
+    t.deepEqual(tree.nodes[0].nodes[0].nodes[0].nodes[1].rawSpaceBefore, ' ');
+    t.deepEqual(tree.nodes[0].nodes[0].nodes[0].nodes[1].type, 'pseudo');
+    t.deepEqual(tree.nodes[0].nodes[0].nodes[0].nodes[1].value, ':has');
+    // Need fix in next major release https://github.com/postcss/postcss-selector-parser/issues/189
+    t.deepEqual(tree.nodes[0].nodes[0].nodes[0].nodes[1].rawSpaceAfter, ' /**/ ');
+    t.deepEqual(tree.nodes[0].nodes[0].nodes[0].nodes[1].rawSpaceBefore, ' ');
+    t.deepEqual(tree.nodes[0].nodes[0].nodes[0].nodes[1].nodes[0].nodes[0].type, 'comment');
+    t.deepEqual(tree.nodes[0].nodes[0].nodes[0].nodes[1].nodes[0].nodes[0].value, '/**/');
+    t.deepEqual(tree.nodes[0].nodes[0].nodes[0].nodes[1].rawSpaceBefore, ' ');
+    t.deepEqual(tree.nodes[0].nodes[0].nodes[0].nodes[1].nodes[0].nodes[1].type, 'tag');
+    t.deepEqual(tree.nodes[0].nodes[0].nodes[0].nodes[1].nodes[0].nodes[1].value, 'h1');
+    t.deepEqual(tree.nodes[0].nodes[0].nodes[0].nodes[1].rawSpaceBefore, ' ');
+    t.deepEqual(tree.nodes[0].nodes[0].nodes[0].nodes[1].nodes[1].nodes[0].type, 'tag');
+    t.deepEqual(tree.nodes[0].nodes[0].nodes[0].nodes[1].nodes[1].nodes[0].value, 'h2');
+    // Need fix in next major release https://github.com/postcss/postcss-selector-parser/issues/189
+    t.deepEqual(tree.nodes[0].nodes[0].nodes[0].nodes[1].nodes[1].nodes[0].rawSpaceAfter, ' /**/ ');
+});

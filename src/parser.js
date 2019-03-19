@@ -507,8 +507,13 @@ export default class Parser {
         }
         // We need to decide between a space that's a descendant combinator and meaningless whitespace at the end of a selector.
         let nextSigTokenPos = this.locateNextMeaningfulToken(this.position);
+        let prevSigTokenPos = this.locatePrevMeaningfulToken();
 
-        if (nextSigTokenPos < 0 || this.tokens[nextSigTokenPos][TOKEN.TYPE] === tokens.comma) {
+        if (
+            nextSigTokenPos < 0 ||
+            this.tokens[nextSigTokenPos][TOKEN.TYPE] === tokens.comma ||
+            (prevSigTokenPos > 0 && this.tokens[prevSigTokenPos][TOKEN.TYPE] === tokens.combinator)
+        ) {
             let nodes = this.parseWhitespaceEquivalentTokens(nextSigTokenPos);
             if (nodes.length > 0) {
                 let last = this.current.last;
@@ -1025,6 +1030,23 @@ export default class Parser {
 
     get prevToken () {
         return this.tokens[this.position - 1];
+    }
+
+    /**
+     * returns the index of the previous non-whitespace, non-comment token.
+     * returns -1 if no meaningful token is found.
+     */
+    locatePrevMeaningfulToken (startPosition = this.position - 1) {
+        let searchPosition = startPosition;
+        while (searchPosition >= 0) {
+            if (WHITESPACE_EQUIV_TOKENS[this.tokens[searchPosition][TOKEN.TYPE]]) {
+                searchPosition--;
+                continue;
+            } else {
+                return searchPosition;
+            }
+        }
+        return -1;
     }
 
     /**

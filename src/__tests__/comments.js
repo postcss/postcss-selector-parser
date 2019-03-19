@@ -85,3 +85,29 @@ test('comments in selector list (4)', 'h2, /*test*/ /*test*/ h4', (t, tree) => {
     t.deepEqual(tree.nodes[1].nodes[2].type, 'tag');
     t.deepEqual(tree.nodes[1].nodes[2].value, 'h4');
 });
+
+test.only('comment before combinator', '.foo /**/ > .bar', (t, tree) => {
+    t.deepEqual(tree.nodes[0].nodes[0].type, 'class');
+    t.deepEqual(tree.nodes[0].nodes[0].value, 'foo');
+    // Need fix in next major release https://github.com/postcss/postcss-selector-parser/issues/189
+    t.deepEqual(tree.nodes[0].nodes[1].rawSpaceBefore, ' /**/ ');
+    t.deepEqual(tree.nodes[0].nodes[1].type, 'combinator');
+    t.deepEqual(tree.nodes[0].nodes[1].value, '>');
+    t.deepEqual(tree.nodes[0].nodes[1].rawSpaceAfter, ' ');
+    t.deepEqual(tree.nodes[0].nodes[2].type, 'class');
+    t.deepEqual(tree.nodes[0].nodes[2].value, 'bar');
+});
+
+test('comment after combinator', '.foo > /**/ .bar', (t, tree) => {
+    t.deepEqual(tree.nodes[0].nodes[0].type, 'class');
+    t.deepEqual(tree.nodes[0].nodes[0].value, 'foo');
+    t.deepEqual(tree.nodes[0].nodes[1].rawSpaceBefore, ' ');
+    t.deepEqual(tree.nodes[0].nodes[1].type, 'combinator');
+    t.deepEqual(tree.nodes[0].nodes[1].value, '>');
+    t.deepEqual(tree.nodes[0].nodes[1].rawSpaceAfter, ' ');
+    t.deepEqual(tree.nodes[0].nodes[2].type, 'comment');
+    t.deepEqual(tree.nodes[0].nodes[2].value, '/**/');
+    t.deepEqual(tree.nodes[0].nodes[1].rawSpaceAfter, ' ');
+    t.deepEqual(tree.nodes[0].nodes[3].type, 'class');
+    t.deepEqual(tree.nodes[0].nodes[3].value, 'bar');
+});

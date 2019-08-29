@@ -124,7 +124,7 @@ export default class Node {
     }
 
     /**
-     * 
+     *
      * @param {number} line The number (starting with 1)
      * @param {number} column The column number (starting with 1)
      */
@@ -177,10 +177,14 @@ export default class Node {
         this.raws.spaces.after = raw;
     }
 
+    valueToString () {
+        return String(this.stringifyProperty("value"));
+    }
+
     toString () {
         return [
             this.rawSpaceBefore,
-            String(this.stringifyProperty("value")),
+            this.valueToString(),
             this.rawSpaceAfter,
         ].join('');
     }

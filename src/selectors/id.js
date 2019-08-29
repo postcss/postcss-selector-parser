@@ -7,11 +7,7 @@ export default class ID extends Node {
         this.type = IDType;
     }
 
-    toString () {
-        return [
-            this.rawSpaceBefore,
-            String('#' + this.stringifyProperty("value")),
-            this.rawSpaceAfter,
-        ].join('');
+    valueToString () {
+        return '#' + super.valueToString();
     }
 }

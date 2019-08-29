@@ -27,11 +27,7 @@ export default class ClassName extends Node {
         return this._value;
     }
 
-    toString () {
-        return [
-            this.rawSpaceBefore,
-            String('.' + this.stringifyProperty("value")),
-            this.rawSpaceAfter,
-        ].join('');
+    valueToString () {
+        return '.' + super.valueToString();
     }
 }

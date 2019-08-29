@@ -148,7 +148,7 @@ export default class Node {
     }
 
     stringifyProperty (name) {
-        return String((this.raws && this.raws[name]) || this[name]);
+        return (this.raws && this.raws[name]) || this[name];
     }
 
     get rawSpaceBefore () {
@@ -178,7 +178,7 @@ export default class Node {
     }
 
     valueToString () {
-        return this.stringifyProperty("value");
+        return String(this.stringifyProperty("value"));
     }
 
     toString () {

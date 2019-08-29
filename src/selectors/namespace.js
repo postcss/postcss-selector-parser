@@ -52,11 +52,7 @@ export default class Namespace extends Node {
         }
     }
 
-    toString () {
-        return [
-            this.rawSpaceBefore,
-            this.qualifiedName(this.stringifyProperty("value")),
-            this.rawSpaceAfter,
-        ].join('');
+    valueToString () {
+        return this.qualifiedName(super.valueToString());
     }
 };

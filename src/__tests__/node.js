@@ -53,7 +53,7 @@ test('Node#setPropertyAndEscape with existing raws', (t) => {
 test('Node#setPropertyAndEscape without existing raws', (t) => {
     let out = parse('.foo', (selectors) => {
         let className = selectors.first.first;
-        t.deepEqual(className.raws, undefined);
+        t.deepEqual(className.raws, {});
         className.setPropertyAndEscape("value", "bar", "ba\\r");
         t.deepEqual(className.raws, {value: "ba\\r"});
     });
@@ -73,7 +73,7 @@ test('Node#setPropertyWithoutEscape with existing raws', (t) => {
 test('Node#setPropertyWithoutEscape without existing raws', (t) => {
     let out = parse('.foo', (selectors) => {
         let className = selectors.first.first;
-        t.deepEqual(className.raws, undefined);
+        t.deepEqual(className.raws, {});
         className.setPropertyWithoutEscape("value", "w+t+f");
         t.deepEqual(className.raws, {});
         t.deepEqual(className.value, "w+t+f");

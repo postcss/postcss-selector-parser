@@ -1,73 +1,12 @@
+import PostCSSNode from 'postcss/lib/node';
 import {ensureObject} from "../util";
 
-let cloneNode = function (obj, parent) {
-    if (typeof obj !== 'object' || obj === null) {
-        return obj;
-    }
-
-    let cloned = new obj.constructor();
-
-    for ( let i in obj ) {
-        if ( !obj.hasOwnProperty(i) ) {
-            continue;
-        }
-        let value = obj[i];
-        let type  = typeof value;
-
-        if ( i === 'parent' && type === 'object' ) {
-            if (parent) {
-                cloned[i] = parent;
-            }
-        } else if ( value instanceof Array ) {
-            cloned[i] = value.map( j => cloneNode(j, cloned) );
-        } else {
-            cloned[i] = cloneNode(value, cloned);
-        }
-    }
-
-    return cloned;
-};
-
-export default class Node {
-    constructor (opts = {}) {
-        Object.assign(this, opts);
+export default class Node extends PostCSSNode {
+    constructor (opts) {
+        super(opts);
         this.spaces = this.spaces || {};
         this.spaces.before = this.spaces.before || '';
         this.spaces.after = this.spaces.after || '';
-    }
-
-    remove () {
-        if (this.parent) {
-            this.parent.removeChild(this);
-        }
-        this.parent = undefined;
-        return this;
-    }
-
-    replaceWith () {
-        if (this.parent) {
-            for (let index in arguments) {
-                this.parent.insertBefore(this, arguments[index]);
-            }
-            this.remove();
-        }
-        return this;
-    }
-
-    next () {
-        return this.parent.at(this.parent.index(this) + 1);
-    }
-
-    prev () {
-        return this.parent.at(this.parent.index(this) - 1);
-    }
-
-    clone (overrides = {}) {
-        let cloned = cloneNode(this);
-        for (let name in overrides) {
-            cloned[name] = overrides[name];
-        }
-        return cloned;
     }
 
     /**

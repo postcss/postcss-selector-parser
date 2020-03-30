@@ -1,5 +1,5 @@
 import indexesOf from 'indexes-of';
-import uniq from 'uniq';
+import uniqs from 'uniqs';
 
 import Root from './selectors/root';
 import Selector from './selectors/selector';
@@ -829,7 +829,7 @@ export default class Parser {
         if (interpolations.length) {
             hasId = hasId.filter(hashIndex => !~interpolations.indexOf(hashIndex));
         }
-        let indices = sortAsc(uniq([0, ...hasClass, ...hasId]));
+        let indices = sortAsc(uniqs([0, ...hasClass, ...hasId]));
         indices.forEach((ind, i) => {
             const index = indices[i + 1] || word.length;
             const value = word.slice(ind, index);

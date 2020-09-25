@@ -1,6 +1,6 @@
 {
     "rules": {
-        "babel/object-curly-spacing": 2,
+        "@babel/object-curly-spacing": 2,
         "brace-style": [2, "1tbs", {"allowSingleLine": false}],
         "camelcase": [2],
         "comma-dangle": [2, "always-multiline"],
@@ -77,7 +77,7 @@
     },
     "parser": "babel-eslint",
     "plugins": [
-        "babel",
+        "@babel",
         "import"
     ],
     "env": {

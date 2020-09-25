@@ -449,7 +449,7 @@ testDeprecation('deprecated constructor', '', (t) => {
         () => {
             return new Attribute({value: '"foo"', attribute: "data-bar"});
         },
-        "Constructing an Attribute selector with a value without specifying quoteMark is deprecated. Note: The value should be unescaped now."
+        {message: "Constructing an Attribute selector with a value without specifying quoteMark is deprecated. Note: The value should be unescaped now."}
     );
 });
 
@@ -459,7 +459,7 @@ testDeprecation('deprecated get of raws.unquoted ', '', (t) => {
             let attr = new Attribute({value: 'foo', quoteMark: '"', attribute: "data-bar"});
             return attr.raws.unquoted;
         },
-        "attr.raws.unquoted is deprecated. Call attr.value instead."
+        {message: "attr.raws.unquoted is deprecated. Call attr.value instead."}
     );
 });
 
@@ -469,7 +469,7 @@ testDeprecation('deprecated set of raws.unquoted ', '', (t) => {
             let attr = new Attribute({value: 'foo', quoteMark: '"', attribute: "data-bar"});
             attr.raws.unquoted = 'fooooo';
         },
-        "Setting attr.raws.unquoted is deprecated and has no effect. attr.value is unescaped by default now."
+        {message: "Setting attr.raws.unquoted is deprecated and has no effect. attr.value is unescaped by default now."}
     );
 });
 

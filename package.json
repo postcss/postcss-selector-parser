@@ -47,7 +47,7 @@
   },
   "license": "MIT",
   "engines": {
-    "node": "^10 || ^12 || >=14"
+    "node": ">=4"
   },
   "homepage": "https://github.com/postcss/postcss-selector-parser",
   "contributors": [

@@ -1,3 +1,7 @@
+# 6.0.4
+
+- Fixed: ts errors
+
 # 6.0.3
 
 - Fixed: replace node built-in "util" module with "util-deprecate"

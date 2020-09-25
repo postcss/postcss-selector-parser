@@ -75,7 +75,7 @@
             "experimentalObjectRestSpread": true
         }
     },
-    "parser": "babel-eslint",
+    "parser": "@babel/eslint-parser",
     "plugins": [
         "@babel",
         "import"

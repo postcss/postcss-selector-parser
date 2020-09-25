@@ -332,9 +332,10 @@ declare namespace parser {
     function root(opts: ContainerOptions): Root;
     function isRoot(node: any): node is Root;
 
-    interface Selector extends Container<string, Diff<Node, Selector>> {
+    interface _Selector<S> extends Container<string, Diff<Node, S>> {
         type: "selector";
     }
+    type Selector = _Selector<Selector>;
     function selector(opts: ContainerOptions): Selector;
     function isSelector(node: any): node is Selector;
 

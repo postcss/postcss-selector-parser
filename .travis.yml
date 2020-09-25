@@ -10,6 +10,9 @@ matrix:
 install:
   - npm install -g npm@latest
   - npm ci
+  # https://github.com/microsoft/TypeScript/issues/40166
+  - |
+    if [ "$TRAVIS_NODE_VERSION" = '6' ]; then npm install typescript@3.9.7 ; fi
 script:
   - npm test
 cache:

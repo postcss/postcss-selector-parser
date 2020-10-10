@@ -68,7 +68,7 @@
       "@babel/register"
     ],
     "concurrency": 5,
-    "timeout": "15s"
+    "timeout": "25s"
   },
   "nyc": {
     "exclude": [

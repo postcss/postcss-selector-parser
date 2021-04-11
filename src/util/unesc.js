@@ -25,9 +25,18 @@ function gobbleHex (str) {
     if (hex.length === 0) {
         return undefined;
     }
+    const codePoint = parseInt(hex, 16);
+
+    const isSurrogate = codePoint >= 0xD800 && codePoint <= 0xDFFF;
+    // Add special case for
+    // "If this number is zero, or is for a surrogate, or is greater than the maximum allowed code point"
+    // https://drafts.csswg.org/css-syntax/#maximum-allowed-code-point
+    if (isSurrogate || codePoint === 0x0000 || codePoint > 0x10FFFF) {
+        return ['\uFFFD', hex.length + (spaceTerminated ? 1 : 0)];
+    }
 
     return [
-        String.fromCodePoint(parseInt(hex, 16)),
+        String.fromCodePoint(codePoint),
         hex.length + (spaceTerminated ? 1 : 0),
     ];
 }

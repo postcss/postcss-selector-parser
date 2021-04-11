@@ -48,3 +48,15 @@ test('class selector with escaping with more chars', '.\\1D306k', (t, tree) => {
 test('class selector with escaping with more chars with whitespace', '.wow\\1D306 k', (t, tree) => {
     t.deepEqual(tree.nodes[0].nodes[0].value, 'wow𝌆k');
 });
+
+test('handles 0 value hex', '\\0', (t, tree) => {
+    t.deepEqual(tree.nodes[0].nodes[0].value, String.fromCodePoint(0xFFFD));
+});
+
+test('handles lone surrogate value hex', '\\DBFF', (t, tree) => {
+    t.deepEqual(tree.nodes[0].nodes[0].value, String.fromCodePoint(0xFFFD));
+});
+
+test('handles out of bound values', '\\110000', (t, tree) => {
+    t.deepEqual(tree.nodes[0].nodes[0].value, String.fromCodePoint(0xFFFD));
+});

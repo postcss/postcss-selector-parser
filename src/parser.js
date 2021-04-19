@@ -1,6 +1,3 @@
-import indexesOf from 'indexes-of';
-import uniq from 'uniq';
-
 import Root from './selectors/root';
 import Selector from './selectors/selector';
 import ClassName from './selectors/className';
@@ -96,6 +93,23 @@ function unescapeProp (node, prop) {
         }
     }
     return node;
+}
+
+function indexesOf (array, item) {
+    let i = -1;
+    const indexes = [];
+
+    while ((i = array.indexOf(item, i + 1)) !== -1) {
+        indexes.push(i);
+    }
+
+    return indexes;
+}
+
+function uniqs () {
+    const list = Array.prototype.concat.apply([], arguments);
+
+    return list.filter((item, i) => i === list.indexOf(item));
 }
 
 export default class Parser {
@@ -829,7 +843,7 @@ export default class Parser {
         if (interpolations.length) {
             hasId = hasId.filter(hashIndex => !~interpolations.indexOf(hashIndex));
         }
-        let indices = sortAsc(uniq([0, ...hasClass, ...hasId]));
+        let indices = sortAsc(uniqs([0, ...hasClass, ...hasId]));
         indices.forEach((ind, i) => {
             const index = indices[i + 1] || word.length;
             const value = word.slice(ind, index);

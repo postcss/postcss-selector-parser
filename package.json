@@ -1,6 +1,6 @@
 {
   "name": "postcss-selector-parser",
-  "version": "6.0.4",
+  "version": "6.0.5",
   "devDependencies": {
     "@babel/cli": "^7.11.6",
     "@babel/core": "^7.11.6",
@@ -41,8 +41,6 @@
   },
   "dependencies": {
     "cssesc": "^3.0.0",
-    "indexes-of": "^1.0.1",
-    "uniq": "^1.0.1",
     "util-deprecate": "^1.0.2"
   },
   "license": "MIT",

@@ -1,5 +1,3 @@
-import indexesOf from 'indexes-of';
-
 import Root from './selectors/root';
 import Selector from './selectors/selector';
 import ClassName from './selectors/className';
@@ -95,6 +93,17 @@ function unescapeProp (node, prop) {
         }
     }
     return node;
+}
+
+function indexesOf (array, item) {
+    let i = -1;
+    const indexes = [];
+
+    while ((i = array.indexOf(item, i + 1)) !== -1) {
+        indexes.push(i);
+    }
+
+    return indexes;
 }
 
 function uniqs () {

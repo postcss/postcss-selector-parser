@@ -264,3 +264,4 @@ test('class selector with escaping (36)', '.not-pseudo\\:\\:focus', (t, tree) =>
     t.deepEqual(tree.nodes[0].nodes[0].type, 'class');
     t.deepEqual(tree.nodes[0].nodes[0].raws.value, 'not-pseudo\\:\\:focus');
 });
+

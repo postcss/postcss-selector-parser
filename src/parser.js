@@ -11,7 +11,6 @@ import Universal from './selectors/universal';
 import Combinator from './selectors/combinator';
 import Nesting from './selectors/nesting';
 
-import sortAsc from './sortAscending';
 import tokenize, {FIELDS as TOKEN} from './tokenize';
 
 import * as tokens from './tokenTypes';
@@ -93,23 +92,6 @@ function unescapeProp (node, prop) {
         }
     }
     return node;
-}
-
-function indexesOf (array, item) {
-    let i = -1;
-    const indexes = [];
-
-    while ((i = array.indexOf(item, i + 1)) !== -1) {
-        indexes.push(i);
-    }
-
-    return indexes;
-}
-
-function uniqs () {
-    const list = Array.prototype.concat.apply([], arguments);
-
-    return list.filter((item, i) => i === list.indexOf(item));
 }
 
 export default class Parser {
@@ -818,74 +800,94 @@ export default class Parser {
     }
 
     splitWord (namespace, firstCallback) {
+        // Collect all the relevant tokens together
+        const tokensList = [this.currToken];
         let nextToken = this.nextToken;
-        let word = this.content();
         while (
             nextToken &&
             ~[tokens.dollar, tokens.caret, tokens.equals, tokens.word].indexOf(nextToken[TOKEN.TYPE])
         ) {
             this.position ++;
-            let current = this.content();
-            word += current;
-            if (current.lastIndexOf('\\') === current.length - 1) {
+            const token = this.currToken;
+            tokensList.push(token);
+            if (this.content(token).endsWith('\\')) {
                 let next = this.nextToken;
                 if (next && next[TOKEN.TYPE] === tokens.space) {
-                    word += this.requiredSpace(this.content(next));
+                    tokensList.push(next);
                     this.position ++;
                 }
             }
             nextToken = this.nextToken;
         }
-        const hasClass = indexesOf(word, '.').filter(i => word[i - 1] !== '\\');
-        let hasId = indexesOf(word, '#').filter(i => word[i - 1] !== '\\');
-        // Eliminate Sass interpolations from the list of id indexes
-        const interpolations = indexesOf(word, '#{');
-        if (interpolations.length) {
-            hasId = hasId.filter(hashIndex => !~interpolations.indexOf(hashIndex));
+
+        // Get the content of each token
+        const tokensContent = tokensList.map(token => {
+            if (token[TOKEN.TYPE] === tokens.space) {
+                return this.requiredSpace(token);
+            }
+            return this.content(token);
+        });
+
+        // Parse the list of tokens and create a list of new nodes
+        const nodesToCreate = [];
+        let inProgressNode;
+        tokensList.forEach((token, tokenIndex) => {
+            const content = tokensContent[tokenIndex];
+            for (let i = 0; i < content.length; i++) {
+                const char = content[i];
+                const prevChar = content[i - 1] || (tokenIndex !== 0 ? tokensContent[tokenIndex - 1].slice(-1) : undefined);
+                const nextChar = content[i + 1] || (tokenIndex !== tokensContent.length - 1 ? tokensContent[tokenIndex + 1][0] : undefined);
+
+                if (char === "." && prevChar !== "\\") {
+                    initNode(ClassName);
+                } else if (char === "#" && prevChar !== "\\" && nextChar !== "{") {
+                    initNode(ID);
+                } else if (!inProgressNode) {
+                    initNode(Tag, char);
+                } else {
+                    inProgressNode.value += char;
+                    inProgressNode.endToken = token;
+                    inProgressNode.endIndex = i;
+                }
+
+                function initNode (NodeConstructor, value = "") {
+                    if (inProgressNode) {
+                        nodesToCreate.push(inProgressNode);
+                    }
+                    inProgressNode = {
+                        NodeConstructor,
+                        value,
+                        startToken: token,
+                        endToken: token,
+                        startIndex: i,
+                        endIndex: i,
+                    };
+                }
+            }
+        });
+        if (inProgressNode) {
+            nodesToCreate.push(inProgressNode);
         }
-        let indices = sortAsc(uniqs([0, ...hasClass, ...hasId]));
-        indices.forEach((ind, i) => {
-            const index = indices[i + 1] || word.length;
-            const value = word.slice(ind, index);
+
+        nodesToCreate.forEach((node, i) => {
             if (i === 0 && firstCallback) {
-                return firstCallback.call(this, value, indices.length);
+                firstCallback.call(this, node.value, nodesToCreate.length);
+                return;
             }
-            let node;
-            const current = this.currToken;
-            const sourceIndex = current[TOKEN.START_POS] + indices[i];
+            const {NodeConstructor, value, startToken, endToken, startIndex, endIndex} = node;
+            const sourceIndex = startToken[TOKEN.START_POS] + startIndex;
             const source = getSource(
-                current[1],
-                current[2] + ind,
-                current[3],
-                current[2] + (index - 1)
+                startToken[TOKEN.START_LINE],
+                startToken[TOKEN.START_COL] + startIndex,
+                endToken[TOKEN.END_LINE],
+                endToken[TOKEN.START_COL] + endIndex
             );
-            if (~hasClass.indexOf(ind)) {
-                let classNameOpts = {
-                    value: value.slice(1),
-                    source,
-                    sourceIndex,
-                };
-                node = new ClassName(unescapeProp(classNameOpts, "value"));
-            } else if (~hasId.indexOf(ind)) {
-                let idOpts = {
-                    value: value.slice(1),
-                    source,
-                    sourceIndex,
-                };
-                node = new ID(unescapeProp(idOpts, "value"));
-            } else {
-                let tagOpts = {
-                    value,
-                    source,
-                    sourceIndex,
-                };
-                unescapeProp(tagOpts, "value");
-                node = new Tag(tagOpts);
-            }
-            this.newNode(node, namespace);
+            const opts = unescapeProp({value, source, sourceIndex}, "value");
+            this.newNode(new NodeConstructor(opts), namespace);
             // Ensure that the namespace is used only once
             namespace = null;
         });
+
         this.position ++;
     }
 

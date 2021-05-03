@@ -69,6 +69,15 @@ test('sass escapes (3)', '.classname1.#{$classname2}', (t, tree) => {
     t.deepEqual(node2.sourceIndex, 11);
 });
 
+test('Sass escapes (4)', `.#{classname1}\\ classname2`, (t, tree) => {
+    const node = tree.nodes[0].nodes[0];
+    t.deepEqual(node.type, "class");
+    t.deepEqual(node.value, "#{classname1} classname2");
+    t.deepEqual(node.source.start.column, 1);
+    t.deepEqual(node.source.end.column, 26);
+    t.deepEqual(node.sourceIndex, 0);
+});
+
 test('placeholder', '%foo', (t, tree) => {
     t.deepEqual(tree.nodes[0].nodes[0].type, "tag");
     t.deepEqual(tree.nodes[0].nodes[0].value, "%foo");

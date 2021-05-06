@@ -5,7 +5,7 @@ import {ATTRIBUTE} from './types';
 
 const deprecate = require("util-deprecate");
 
-const WRAPPED_IN_QUOTES = /^('|")(.*)\1$/;
+const WRAPPED_IN_QUOTES = /^('|")([^]*)\1$/;
 
 const warnOfDeprecatedValueAssignment = deprecate(() => {},
     "Assigning an attribute a value containing characters that might need to be escaped is deprecated. " +

@@ -367,6 +367,13 @@ test('extraneous non-combinating whitespace', '  [href]   ,  [class]   ', (t, tr
     t.deepEqual(tree.nodes[1].nodes[0].spaces.after, '   ');
 });
 
+test('newline in attribute selector', '[class="woop \\\nwoop woop"]', (t, tree) => {
+    t.deepEqual(tree.nodes[0].nodes[0].attribute, 'class');
+    t.deepEqual(tree.nodes[0].nodes[0].operator, '=');
+    t.deepEqual(tree.nodes[0].nodes[0].value, 'woop \nwoop woop');
+    t.true(tree.nodes[0].nodes[0].quoted);
+});
+
 test('comments within attribute selectors', '[href/* wow */=/* wow */test]', (t, tree) => {
     t.deepEqual(tree.nodes[0].nodes[0].attribute, 'href');
     t.deepEqual(tree.nodes[0].nodes[0].operator, '=');

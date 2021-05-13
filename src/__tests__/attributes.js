@@ -51,6 +51,11 @@ test('select elements with or without a namespace', '[*|href]', (t, tree) => {
     t.deepEqual(tree.nodes[0].nodes[0].attribute, 'href');
 });
 
+test('select elements with or without a namespace (3)', '[ |href ]', (t, tree) => {
+    t.deepEqual(tree.nodes[0].nodes[0].namespace, true);
+    t.deepEqual(tree.nodes[0].nodes[0].attribute, 'href');
+});
+
 test('namespace with escapes', '[\\31 \\#\\32 |href]', (t, tree) => {
     let attr = tree.nodes[0].nodes[0];
     t.deepEqual(attr.namespace, '1#2');
@@ -97,6 +102,30 @@ test('attribute selector with escaped quote', '[title="Something \\"weird\\""]',
     t.truthy(attr.quoted);
     t.deepEqual(attr.raws.value, '"Something \\"weird\\""');
     t.deepEqual(tree.toString(), '[title="Something \\"weird\\""]');
+});
+
+test('attribute selector with escaped quote with comments', '[/*t*/title/*t*/=/*t*/"Something \\"weird\\""/*t*/]', (t, tree) => {
+    let attr = tree.nodes[0].nodes[0];
+    t.deepEqual(attr.value, 'Something "weird"');
+    t.deepEqual(attr.getQuotedValue(), '\"Something \\"weird\\"\"');
+    t.deepEqual(attr.getQuotedValue({smart: true}), '\'Something "weird"\'');
+    t.deepEqual(attr.getQuotedValue({quoteMark: null}), 'Something\\ \\"weird\\"');
+    t.deepEqual(attr.quoteMark, '"');
+    t.truthy(attr.quoted);
+    t.deepEqual(attr.raws.value, '"Something \\"weird\\""/*t*/');
+    t.deepEqual(tree.toString(), '[/*t*/title/*t*/=/*t*/"Something \\"weird\\""/*t*/]');
+});
+
+test('attribute selector with escaped quote with comments (2)', '[ /*t*/ title /*t*/ = /*t*/ "Something \\"weird\\"" /*t*/ ]', (t, tree) => {
+    let attr = tree.nodes[0].nodes[0];
+    t.deepEqual(attr.value, 'Something "weird"');
+    t.deepEqual(attr.getQuotedValue(), '\"Something \\"weird\\"\"');
+    t.deepEqual(attr.getQuotedValue({smart: true}), '\'Something "weird"\'');
+    t.deepEqual(attr.getQuotedValue({quoteMark: null}), 'Something\\ \\"weird\\"');
+    t.deepEqual(attr.quoteMark, '"');
+    t.truthy(attr.quoted);
+    t.deepEqual(attr.raws.value, '"Something \\"weird\\""');
+    t.deepEqual(tree.toString(), '[ /*t*/ title /*t*/ = /*t*/ "Something \\"weird\\"" /*t*/ ]');
 });
 
 test('attribute selector with escaped colon', '[ng\\:cloak]', (t, tree) => {
@@ -328,9 +357,47 @@ test('spaces in attribute selectors', 'h1[  href  *=  "test"  ]', (t, tree) => {
     t.truthy(tree.nodes[0].nodes[1].quoted);
 });
 
-test('insensitive attribute selector 1', '[href="test" i]', (t, tree) => {
+test('insensitive attribute selector', '[href=test i]', (t, tree) => {
     t.deepEqual(tree.nodes[0].nodes[0].value, 'test');
     t.deepEqual(tree.nodes[0].nodes[0].insensitive, true);
+});
+
+test('insensitive attribute selector 2', '[href="test" i]', (t, tree) => {
+    t.deepEqual(tree.nodes[0].nodes[0].value, 'test');
+    t.deepEqual(tree.nodes[0].nodes[0].insensitive, true);
+});
+
+test('insensitive attribute selector 3', '[href=TEsT i  ]', (t, tree) => {
+    t.deepEqual(tree.nodes[0].nodes[0].value, 'TEsT');
+    t.deepEqual(tree.nodes[0].nodes[0].insensitive, true);
+    t.deepEqual(tree.nodes[0].nodes[0].spaces.value.after, ' ');
+    t.deepEqual(tree.nodes[0].nodes[0].spaces.insensitive.after, '  ');
+});
+
+test('insensitive attribute selector 4', '[href=test i]', (t, tree) => {
+    t.deepEqual(tree.nodes[0].nodes[0].value, 'test');
+    t.deepEqual(tree.nodes[0].nodes[0].insensitive, true);
+});
+
+test('insensitive attribute selector 5', '[href="" i]', (t, tree) => {
+    t.deepEqual(tree.nodes[0].nodes[0].value, '');
+    t.deepEqual(tree.nodes[0].nodes[0].insensitive, true);
+});
+
+test('sensitive attribute selector', '[href=test s]', (t, tree) => {
+    t.deepEqual(tree.nodes[0].nodes[0].value, 'test');
+    t.deepEqual(tree.nodes[0].nodes[0].insensitive, false);
+    t.deepEqual(tree.nodes[0].nodes[0].raws.insensitiveFlag, 's');
+});
+
+test('multiple flags attribute selector', '[href=test qwer]', (t, tree) => {
+    t.deepEqual(tree.nodes[0].nodes[0].value, 'test');
+    t.deepEqual(tree.nodes[0].nodes[0].insensitive, false);
+    t.deepEqual(tree.nodes[0].nodes[0].raws.insensitiveFlag, 'qwer');
+});
+
+test('capitalized insensitive attribute selector 3', '[href=test I]', (t, tree) => {
+    t.deepEqual(tree.nodes[0].nodes[0].value, 'test');
     t.deepEqual(tree.nodes[0].nodes[0].insensitive, true);
 });
 
@@ -340,22 +407,6 @@ test('insensitive attribute selector with a empty value', '[href="" i]', (t, tre
     t.deepEqual(tree.nodes[0].nodes[0].value, '');
     t.deepEqual(tree.nodes[0].nodes[0].insensitive, true);
     t.true(tree.nodes[0].nodes[0].quoted);
-});
-
-test('insensitive attribute selector 2', '[href=TEsT i  ]', (t, tree) => {
-    t.deepEqual(tree.nodes[0].nodes[0].value, 'TEsT');
-    t.deepEqual(tree.nodes[0].nodes[0].insensitive, true);
-    t.deepEqual(tree.nodes[0].nodes[0].spaces.value.after, ' ');
-    t.deepEqual(tree.nodes[0].nodes[0].spaces.insensitive.after, '  ');
-});
-
-test('insensitive attribute selector 3', '[href=test i]', (t, tree) => {
-    t.deepEqual(tree.nodes[0].nodes[0].value, 'test');
-    t.deepEqual(tree.nodes[0].nodes[0].insensitive, true);
-});
-test('capitalized insensitive attribute selector 3', '[href=test I]', (t, tree) => {
-    t.deepEqual(tree.nodes[0].nodes[0].value, 'test');
-    t.deepEqual(tree.nodes[0].nodes[0].insensitive, true);
 });
 
 test('extraneous non-combinating whitespace', '  [href]   ,  [class]   ', (t, tree) => {

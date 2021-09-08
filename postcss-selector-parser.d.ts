@@ -237,7 +237,7 @@ declare namespace parser {
         empty(): Container;
         insertAfter(oldNode: Child, newNode: Child): this;
         insertBefore(oldNode: Child, newNode: Child): this;
-        each(callback: (node: Child) => boolean | void): boolean | undefined;
+        each(callback: (node: Child, index: number) => boolean | void): boolean | undefined;
         walk(
             callback: (node: Node) => boolean | void
         ): boolean | undefined;

@@ -36,3 +36,8 @@ test('tag with attribute', 'label[for="email"]', (t, tree) => {
     t.deepEqual(tree.nodes[0].nodes[1].type, 'attribute');
     t.deepEqual(tree.nodes[0].nodes[1].quoteMark, '"');
 });
+
+test('keyframes animation tag selector', '0.00%', (t, tree) => {
+    t.deepEqual(tree.nodes[0].nodes[0].value, '0.00%');
+    t.deepEqual(tree.nodes[0].nodes[0].type, 'tag');
+});

@@ -836,7 +836,13 @@ export default class Parser {
             }
             nextToken = this.nextToken;
         }
-        const hasClass = indexesOf(word, '.').filter(i => word[i - 1] !== '\\');
+        const hasClass = indexesOf(word, '.').filter(i => {
+            // Allow escaped dot within class name
+            const escapedDot = word[i - 1] === '\\';
+            // Allow decimal numbers percent in @keyframes
+            const isKeyframesPercent = /^\d+\.\d+%$/.test(word);
+            return !escapedDot && !isKeyframesPercent;
+        });
         let hasId = indexesOf(word, '#').filter(i => word[i - 1] !== '\\');
         // Eliminate Sass interpolations from the list of id indexes
         const interpolations = indexesOf(word, '#{');

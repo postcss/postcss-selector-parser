@@ -1,3 +1,7 @@
+# 6.0.7
+
+- Fixed: parse animation percents
+
 # 6.0.6
 
 - Fixed: parse quoted attributes containing a newline correctly

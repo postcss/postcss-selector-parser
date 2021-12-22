@@ -1,6 +1,6 @@
 # 6.0.8
 
-- FixedL reduced size
+- Fixed: reduced size
 
 # 6.0.7
 

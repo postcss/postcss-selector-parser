@@ -29,7 +29,8 @@
     "CHANGELOG.md",
     "LICENSE-MIT",
     "dist",
-    "postcss-selector-parser.d.ts"
+    "postcss-selector-parser.d.ts",
+    "!**/__tests__"
   ],
   "scripts": {
     "pretest": "eslint src && tsc --noEmit postcss-selector-parser.d.ts",

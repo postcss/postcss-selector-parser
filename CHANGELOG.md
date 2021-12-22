@@ -1,3 +1,7 @@
+# 6.0.8
+
+- FixedL reduced size
+
 # 6.0.7
 
 - Fixed: parse animation percents

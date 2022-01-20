@@ -1,3 +1,7 @@
+# 6.0.9
+
+- Fixed: `Combinator.raws` property type
+
 # 6.0.8
 
 - Fixed: reduced size

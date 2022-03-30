@@ -56,6 +56,8 @@ export function isPseudoElement (node) {
                node.value.startsWith("::")
              || node.value.toLowerCase() === ":before"
              || node.value.toLowerCase() === ":after"
+             || node.value.toLowerCase() === ":first-letter"
+             || node.value.toLowerCase() === ":first-line"
            );
 }
 export function isPseudoClass (node) {

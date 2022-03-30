@@ -79,8 +79,8 @@ test('pseudo element guard', '::first-line', (t, tree) => {
     t.false(parser.isNamespace(n));
 });
 
-test('special pseudo element guard', ':before:after', (t, tree) => {
-    [node(tree), node(tree, 1)].forEach((n) => {
+test('special pseudo element guard', ':before:after:first-letter:first-line', (t, tree) => {
+    [node(tree), node(tree, 1), node(tree, 2), node(tree, 3)].forEach((n) => {
         t.true(parser.isPseudo(n));
         t.false(parser.isPseudoClass(n));
         t.true(parser.isPseudoElement(n));
@@ -89,8 +89,8 @@ test('special pseudo element guard', ':before:after', (t, tree) => {
     });
 });
 
-test('special pseudo element guard (uppercase)', ':BEFORE:AFTER', (t, tree) => {
-    [node(tree), node(tree, 1)].forEach((n) => {
+test('special pseudo element guard (uppercase)', ':BEFORE:AFTER:FIRST-LETTER:FIRST-LINE', (t, tree) => {
+    [node(tree), node(tree, 1), node(tree, 2), node(tree, 3)].forEach((n) => {
         t.true(parser.isPseudo(n));
         t.false(parser.isPseudoClass(n));
         t.true(parser.isPseudoElement(n));

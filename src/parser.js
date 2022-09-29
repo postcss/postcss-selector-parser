@@ -158,11 +158,18 @@ export default class Parser {
             attr.push(this.currToken);
             this.position ++;
         }
-        if (this.currToken[TOKEN.TYPE] !== tokens.closeSquare) {
-            return this.expected('closing square bracket', this.currToken[TOKEN.START_POS]);
+
+        if (!this.currToken) {
+            this.position --;
+            return this.missingClosingSquareBracket();
         }
 
         const len = attr.length;
+
+        if (len === 0) {
+            return this.expected('attribute', this.currToken[TOKEN.START_POS]);
+        }
+
         const node = {
             source: getSource(
                 startingToken[1],
@@ -312,32 +319,27 @@ export default class Parser {
                         node.raws.value = (oldRawValue || oldValue) + content;
                     }
                     lastAdded = 'value';
-                } else {
+                } else if (
+                    (node.value || node.value === '') &&
+                    (node.quoteMark || spaceAfterMeaningfulToken)
+                ) {
                     let insensitive = (content === 'i' || content === "I");
-                    if ((node.value || node.value === '') && (node.quoteMark || spaceAfterMeaningfulToken)) {
-                        node.insensitive = insensitive;
-                        if (!insensitive || content === "I") {
-                            ensureObject(node, 'raws');
-                            node.raws.insensitiveFlag = content;
-                        }
-                        lastAdded = 'insensitive';
-                        if (spaceBefore) {
-                            ensureObject(node, 'spaces', 'insensitive');
-                            node.spaces.insensitive.before = spaceBefore;
+                    node.insensitive = insensitive;
+                    if (!insensitive || content === "I") {
+                        ensureObject(node, 'raws');
+                        node.raws.insensitiveFlag = content;
+                    }
+                    lastAdded = 'insensitive';
+                    if (spaceBefore) {
+                        ensureObject(node, 'spaces', 'insensitive');
+                        node.spaces.insensitive.before = spaceBefore;
 
-                            spaceBefore = '';
-                        }
-                        if (commentBefore) {
-                            ensureObject(node, 'raws', 'spaces', 'insensitive');
-                            node.raws.spaces.insensitive.before = commentBefore;
-                            commentBefore = '';
-                        }
-                    } else if (node.value || node.value === '') {
-                        lastAdded = 'value';
-                        node.value += content;
-                        if (node.raws.value) {
-                            node.raws.value += content;
-                        }
+                        spaceBefore = '';
+                    }
+                    if (commentBefore) {
+                        ensureObject(node, 'raws', 'spaces', 'insensitive');
+                        node.raws.spaces.insensitive.before = commentBefore;
+                        commentBefore = '';
                     }
                 }
                 spaceAfterMeaningfulToken = false;
@@ -479,8 +481,7 @@ export default class Parser {
         if (rawSpace === space) {
             rawSpace = undefined;
         }
-        let result = {space, rawSpace};
-        return result;
+        return {space, rawSpace};
     }
 
     isNamedCombinator (position = this.position) {
@@ -489,30 +490,27 @@ export default class Parser {
                this.tokens[position + 2] && this.tokens[position + 2][TOKEN.TYPE] === tokens.slash;
 
     }
+
     namedCombinator () {
-        if (this.isNamedCombinator()) {
-            let nameRaw = this.content(this.tokens[this.position + 1]);
-            let name = unesc(nameRaw).toLowerCase();
-            let raws = {};
-            if (name !== nameRaw) {
-                raws.value = `/${nameRaw}/`;
-            }
-            let node = new Combinator({
-                value: `/${name}/`,
-                source: getSource(
-                    this.currToken[TOKEN.START_LINE],
-                    this.currToken[TOKEN.START_COL],
-                    this.tokens[this.position + 2][TOKEN.END_LINE],
-                    this.tokens[this.position + 2][TOKEN.END_COL],
-                ),
-                sourceIndex: this.currToken[TOKEN.START_POS],
-                raws,
-            });
-            this.position = this.position + 3;
-            return node;
-        } else {
-            this.unexpected();
+        let nameRaw = this.content(this.tokens[this.position + 1]);
+        let name = unesc(nameRaw).toLowerCase();
+        let raws = {};
+        if (name !== nameRaw) {
+            raws.value = `/${nameRaw}/`;
         }
+        let node = new Combinator({
+            value: `/${name}/`,
+            source: getSource(
+                this.currToken[TOKEN.START_LINE],
+                this.currToken[TOKEN.START_COL],
+                this.tokens[this.position + 2][TOKEN.END_LINE],
+                this.tokens[this.position + 2][TOKEN.END_COL],
+            ),
+            sourceIndex: this.currToken[TOKEN.START_POS],
+            raws,
+        });
+        this.position = this.position + 3;
+        return node;
     }
 
     combinator () {
@@ -634,12 +632,20 @@ export default class Parser {
         });
     }
 
-    missingParenthesis () {
+    missingOpeningParenthesis () {
         return this.expected('opening parenthesis', this.currToken[TOKEN.START_POS]);
     }
 
-    missingSquareBracket () {
+    missingClosingParenthesis () {
+        return this.expected('closing parenthesis', this.currToken[TOKEN.START_POS]);
+    }
+
+    missingOpeningSquareBracket () {
         return this.expected('opening square bracket', this.currToken[TOKEN.START_POS]);
+    }
+
+    missingClosingSquareBracket () {
+        return this.expected('closing square bracket', this.currToken[TOKEN.START_POS]);
     }
 
     unexpected () {
@@ -716,6 +722,10 @@ export default class Parser {
                 parenValue += this.parseParenthesisToken(this.currToken);
                 this.position ++;
             }
+            if (unbalanced) {
+                this.position --;
+                return this.missingClosingParenthesis();
+            }
             if (last) {
                 last.appendToPropertyAndEscape("value", parenValue, parenValue);
             } else {
@@ -732,7 +742,8 @@ export default class Parser {
             }
         }
         if (unbalanced) {
-            return this.expected('closing parenthesis', this.currToken[TOKEN.START_POS]);
+            this.position --;
+            return this.missingClosingParenthesis();
         }
     }
 
@@ -747,22 +758,13 @@ export default class Parser {
             return this.expected(['pseudo-class', 'pseudo-element'], this.position - 1);
         }
         if (this.currToken[TOKEN.TYPE] === tokens.word) {
-            this.splitWord(false, (first, length) => {
+            this.splitWord(false, (first) => {
                 pseudoStr += first;
                 this.newNode(new Pseudo({
                     value: pseudoStr,
                     source: getTokenSourceSpan(startingToken, this.currToken),
                     sourceIndex: startingToken[TOKEN.START_POS],
                 }));
-                if (
-                    length > 1 &&
-                    this.nextToken &&
-                    this.nextToken[TOKEN.TYPE] === tokens.openParenthesis
-                ) {
-                    this.error('Misplaced parenthesis.', {
-                        index: this.nextToken[TOKEN.START_POS],
-                    });
-                }
             });
         } else {
             return this.expected(['pseudo-class', 'pseudo-element'], this.currToken[TOKEN.START_POS]);
@@ -827,13 +829,6 @@ export default class Parser {
             this.position ++;
             let current = this.content();
             word += current;
-            if (current.lastIndexOf('\\') === current.length - 1) {
-                let next = this.nextToken;
-                if (next && next[TOKEN.TYPE] === tokens.space) {
-                    word += this.requiredSpace(this.content(next));
-                    this.position ++;
-                }
-            }
             nextToken = this.nextToken;
         }
         const hasClass = indexesOf(word, '.').filter(i => {
@@ -925,7 +920,7 @@ export default class Parser {
             break;
         case tokens.closeParenthesis:
             if (throwOnParenthesis) {
-                this.missingParenthesis();
+                this.missingOpeningParenthesis();
             }
             break;
         case tokens.openSquare:
@@ -958,7 +953,7 @@ export default class Parser {
             break;
         // These cases throw; no break needed.
         case tokens.closeSquare:
-            this.missingSquareBracket();
+            this.missingOpeningSquareBracket();
         case tokens.semicolon:
             this.missingBackslash();
         default:

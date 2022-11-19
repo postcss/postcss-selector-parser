@@ -238,6 +238,31 @@ export default class Attribute extends Namespace {
         return this._value;
     }
 
+    get insensitive () {
+        return this._insensitive;
+    }
+
+    /**
+     * Set the case insensitive flag.
+     * If the case insensitive flag changes, the raw (escaped) value at `attr.raws.insensitiveFlag`
+     * of the attribute is updated accordingly.
+     *
+     * @param {true | false} insensitive true if the attribute should match case-insensitively.
+     */
+    set insensitive (insensitive) {
+        if (!insensitive) {
+            this._insensitive = false;
+
+            // "i" and "I" can be used in "this.raws.insensitiveFlag" to store the original notation.
+            // When setting `attr.insensitive = false` both should be erased to ensure correct serialization.
+            if (this.raws && (this.raws.insensitiveFlag === 'I' || this.raws.insensitiveFlag === 'i')) {
+                this.raws.insensitiveFlag = undefined;
+            }
+        }
+
+        this._insensitive = insensitive;
+    }
+
     /**
      * Before 3.0, the value had to be set to an escaped value including any wrapped
      * quote marks. In 3.0, the semantics of `Attribute.value` changed so that the value

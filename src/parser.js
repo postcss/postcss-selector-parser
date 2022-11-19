@@ -356,7 +356,7 @@ export default class Parser {
                 ensureObject(node, 'raws');
                 node.raws.value = content;
 
-                spaceAfterMeaningfulToken = false;
+                spaceAfterMeaningfulToken = true;
                 break;
             case tokens.equals:
                 if (!node.attribute) {
@@ -464,8 +464,8 @@ export default class Parser {
     }
 
     /**
-     * 
-     * @param {*} nodes 
+     *
+     * @param {*} nodes
      */
     convertWhitespaceNodesToSpace (nodes, requiredSpace = false) {
         let space = "";

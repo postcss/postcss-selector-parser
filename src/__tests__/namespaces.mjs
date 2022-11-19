@@ -1,4 +1,4 @@
-import {test} from './util/helpers';
+import {test} from './util/helpers.mjs';
 
 test('match tags in the postcss namespace', 'postcss|button', (t, tree) => {
     t.deepEqual(tree.nodes[0].nodes[0].namespace, 'postcss');

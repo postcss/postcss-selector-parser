@@ -1,4 +1,4 @@
-import {test} from './util/helpers';
+import {test} from './util/helpers.mjs';
 
 test('pseudo element (single colon)', 'h1:after', (t, tree) => {
     t.deepEqual(tree.nodes[0].nodes[0].type, 'tag');

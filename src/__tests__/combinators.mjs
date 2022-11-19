@@ -1,5 +1,7 @@
-import {COMBINATOR} from '../selectors/types';
-import {test} from './util/helpers';
+import selectorTypes from '../selectors/types.js';
+import {test} from './util/helpers.mjs';
+
+const COMBINATOR = selectorTypes.COMBINATOR;
 
 test('multiple combinating spaces', 'h1         h2', (t, tree) => {
     t.deepEqual(tree.nodes[0].nodes[0].value, 'h1');

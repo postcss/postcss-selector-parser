@@ -1,5 +1,5 @@
 import ava from 'ava';
-import parser from '../index';
+import parser from '../index.js';
 
 export const parse = (input, options, transform) => {
     return parser(transform).processSync(input, options);

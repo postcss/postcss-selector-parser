@@ -1,4 +1,4 @@
-import {test} from './util/helpers';
+import {test} from './util/helpers.mjs';
 
 test('universal selector', '*', (t, tree) => {
     t.deepEqual(tree.nodes[0].nodes[0].source.start.column, 1);

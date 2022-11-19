@@ -1,5 +1,5 @@
 import ava from "ava";
-import stripComments from "../../src/util/stripComments";
+import stripComments from "../util/stripComments.js";
 
 ava("stripComments()", (t) => {
     t.deepEqual(stripComments("aaa/**/bbb"), "aaabbb");

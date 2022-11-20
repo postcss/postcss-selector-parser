@@ -16,7 +16,7 @@
     "eslint": "^7.9.0",
     "eslint-plugin-import": "^2.22.0",
     "glob": "^7.1.6",
-    "minimist": "^1.2.5",
+    "minimist": "^1.2.6",
     "nyc": "^15.1.0",
     "postcss": "^8.0.0",
     "semver": "^7.3.2",

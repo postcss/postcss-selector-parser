@@ -301,7 +301,7 @@ export default class Parser {
                         node.raws.attribute += content;
                     }
                     lastAdded = 'attribute';
-                } else if ((!node.value && node.value !== "") || (lastAdded === "value" && !spaceAfterMeaningfulToken)) {
+                } else if ((!node.value && node.value !== "") || (lastAdded === "value" && !(spaceAfterMeaningfulToken || node.quoteMark))) {
                     let unescaped = unesc(content);
                     let oldRawValue = getProp(node, 'raws', 'value') || '';
                     let oldValue = node.value || '';
@@ -356,7 +356,7 @@ export default class Parser {
                 ensureObject(node, 'raws');
                 node.raws.value = content;
 
-                spaceAfterMeaningfulToken = true;
+                spaceAfterMeaningfulToken = false;
                 break;
             case tokens.equals:
                 if (!node.attribute) {

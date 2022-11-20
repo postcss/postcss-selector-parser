@@ -376,6 +376,16 @@ test('capitalized insensitive attribute selector 4', '[href="test"I]', (t, tree)
     t.deepEqual(tree.nodes[0].nodes[0].insensitive, true);
 });
 
+test('insensitive attribute selector 5', '[href="test" i ]', (t, tree) => {
+    t.deepEqual(tree.nodes[0].nodes[0].value, 'test');
+    t.deepEqual(tree.nodes[0].nodes[0].insensitive, true);
+});
+
+test('insensitive attribute selector 6', '[href=test i ]', (t, tree) => {
+    t.deepEqual(tree.nodes[0].nodes[0].value, 'test');
+    t.deepEqual(tree.nodes[0].nodes[0].insensitive, true);
+});
+
 test('extraneous non-combinating whitespace', '  [href]   ,  [class]   ', (t, tree) => {
     t.deepEqual(tree.nodes[0].nodes[0].attribute, 'href');
     t.deepEqual(tree.nodes[0].nodes[0].spaces.before, '  ');

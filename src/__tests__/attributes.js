@@ -352,8 +352,36 @@ test('insensitive attribute selector 2', '[href=TEsT i  ]', (t, tree) => {
 test('insensitive attribute selector 3', '[href=test i]', (t, tree) => {
     t.deepEqual(tree.nodes[0].nodes[0].value, 'test');
     t.deepEqual(tree.nodes[0].nodes[0].insensitive, true);
+
+    tree.nodes[0].nodes[0].insensitive = false;
+
+    t.deepEqual(tree.toString(), '[href=test ]');
 });
 test('capitalized insensitive attribute selector 3', '[href=test I]', (t, tree) => {
+    t.deepEqual(tree.nodes[0].nodes[0].value, 'test');
+    t.deepEqual(tree.nodes[0].nodes[0].insensitive, true);
+
+    tree.nodes[0].nodes[0].insensitive = false;
+
+    t.deepEqual(tree.toString(), '[href=test ]');
+});
+
+test('insensitive attribute selector 4', '[href="test"i]', (t, tree) => {
+    t.deepEqual(tree.nodes[0].nodes[0].value, 'test');
+    t.deepEqual(tree.nodes[0].nodes[0].insensitive, true);
+});
+
+test('capitalized insensitive attribute selector 4', '[href="test"I]', (t, tree) => {
+    t.deepEqual(tree.nodes[0].nodes[0].value, 'test');
+    t.deepEqual(tree.nodes[0].nodes[0].insensitive, true);
+});
+
+test('insensitive attribute selector 5', '[href="test" i ]', (t, tree) => {
+    t.deepEqual(tree.nodes[0].nodes[0].value, 'test');
+    t.deepEqual(tree.nodes[0].nodes[0].insensitive, true);
+});
+
+test('insensitive attribute selector 6', '[href=test i ]', (t, tree) => {
     t.deepEqual(tree.nodes[0].nodes[0].value, 'test');
     t.deepEqual(tree.nodes[0].nodes[0].insensitive, true);
 });

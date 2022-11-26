@@ -68,9 +68,7 @@
     ],
     "concurrency": 5,
     "timeout": "25s",
-    "nodeArguments": [
-      "--throw-deprecation"
-    ]
+    "nodeArguments": []
   },
   "nyc": {
     "exclude": [

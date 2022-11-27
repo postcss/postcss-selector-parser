@@ -1,4 +1,4 @@
-import {test} from './util/helpers';
+import {test} from './util/helpers.mjs';
 
 test('nesting selector', '&', (t, tree) => {
     t.deepEqual(tree.nodes[0].nodes[0].value, '&');

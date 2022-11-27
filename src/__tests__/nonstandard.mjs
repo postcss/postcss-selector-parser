@@ -1,4 +1,4 @@
-import {test} from './util/helpers';
+import {test} from './util/helpers.mjs';
 
 test('non-standard selector', '.icon.is-$(network)', (t, tree) => {
     let class1 = tree.nodes[0].nodes[0];

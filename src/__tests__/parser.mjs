@@ -1,5 +1,5 @@
 import test from 'ava';
-import parser from '../index';
+import parser from '../index.js';
 
 // Node creation
 const nodeTypes = [

@@ -2,7 +2,7 @@ import process from 'process';
 import util from 'util';
 import ava from 'ava';
 import semver from 'semver';
-import parser from '../../index';
+import parser from '../../index.js';
 
 export const parse = (input, transform) => {
     return parser(transform).processSync(input);

@@ -1,6 +1,6 @@
 import test from 'ava';
 import postcss from 'postcss';
-import {parse} from './util/helpers';
+import {parse} from './util/helpers.mjs';
 
 const cse = 'CssSyntaxError';
 

@@ -1,4 +1,4 @@
-import {throws} from './util/helpers';
+import {throws} from './util/helpers.mjs';
 
 // Unclosed elements
 throws('unclosed string', 'a[href="wow]');

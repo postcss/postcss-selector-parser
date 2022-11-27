@@ -1,8 +1,4 @@
-import process from "process";
-import Attribute from '../selectors/attribute';
-import {test, nodeVersionAtLeast, nodeVersionBefore} from './util/helpers';
-
-process.throwDeprecation = true;
+import {test, nodeVersionAtLeast, nodeVersionBefore} from './util/helpers.mjs';
 
 test('attribute selector', '[href]', (t, tree) => {
     t.deepEqual(tree.nodes[0].nodes[0].attribute, 'href');
@@ -478,35 +474,6 @@ test('comment after insensitive(space before)', '[href="foo" i /**/]', (t, tree)
 });
 
 const testDeprecation = nodeVersionAtLeast('7.0.0') || nodeVersionBefore('6.0.0') ? test : test.skip;
-
-testDeprecation('deprecated constructor', '', (t) => {
-    t.throws(
-        () => {
-            return new Attribute({value: '"foo"', attribute: "data-bar"});
-        },
-        {message: "Constructing an Attribute selector with a value without specifying quoteMark is deprecated. Note: The value should be unescaped now."}
-    );
-});
-
-testDeprecation('deprecated get of raws.unquoted ', '', (t) => {
-    t.throws(
-        () => {
-            let attr = new Attribute({value: 'foo', quoteMark: '"', attribute: "data-bar"});
-            return attr.raws.unquoted;
-        },
-        {message: "attr.raws.unquoted is deprecated. Call attr.value instead."}
-    );
-});
-
-testDeprecation('deprecated set of raws.unquoted ', '', (t) => {
-    t.throws(
-        () => {
-            let attr = new Attribute({value: 'foo', quoteMark: '"', attribute: "data-bar"});
-            attr.raws.unquoted = 'fooooo';
-        },
-        {message: "Setting attr.raws.unquoted is deprecated and has no effect. attr.value is unescaped by default now."}
-    );
-});
 
 testDeprecation('smart quotes', '[data-foo=bar]', (t, tree) => {
     let attr = tree.nodes[0].nodes[0];

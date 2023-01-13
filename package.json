@@ -14,7 +14,7 @@
     "coveralls": "^3.1.0",
     "del-cli": "^5.0.0",
     "eslint": "^8.28.0",
-    "eslint-plugin-import": "^2.22.0",
+    "eslint-plugin-import": "^2.26.0",
     "glob": "^8.0.3",
     "minimist": "^1.2.5",
     "nyc": "^15.1.0",

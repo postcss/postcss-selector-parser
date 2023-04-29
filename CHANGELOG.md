@@ -1,3 +1,7 @@
+# 6.0.12
+
+- Fixed: `clone` arguments should be optional
+
 # 6.0.11
 
 - Fixed: parse attribute case insensitivity flag

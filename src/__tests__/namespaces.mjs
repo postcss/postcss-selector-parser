@@ -1,4 +1,4 @@
-import {test} from './util/helpers.mjs';
+import {test, throws} from './util/helpers.mjs';
 
 test('match tags in the postcss namespace', 'postcss|button', (t, tree) => {
     t.deepEqual(tree.nodes[0].nodes[0].namespace, 'postcss');
@@ -76,3 +76,10 @@ test('ns alias for namespace', 'f\\oo|h1.foo', (t, tree) => {
     t.deepEqual(tag.namespace, 'bar');
     t.deepEqual(tag.ns, 'bar');
 });
+
+throws('lone pipe symbol', '|');
+throws('lone pipe symbol with leading spaces', ' |');
+throws('lone pipe symbol with trailing spaces', '| ');
+throws('lone pipe symbol with surrounding spaces', ' | ');
+throws('trailing pipe symbol with a namespace', 'foo| ');
+throws('trailing pipe symbol with any namespace', '*| ');

@@ -1,3 +1,7 @@
+# 6.0.13
+
+- Fixed: throw on unexpected pipe symbols
+
 # 6.0.12
 
 - Fixed: `clone` arguments should be optional

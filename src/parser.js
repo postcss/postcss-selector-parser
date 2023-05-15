@@ -646,6 +646,10 @@ export default class Parser {
         return this.error(`Unexpected '${this.content()}'. Escaping special characters with \\ may help.`, this.currToken[TOKEN.START_POS]);
     }
 
+    unexpectedPipe () {
+        return this.error(`Unexpected '|'.`, this.currToken[TOKEN.START_POS]);
+    }
+
     namespace () {
         const before = this.prevToken && this.content(this.prevToken) || true;
         if (this.nextToken[TOKEN.TYPE] === tokens.word) {
@@ -655,6 +659,8 @@ export default class Parser {
             this.position ++;
             return this.universal(before);
         }
+
+        this.unexpectedPipe();
     }
 
     nesting () {

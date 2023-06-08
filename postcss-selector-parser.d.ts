@@ -500,18 +500,18 @@ declare namespace parser {
     }
     function pseudo(opts: ContainerOptions): Pseudo;
     /**
-     * Checks wether the node is the Psuedo subtype of node.
+     * Checks whether the node is the Pseudo subtype of node.
      */
     function isPseudo(node: any): node is Pseudo;
 
     /**
-     * Checks wether the node is, specifically, a pseudo element instead of
+     * Checks whether the node is, specifically, a pseudo element instead of
      * pseudo class.
      */
     function isPseudoElement(node: any): node is Pseudo;
 
     /**
-     * Checks wether the node is, specifically, a pseudo class instead of
+     * Checks whether the node is, specifically, a pseudo class instead of
      * pseudo element.
      */
     function isPseudoClass(node: any): node is Pseudo;

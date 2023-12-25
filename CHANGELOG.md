@@ -1,3 +1,7 @@
+# 6.0.14
+
+- Fixed: type definitions
+
 # 6.0.13
 
 - Fixed: throw on unexpected pipe symbols

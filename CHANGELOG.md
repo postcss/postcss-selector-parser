@@ -1,3 +1,7 @@
+# 6.0.15
+
+- Fixed: Node#prev and Node#next type for the first/last node
+
 # 6.0.14
 
 - Fixed: type definitions

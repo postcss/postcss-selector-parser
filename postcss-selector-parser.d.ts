@@ -164,8 +164,8 @@ declare namespace parser {
         rawSpaceAfter: string;
         remove(): Node;
         replaceWith(...nodes: Node[]): Node;
-        next(): Node;
-        prev(): Node;
+        next(): Node | undefined;
+        prev(): Node | undefined;
         clone(opts?: {[override: string]:any}): this;
         /**
          * Return whether this node includes the character at the position of the given line and column.

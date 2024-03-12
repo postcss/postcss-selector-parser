@@ -22,14 +22,17 @@ test('container#prepend', (t) => {
 
 test('container#each', (t) => {
     let str = '';
+    let indexes = [];
     parse('h1, h2:not(h3, h4)', (selectors) => {
-        selectors.each((selector) => {
+        selectors.each((selector, index) => {
             if (selector.first.type === 'tag') {
                 str += selector.first.value;
             }
+            indexes.push(index);
         });
     });
     t.deepEqual(str, 'h1h2');
+    t.deepEqual(indexes, [0, 1]);
 });
 
 test('container#each (safe iteration)', (t) => {
@@ -63,14 +66,17 @@ test('container#each (early exit)', (t) => {
 
 test('container#walk', (t) => {
     let str = '';
+    let indexes = [];
     parse('h1, h2:not(h3, h4)', (selectors) => {
-        selectors.walk((selector) => {
+        selectors.walk((selector, index) => {
             if (selector.type === 'tag') {
                 str += selector.value;
+                indexes.push(index);
             }
         });
     });
     t.deepEqual(str, 'h1h2h3h4');
+    t.deepEqual(indexes, [0, 0, 0, 0]);
 });
 
 test('container#walk (safe iteration)', (t) => {

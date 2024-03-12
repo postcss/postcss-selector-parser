@@ -33,7 +33,8 @@
     "!**/__tests__"
   ],
   "scripts": {
-    "pretest": "eslint src && tsc --noEmit postcss-selector-parser.d.ts",
+    "typecheck": "tsc --noEmit --strict postcss-selector-parser.d.ts postcss-selector-parser.test.ts",
+    "pretest": "eslint src && npm run typecheck",
     "prepare": "del-cli dist && BABEL_ENV=publish babel src --out-dir dist --ignore /__tests__/",
     "lintfix": "eslint --fix src",
     "report": "nyc report --reporter=html",

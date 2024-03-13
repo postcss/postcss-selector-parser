@@ -1,3 +1,7 @@
+# 6.0.16
+
+- Fixed: add missing `index` argument to `each`/`walk` callback types (#289)
+
 # 6.0.15
 
 - Fixed: Node#prev and Node#next type for the first/last node

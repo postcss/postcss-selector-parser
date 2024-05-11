@@ -131,7 +131,10 @@ export default class Parser {
         this.root.errorGenerator = this._errorGenerator();
 
 
-        const selector = new Selector({source: {start: {line: 1, column: 1}}});
+        const selector = new Selector({
+            source: {start: {line: 1, column: 1}},
+            sourceIndex: 0,
+        });
         this.root.append(selector);
         this.current = selector;
 
@@ -608,7 +611,12 @@ export default class Parser {
             return;
         }
         this.current._inferEndPosition();
-        const selector = new Selector({source: {start: tokenStart(this.tokens[this.position + 1])}});
+        const selector = new Selector({
+            source: {
+                start: tokenStart(this.tokens[this.position + 1]),
+            },
+            sourceIndex: this.tokens[this.position + 1][TOKEN.START_POS],
+        });
         this.current.parent.append(selector);
         this.current = selector;
         this.position ++;
@@ -685,7 +693,10 @@ export default class Parser {
         let unbalanced = 1;
         this.position ++;
         if (last && last.type === types.PSEUDO) {
-            const selector = new Selector({source: {start: tokenStart(this.tokens[this.position - 1])}});
+            const selector = new Selector({
+                source: {start: tokenStart(this.tokens[this.position])},
+                sourceIndex: this.tokens[this.position][TOKEN.START_POS],
+            });
             const cache = this.current;
             last.append(selector);
             this.current = selector;

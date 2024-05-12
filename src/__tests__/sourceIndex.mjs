@@ -175,6 +175,19 @@ test('pseudo-class', 'h1:first-child', (t, tree) => {
     t.deepEqual(tree.nodes[0].nodes[1].sourceIndex, 2);
 });
 
+test('pseudo-class without argument', ':not()', (t, tree) => {
+    t.deepEqual(tree.nodes[0].source.start.column, 1);
+    t.deepEqual(tree.nodes[0].source.end.column, 6);
+    t.deepEqual(tree.nodes[0].sourceIndex, 0);
+    t.deepEqual(tree.nodes[0].nodes[0].source.start.line, 1);
+    t.deepEqual(tree.nodes[0].nodes[0].source.start.column, 1);
+    t.deepEqual(tree.nodes[0].nodes[0].source.end.column, 6);
+    t.deepEqual(tree.nodes[0].nodes[0].sourceIndex, 0);
+    t.deepEqual(tree.nodes[0].nodes[0].nodes[0].source.start.column, 6);
+    t.deepEqual(tree.nodes[0].nodes[0].nodes[0].source.end.column, 6);
+    t.deepEqual(tree.nodes[0].nodes[0].nodes[0].sourceIndex, 5);
+});
+
 test('pseudo-class with argument', 'h1:not(.strudel, .food)', (t, tree) => {
     t.deepEqual(tree.nodes[0].source.start.column, 1);
     t.deepEqual(tree.nodes[0].source.end.column, 23);

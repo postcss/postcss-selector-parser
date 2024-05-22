@@ -1,12 +1,18 @@
 import {test} from './util/helpers.mjs';
 
 test('universal selector', '*', (t, tree) => {
+    t.deepEqual(tree.nodes[0].source.start.column, 1);
+    t.deepEqual(tree.nodes[0].source.end.column, 1);
+    t.deepEqual(tree.nodes[0].sourceIndex, 0);
     t.deepEqual(tree.nodes[0].nodes[0].source.start.column, 1);
     t.deepEqual(tree.nodes[0].nodes[0].source.end.column, 1);
     t.deepEqual(tree.nodes[0].nodes[0].sourceIndex, 0);
 });
 
 test('lobotomized owl selector', ' * + * ', (t, tree) => {
+    t.deepEqual(tree.nodes[0].source.start.column, 1);
+    t.deepEqual(tree.nodes[0].source.end.column, 6);
+    t.deepEqual(tree.nodes[0].sourceIndex, 0);
     t.deepEqual(tree.nodes[0].nodes[0].source.start.column, 2);
     t.deepEqual(tree.nodes[0].nodes[0].source.end.column, 2);
     t.deepEqual(tree.nodes[0].nodes[0].sourceIndex, 1);
@@ -19,12 +25,18 @@ test('lobotomized owl selector', ' * + * ', (t, tree) => {
 });
 
 test('comment', '/**\n * Hello!\n */', (t, tree) => {
+    t.deepEqual(tree.nodes[0].source.start.column, 1);
+    t.deepEqual(tree.nodes[0].source.end.column, 3);
+    t.deepEqual(tree.nodes[0].sourceIndex, 0);
     t.deepEqual(tree.nodes[0].nodes[0].source.start.column, 1);
     t.deepEqual(tree.nodes[0].nodes[0].source.end.column, 3);
     t.deepEqual(tree.nodes[0].nodes[0].sourceIndex, 0);
 });
 
 test('comment & universal selectors', '*/*test*/*', (t, tree) => {
+    t.deepEqual(tree.nodes[0].source.start.column, 1);
+    t.deepEqual(tree.nodes[0].source.end.column, 10);
+    t.deepEqual(tree.nodes[0].sourceIndex, 0);
     t.deepEqual(tree.nodes[0].nodes[0].source.start.column, 1);
     t.deepEqual(tree.nodes[0].nodes[0].source.end.column, 1);
     t.deepEqual(tree.nodes[0].nodes[0].sourceIndex, 0);
@@ -37,27 +49,42 @@ test('comment & universal selectors', '*/*test*/*', (t, tree) => {
 });
 
 test('tag selector', 'h1', (t, tree) => {
+    t.deepEqual(tree.nodes[0].source.start.column, 1);
+    t.deepEqual(tree.nodes[0].source.end.column, 2);
+    t.deepEqual(tree.nodes[0].sourceIndex, 0);
     t.deepEqual(tree.nodes[0].nodes[0].source.start.column, 1);
     t.deepEqual(tree.nodes[0].nodes[0].source.end.column, 2);
     t.deepEqual(tree.nodes[0].nodes[0].sourceIndex, 0);
 });
 
 test('id selector', '#id', (t, tree) => {
+    t.deepEqual(tree.nodes[0].source.start.column, 1);
+    t.deepEqual(tree.nodes[0].source.end.column, 3);
+    t.deepEqual(tree.nodes[0].sourceIndex, 0);
     t.deepEqual(tree.nodes[0].nodes[0].source.start.column, 1);
     t.deepEqual(tree.nodes[0].nodes[0].source.end.column, 3);
     t.deepEqual(tree.nodes[0].nodes[0].sourceIndex, 0);
 });
 
 test('tag selector followed by id selector', 'h1, #id', (t, tree) => {
+    t.deepEqual(tree.nodes[0].source.start.column, 1);
+    t.deepEqual(tree.nodes[0].source.end.column, 2);
+    t.deepEqual(tree.nodes[0].sourceIndex, 0);
     t.deepEqual(tree.nodes[0].nodes[0].source.start.column, 1);
     t.deepEqual(tree.nodes[0].nodes[0].source.end.column, 2);
     t.deepEqual(tree.nodes[0].nodes[0].sourceIndex, 0);
+    t.deepEqual(tree.nodes[1].source.start.column, 4);
+    t.deepEqual(tree.nodes[1].source.end.column, 7);
+    t.deepEqual(tree.nodes[1].sourceIndex, 3);
     t.deepEqual(tree.nodes[1].nodes[0].source.start.column, 5);
     t.deepEqual(tree.nodes[1].nodes[0].source.end.column, 7);
     t.deepEqual(tree.nodes[1].nodes[0].sourceIndex, 4);
 });
 
 test('multiple id selectors', '#one#two', (t, tree) => {
+    t.deepEqual(tree.nodes[0].source.start.column, 1);
+    t.deepEqual(tree.nodes[0].source.end.column, 8);
+    t.deepEqual(tree.nodes[0].sourceIndex, 0);
     t.deepEqual(tree.nodes[0].nodes[0].source.start.column, 1);
     t.deepEqual(tree.nodes[0].nodes[0].source.end.column, 4);
     t.deepEqual(tree.nodes[0].nodes[0].sourceIndex, 0);
@@ -67,6 +94,9 @@ test('multiple id selectors', '#one#two', (t, tree) => {
 });
 
 test('multiple id selectors (2)', '#one#two#three#four', (t, tree) => {
+    t.deepEqual(tree.nodes[0].source.start.column, 1);
+    t.deepEqual(tree.nodes[0].source.end.column, 19);
+    t.deepEqual(tree.nodes[0].sourceIndex, 0);
     t.deepEqual(tree.nodes[0].nodes[2].source.start.column, 9);
     t.deepEqual(tree.nodes[0].nodes[2].source.end.column, 14);
     t.deepEqual(tree.nodes[0].nodes[2].sourceIndex, 8);
@@ -76,24 +106,39 @@ test('multiple id selectors (2)', '#one#two#three#four', (t, tree) => {
 });
 
 test('multiple id selectors (3)', '#one#two,#three#four', (t, tree) => {
+    t.deepEqual(tree.nodes[0].source.start.column, 1);
+    t.deepEqual(tree.nodes[0].source.end.column, 8);
+    t.deepEqual(tree.nodes[0].sourceIndex, 0);
     t.deepEqual(tree.nodes[0].nodes[1].source.start.column, 5);
     t.deepEqual(tree.nodes[0].nodes[1].source.end.column, 8);
     t.deepEqual(tree.nodes[0].nodes[1].sourceIndex, 4);
+    t.deepEqual(tree.nodes[1].source.start.column, 10);
+    t.deepEqual(tree.nodes[1].source.end.column, 20);
+    t.deepEqual(tree.nodes[1].sourceIndex, 9);
     t.deepEqual(tree.nodes[1].nodes[1].source.start.column, 16);
     t.deepEqual(tree.nodes[1].nodes[1].source.end.column, 20);
     t.deepEqual(tree.nodes[1].nodes[1].sourceIndex, 15);
 });
 
 test('multiple class selectors', '.one.two,.three.four', (t, tree) => {
+    t.deepEqual(tree.nodes[0].source.start.column, 1);
+    t.deepEqual(tree.nodes[0].source.end.column, 8);
+    t.deepEqual(tree.nodes[0].sourceIndex, 0);
     t.deepEqual(tree.nodes[0].nodes[1].source.start.column, 5);
     t.deepEqual(tree.nodes[0].nodes[1].source.end.column, 8);
     t.deepEqual(tree.nodes[0].nodes[1].sourceIndex, 4);
+    t.deepEqual(tree.nodes[1].source.start.column, 10);
+    t.deepEqual(tree.nodes[1].source.end.column, 20);
+    t.deepEqual(tree.nodes[1].sourceIndex, 9);
     t.deepEqual(tree.nodes[1].nodes[1].source.start.column, 16);
     t.deepEqual(tree.nodes[1].nodes[1].source.end.column, 20);
     t.deepEqual(tree.nodes[1].nodes[1].sourceIndex, 15);
 });
 
 test('attribute selector', '[name="james"]', (t, tree) => {
+    t.deepEqual(tree.nodes[0].source.start.column, 1);
+    t.deepEqual(tree.nodes[0].source.end.column, 14);
+    t.deepEqual(tree.nodes[0].sourceIndex, 0);
     t.deepEqual(tree.nodes[0].nodes[0].source.start.line, 1);
     t.deepEqual(tree.nodes[0].nodes[0].source.start.column, 1);
     t.deepEqual(tree.nodes[0].nodes[0].source.end.column, 14);
@@ -130,11 +175,33 @@ test('pseudo-class', 'h1:first-child', (t, tree) => {
     t.deepEqual(tree.nodes[0].nodes[1].sourceIndex, 2);
 });
 
+test('pseudo-class without argument', ':not()', (t, tree) => {
+    t.deepEqual(tree.nodes[0].source.start.column, 1);
+    t.deepEqual(tree.nodes[0].source.end.column, 6);
+    t.deepEqual(tree.nodes[0].sourceIndex, 0);
+    t.deepEqual(tree.nodes[0].nodes[0].source.start.line, 1);
+    t.deepEqual(tree.nodes[0].nodes[0].source.start.column, 1);
+    t.deepEqual(tree.nodes[0].nodes[0].source.end.column, 6);
+    t.deepEqual(tree.nodes[0].nodes[0].sourceIndex, 0);
+    t.deepEqual(tree.nodes[0].nodes[0].nodes[0].source.start.column, 6);
+    t.deepEqual(tree.nodes[0].nodes[0].nodes[0].source.end.column, 6);
+    t.deepEqual(tree.nodes[0].nodes[0].nodes[0].sourceIndex, 5);
+});
+
 test('pseudo-class with argument', 'h1:not(.strudel, .food)', (t, tree) => {
+    t.deepEqual(tree.nodes[0].source.start.column, 1);
+    t.deepEqual(tree.nodes[0].source.end.column, 23);
+    t.deepEqual(tree.nodes[0].sourceIndex, 0);
     t.deepEqual(tree.nodes[0].nodes[1].source.start.line, 1);
     t.deepEqual(tree.nodes[0].nodes[1].source.start.column, 3);
     t.deepEqual(tree.nodes[0].nodes[1].source.end.column, 23);
     t.deepEqual(tree.nodes[0].nodes[1].sourceIndex, 2);
+    t.deepEqual(tree.nodes[0].nodes[1].nodes[0].source.start.column, 8);
+    t.deepEqual(tree.nodes[0].nodes[1].nodes[0].source.end.column, 15);
+    t.deepEqual(tree.nodes[0].nodes[1].nodes[0].sourceIndex, 7);
+    t.deepEqual(tree.nodes[0].nodes[1].nodes[1].source.start.column, 17);
+    t.deepEqual(tree.nodes[0].nodes[1].nodes[1].source.end.column, 23);
+    t.deepEqual(tree.nodes[0].nodes[1].nodes[1].sourceIndex, 16);
 });
 
 test('pseudo-element', 'h1::before', (t, tree) => {

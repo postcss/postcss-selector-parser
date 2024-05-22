@@ -99,8 +99,8 @@ test('Node#isAtPosition', (t) => {
         let notSelector = pseudoNot.first;
         t.deepEqual(notSelector.isAtPosition(1, 1), false);
         t.deepEqual(notSelector.isAtPosition(1, 4), false);
-        t.deepEqual(notSelector.isAtPosition(1, 5), true);
         t.deepEqual(notSelector.isAtPosition(1, 6), true);
+        t.deepEqual(notSelector.isAtPosition(1, 7), true);
         t.deepEqual(notSelector.isAtPosition(1, 9), true);
         t.deepEqual(notSelector.isAtPosition(1, 10), true);
         t.deepEqual(notSelector.isAtPosition(1, 11), false);

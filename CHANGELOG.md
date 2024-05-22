@@ -1,3 +1,7 @@
+# 6.1.0
+
+- Feature: add `sourceIndex` to `Selector` nodes (#290)
+
 # 6.0.16
 
 - Fixed: add missing `index` argument to `each`/`walk` callback types (#289)

@@ -538,7 +538,7 @@ declare namespace parser {
     interface Nesting extends Base {
         type: "nesting";
     }
-    function nesting(opts: any): Nesting;
+    function nesting(opts?: any): Nesting;
     function isNesting(node: any): node is Nesting;
 
     interface String extends Base {

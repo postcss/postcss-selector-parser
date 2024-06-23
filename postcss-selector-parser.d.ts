@@ -532,13 +532,13 @@ declare namespace parser {
     interface Identifier extends Base {
         type: "id";
     }
-    function id(opts: any): any;
+    function id(opts: any): Identifier;
     function isIdentifier(node: any): node is Identifier;
 
     interface Nesting extends Base {
         type: "nesting";
     }
-    function nesting(opts: any): any;
+    function nesting(opts?: any): Nesting;
     function isNesting(node: any): node is Nesting;
 
     interface String extends Base {
@@ -550,6 +550,6 @@ declare namespace parser {
     interface Universal extends Base {
         type: "universal";
     }
-    function universal(opts?: NamespaceOptions): any;
+    function universal(opts?: NamespaceOptions): Universal;
     function isUniversal(node: any): node is Universal;
 }

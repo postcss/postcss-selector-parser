@@ -1,3 +1,7 @@
+# 6.1.1
+
+- Fixed: improve typings of constructor helpers (#292)
+
 # 6.1.0
 
 - Feature: add `sourceIndex` to `Selector` nodes (#290)

@@ -525,7 +525,7 @@ export default class Parser {
         // We need to decide between a space that's a descendant combinator and meaningless whitespace at the end of a selector.
         let nextSigTokenPos = this.locateNextMeaningfulToken(this.position);
 
-        if (nextSigTokenPos < 0 || this.tokens[nextSigTokenPos][TOKEN.TYPE] === tokens.comma) {
+        if (nextSigTokenPos < 0 || this.tokens[nextSigTokenPos][TOKEN.TYPE] === tokens.comma || this.tokens[nextSigTokenPos][TOKEN.TYPE] === tokens.closeParenthesis) {
             let nodes = this.parseWhitespaceEquivalentTokens(nextSigTokenPos);
             if (nodes.length > 0) {
                 let last = this.current.last;

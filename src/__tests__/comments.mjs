@@ -33,10 +33,35 @@ test('multiple comments and other things', 'h1/*test*/h2/*test*/.test/*test*/', 
 });
 
 test('ending in comment', ".bar /* comment 3 */", (t, tree) => {
+    t.is(tree.nodes[0].nodes.length, 1);
     let classname = tree.nodes[0].nodes[0];
     t.deepEqual(classname.type, 'class', 'should have a tag');
     t.deepEqual(classname.spaces.after, ' ');
     t.deepEqual(classname.raws.spaces.after, ' /* comment 3 */');
+});
+
+test('ending in comment and whitespace', ".bar /* comment 3 */ ", (t, tree) => {
+    t.is(tree.nodes[0].nodes.length, 1);
+    let classname = tree.nodes[0].nodes[0];
+    t.deepEqual(classname.type, 'class', 'should have a tag');
+    t.deepEqual(classname.spaces.after, '  ');
+    t.deepEqual(classname.raws.spaces.after, ' /* comment 3 */ ');
+});
+
+test('ending in comment in a pseudo', ":is(.bar /* comment 3 */)", (t, tree) => {
+    t.is(tree.nodes[0].nodes[0].nodes[0].nodes.length, 1);
+    let classname = tree.nodes[0].nodes[0].nodes[0].nodes[0];
+    t.deepEqual(classname.type, 'class', 'should have a tag');
+    t.deepEqual(classname.spaces.after, ' ');
+    t.deepEqual(classname.raws.spaces.after, ' /* comment 3 */');
+});
+
+test('ending in comment and whitespace in a pseudo', ":is(.bar /* comment 3 */ )", (t, tree) => {
+    t.is(tree.nodes[0].nodes[0].nodes[0].nodes.length, 1);
+    let classname = tree.nodes[0].nodes[0].nodes[0].nodes[0];
+    t.deepEqual(classname.type, 'class', 'should have a tag');
+    t.deepEqual(classname.spaces.after, '  ');
+    t.deepEqual(classname.raws.spaces.after, ' /* comment 3 */ ');
 });
 
 test('comments in selector list', 'h2, /*test*/ h4', (t, tree) => {

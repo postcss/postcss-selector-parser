@@ -1,3 +1,7 @@
+# 6.1.2
+
+- Fixed: erroneous trailing combinators in pseudos
+
 # 6.1.1
 
 - Fixed: improve typings of constructor helpers (#292)

@@ -18,6 +18,9 @@ export default class Container extends Node {
     prepend (selector) {
         selector.parent = this;
         this.nodes.unshift(selector);
+        for ( let id in this.indexes ) {
+            this.indexes[id]++;
+        }
         return this;
     }
 
@@ -82,7 +85,7 @@ export default class Container extends Node {
         let index;
         for ( let id in this.indexes ) {
             index = this.indexes[id];
-            if ( oldIndex <= index ) {
+            if ( oldIndex < index ) {
                 this.indexes[id] = index + 1;
             }
         }
@@ -100,7 +103,7 @@ export default class Container extends Node {
         let index;
         for ( let id in this.indexes ) {
             index = this.indexes[id];
-            if ( index <= oldIndex ) {
+            if ( index >= oldIndex ) {
                 this.indexes[id] = index + 1;
             }
         }

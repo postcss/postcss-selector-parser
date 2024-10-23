@@ -35,20 +35,52 @@ test('container#each', (t) => {
     t.deepEqual(indexes, [0, 1]);
 });
 
-test('container#each (safe iteration)', (t) => {
-    let out = parse('.x, .y', (selectors) => {
-        selectors.each((selector) => {
-            selector.parent.insertBefore(
-                selector,
-                parser.className({value : 'b'})
-            );
-            selector.parent.insertAfter(
-                selector,
-                parser.className({value : 'a'})
-            );
+test('container#each (safe iteration w/ insertBefore)', (t) => {
+    let indexes = [];
+    let out = parse('.x,.z', (selectors) => {
+        selectors.each((selector, index) => {
+            if (index === 0) {
+                selectors.insertBefore(
+                    selectors.at(1),
+                    parser.className({ value: 'y' })
+                );
+            }
+            indexes.push(index);
         });
     });
-    t.deepEqual(out, '.b,.x,.a,.b, .y,.a');
+    t.deepEqual(out, '.x,.y,.z');
+    t.deepEqual(indexes, [0, 1, 2]);
+});
+
+test('container#each (safe iteration w/ prepend)', (t) => {
+    let indexes = [];
+    let out = parse('.y,.z', (selectors) => {
+        selectors.each((selector, index) => {
+            if (index === 0) {
+                selectors.prepend(parser.className({ value: 'x' }));
+            }
+            indexes.push(index);
+        });
+    });
+    t.deepEqual(out, '.x,.y,.z');
+    t.deepEqual(indexes, [0, 2]);
+});
+
+test('container#each (safe iteration w/ insertAfter)', (t) => {
+    let indexes = [];
+    let out = parse('.x,.z', (selectors) => {
+        selectors.each((selector, index) => {
+            if (index === 0) {
+                selectors.insertAfter(
+                    selector,
+                    parser.className({ value: 'y' })
+                );
+            }
+            indexes.push(index);
+        });
+    });
+    t.deepEqual(out, '.x,.y,.z');
+    t.deepEqual(indexes, [0, 1, 2]);
 });
 
 test('container#each (early exit)', (t) => {

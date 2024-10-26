@@ -86,12 +86,12 @@ declare namespace parser {
 
     interface Options {
         /**
-         * Preserve whitespace when true. Default: false;
+         * Preserve whitespace when true. Default: true;
          */
         lossless: boolean;
         /**
          * When true and a postcss.Rule is passed, set the result of
-         * processing back onto the rule when done. Default: false.
+         * processing back onto the rule when done. Default: true.
          */
         updateSelector: boolean;
     }

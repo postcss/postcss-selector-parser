@@ -254,7 +254,7 @@ if (next && next.type !== 'combinator') {
 }
 ```
 
-### `node.replaceWith(node)`
+### `node.replaceWith(node[,...nodeN])`
 
 Replace a node with another.
 
@@ -267,6 +267,8 @@ attr.replaceWith(className);
 Arguments:
 
 * `node`: The node to substitute the original with.
+...
+* `nodeN`: The node to substitute the original with.
 
 ### `node.remove()`
 

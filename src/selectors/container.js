@@ -78,7 +78,11 @@ export default class Container extends Node {
     insertAfter (oldNode, newNode) {
         newNode.parent = this;
         let oldIndex = this.index(oldNode);
-        this.nodes.splice(oldIndex + 1, 0, newNode);
+        const resetNode = [];
+        for (let i = 2; i < arguments.length; i++) {
+            resetNode.push(arguments[i]);
+        }
+        this.nodes.splice(oldIndex + 1, 0, newNode, ...resetNode);
 
         newNode.parent = this;
 
@@ -86,7 +90,7 @@ export default class Container extends Node {
         for ( let id in this.indexes ) {
             index = this.indexes[id];
             if ( oldIndex < index ) {
-                this.indexes[id] = index + 1;
+                this.indexes[id] = index + arguments.length - 1;
             }
         }
 
@@ -96,7 +100,11 @@ export default class Container extends Node {
     insertBefore (oldNode, newNode) {
         newNode.parent = this;
         let oldIndex = this.index(oldNode);
-        this.nodes.splice(oldIndex, 0, newNode);
+        const resetNode = [];
+        for (let i = 2; i < arguments.length; i++) {
+            resetNode.push(arguments[i]);
+        }
+        this.nodes.splice(oldIndex, 0, newNode, ...resetNode);
 
         newNode.parent = this;
 
@@ -104,7 +112,7 @@ export default class Container extends Node {
         for ( let id in this.indexes ) {
             index = this.indexes[id];
             if ( index >= oldIndex ) {
-                this.indexes[id] = index + 1;
+                this.indexes[id] = index + arguments.length - 1;
             }
         }
 
@@ -132,7 +140,7 @@ export default class Container extends Node {
      * Return the most specific node at the line and column number given.
      * The source location is based on the original parsed location, locations aren't
      * updated as selector nodes are mutated.
-     * 
+     *
      * Note that this location is relative to the location of the first character
      * of the selector, and not the location of the selector in the overall document
      * when used in conjunction with postcss.

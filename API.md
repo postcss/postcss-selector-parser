@@ -531,7 +531,7 @@ Arguments:
 
 * `node`: The node to add.
 
-### `container.insertBefore(old, new)` & `container.insertAfter(old, new)`
+### `container.insertBefore(old, new[, ...newNodes])` & `container.insertAfter(old, new[, ...newNodes])`
 
 Add a node before or after an existing node in a container:
 

@@ -927,6 +927,7 @@ export default class Parser {
         }
         this.current._inferEndPosition();
         return this.root;
+        console.log(true);
     }
 
     parse (throwOnParenthesis) {

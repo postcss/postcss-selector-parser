@@ -349,6 +349,16 @@ test('container#insertBefore', (t) => {
     t.deepEqual(out, 'h1,h2');
 });
 
+test('container#insertBefore (multiple node)', (t) => {
+    let out = parse('h2', (selectors) => {
+        let selector = selectors.first;
+        let clone1 = selector.first.clone({value: 'h1'});
+        let clone2 = selector.first.clone({value: 'h0'});
+        selectors.insertBefore(selector, clone1, clone2);
+    });
+    t.deepEqual(out, 'h1,h0,h2');
+});
+
 test('container#insertBefore and node#remove', (t) => {
     let out = parse('h2', (selectors) => {
         let selector = selectors.first;
@@ -367,6 +377,16 @@ test('container#insertAfter', (t) => {
     });
     t.deepEqual(out, 'h1,h2');
 });
+
+test('container#insertAfter (multiple node)', (t) => {
+    let out = parse('h1', (selectors) => {
+        let selector = selectors.first;
+        let clone1 = selector.first.clone({value: 'h2'});
+        let clone2 = selector.first.clone({value: 'h3'});
+        selectors.insertAfter(selector, clone1, clone2);
+    });
+    t.deepEqual(out, 'h1,h2,h3');
+})
 
 test('container#insertAfter and node#remove', (t) => {
     let out = parse('h2', (selectors) => {

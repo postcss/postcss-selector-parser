@@ -235,8 +235,8 @@ declare namespace parser {
         removeChild(child: Child): this;
         removeAll(): this;
         empty(): this;
-        insertAfter(oldNode: Child, ...newNode: Child[]): this;
-        insertBefore(oldNode: Child, ...newNode: Child[]): this;
+        insertAfter(oldNode: Child, newNode: Child, ...restNode: Child[]): this;
+        insertBefore(oldNode: Child, newNode: Child, ...restNode: Child[]): this;
         each(callback: (node: Child, index: number) => boolean | void): boolean | undefined;
         walk(
             callback: (node: Node, index: number) => boolean | void

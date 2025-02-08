@@ -39,6 +39,7 @@
     "lintfix": "eslint --fix src",
     "report": "nyc report --reporter=html",
     "test": "nyc ava src/__tests__/*.mjs",
+    "test:node22": "nyc ava src/__tests__/*.mjs --node-arguments=--no-experimental-detect-module",
     "testone": "ava"
   },
   "dependencies": {
@@ -69,9 +70,7 @@
     ],
     "concurrency": 5,
     "timeout": "25s",
-    "nodeArguments": [
-      "--no-experimental-detect-module"
-    ]
+    "nodeArguments": []
   },
   "nyc": {
     "exclude": [

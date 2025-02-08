@@ -25,11 +25,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
-      - name: install
-        run: npm install
 
       - name: npm ci
         run: npm ci --ignore-scripts
 
       - name: test
-        run: npm test
+        run: |
+          if [ "${{ matrix.node }}" == "22" ]; then
+            npm run test:node22
+          else
+            npm run test

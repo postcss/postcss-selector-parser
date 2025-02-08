@@ -34,4 +34,5 @@ jobs:
           if [ "${{ matrix.node }}" == "22" ]; then
             npm run test:node22
           else
-            npm run test
+            npm test
+          fi

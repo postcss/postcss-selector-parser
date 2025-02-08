@@ -25,6 +25,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
+      - name: install
+        run: npm install
 
       - name: npm ci
         run: npm ci --ignore-scripts

@@ -69,7 +69,9 @@
     ],
     "concurrency": 5,
     "timeout": "25s",
-    "nodeArguments": []
+    "nodeArguments": [
+      "--no-experimental-detect-module"
+    ]
   },
   "nyc": {
     "exclude": [

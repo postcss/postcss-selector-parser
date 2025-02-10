@@ -39,6 +39,7 @@
     "lintfix": "eslint --fix src",
     "report": "nyc report --reporter=html",
     "test": "nyc ava src/__tests__/*.mjs",
+    "test:node22": "nyc ava src/__tests__/*.mjs --node-arguments=--no-experimental-detect-module",
     "testone": "ava"
   },
   "dependencies": {

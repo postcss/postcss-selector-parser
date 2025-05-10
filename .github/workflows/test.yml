@@ -31,8 +31,9 @@ jobs:
 
       - name: test
         run: |
-          if [ "${{ matrix.node }}" == "22" ] || [ "${{ matrix.node }}" == "24" ]; then
+          case "${{ matrix.node }}" in "20"|"22"|"24")
             npm run test:node22
-          else
-            npm test
-          fi
+          ;;*)
+          npm test
+          ;;
+          esac

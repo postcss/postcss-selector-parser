@@ -11,7 +11,7 @@
     "@babel/register": "^7.11.5",
     "ava": "^5.1.0",
     "babel-plugin-add-module-exports": "^1.0.4",
-    "coveralls-next": "^4.2.1",
+    "coveralls-next": "^6.0.1",
     "del-cli": "^5.0.0",
     "eslint": "^8.28.0",
     "eslint-plugin-import": "^2.26.0",

@@ -263,6 +263,7 @@ declare namespace parser {
             callback: (node: Pseudo) => boolean | void
         ): boolean | undefined;
         walkTags(callback: (node: Tag) => boolean | void): boolean | undefined;
+        walkUniversals(callback: (node: Universal) => boolean | void): boolean | undefined;
         split(callback: (node: Child) => boolean): [Child[], Child[]];
         map<T>(callback: (node: Child) => T): T[];
         reduce(

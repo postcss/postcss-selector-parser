@@ -1,3 +1,8 @@
+# 7.1.1
+
+- perf: replace startsWith with strict equality (#308)
+- fix(types): add walkUniversal declaration (#311)
+
 # 7.1.0
 
 - feat: insert(Before|After) support multiple new node

@@ -1,4 +1,3 @@
-import {resolveMaxNestingDepth} from '../util';
 import Container from './container';
 import {ROOT} from './types';
 
@@ -8,9 +7,9 @@ export default class Root extends Container {
         this.type = ROOT;
     }
 
-    toString (options = {}, depth = 0, max = resolveMaxNestingDepth(options.maxNestingDepth)) {
+    _stringify (options, depth, max) {
         let str = this.reduce((memo, selector) => {
-            memo.push(selector.toString(options, depth, max));
+            memo.push(selector._stringify(options, depth, max));
             return memo;
         }, []).join(',');
         return this.trailingComma ? str + ',' : str;

@@ -325,7 +325,11 @@ export default class Container extends Node {
         return this.nodes.sort(callback);
     }
 
-    toString (options = {}, depth = 0, max = resolveMaxNestingDepth(options.maxNestingDepth)) {
-        return this.map(child => child.toString(options, depth, max)).join('');
+    toString (options = {}) {
+        return this._stringify(options, 0, resolveMaxNestingDepth(options.maxNestingDepth));
+    }
+
+    _stringify (options, depth, max) {
+        return this.map(child => child._stringify(options, depth, max)).join('');
     }
 }

@@ -33,7 +33,7 @@ export default class Processor {
     _parseOptions (options) {
         let merged = Object.assign({}, this.options, options);
         return {
-            lossy: this._isLossy(options),
+            lossy: this._isLossy(merged),
             maxNestingDepth: merged.maxNestingDepth,
         };
     }

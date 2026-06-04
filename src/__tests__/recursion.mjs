@@ -58,3 +58,34 @@ ava('maxNestingDepth option controls the limit in both directions', t => {
     // ...while a high limit accepts the very same selector.
     t.notThrows(() => parser().astSync(input, {maxNestingDepth: 100}));
 });
+
+ava('the parse and serialize limits stay in sync through processSync', t => {
+    const input = nest(40);
+    // With a raised limit, parsing AND the implicit toString() in processSync
+    // must both succeed and round-trip the selector unchanged.
+    t.is(parser().processSync(input, {maxNestingDepth: 100}), input);
+    // With a low limit, the same call fails (at parse time) instead of crashing.
+    t.throws(() => parser().processSync(input, {maxNestingDepth: 10}), {instanceOf: Error});
+});
+
+ava('toString accepts an explicit maxNestingDepth for programmatic ASTs', t => {
+    const deep = buildDeepAst(40);
+    // Default limit (256) serializes it fine.
+    t.notThrows(() => deep.toString());
+    // A tightened limit rejects it with a controlled error...
+    const error = t.throws(() => deep.toString({maxNestingDepth: 10}), {instanceOf: Error});
+    t.false(error instanceof RangeError);
+    t.regex(error.message, /\b10\b/);
+});
+
+ava('invalid maxNestingDepth values fall back to the safe default', t => {
+    // NaN, Infinity, negatives and non-numbers must not disable the guard:
+    // a hostile payload still throws a controlled error rather than crashing.
+    for (const bad of [NaN, Infinity, -1, '256', null]) {
+        const error = t.throws(
+            () => parser().astSync(nest(1000), {maxNestingDepth: bad}),
+            {instanceOf: Error}
+        );
+        t.false(error instanceof RangeError, `value ${String(bad)} should keep the guard active`);
+    }
+});

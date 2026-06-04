@@ -1,15 +1,6 @@
 import Node from './node';
 import * as types from './types';
 
-/**
- * The default maximum selector nesting depth allowed when parsing or
- * serializing a selector. Going beyond this would otherwise recurse deeply
- * enough to overflow the call stack (CVE-2026-9358 / CWE-674). Real-world
- * selectors never get anywhere near this, so it acts purely as a safety net
- * that turns an uncatchable stack overflow into a catchable error.
- */
-export const MAX_NESTING_DEPTH = 256;
-
 export default class Container extends Node {
     constructor (opts) {
         super(opts);
@@ -333,7 +324,7 @@ export default class Container extends Node {
         return this.nodes.sort(callback);
     }
 
-    toString (depth = 0) {
-        return this.map(child => child.toString(depth)).join('');
+    toString (options = {}, depth = 0) {
+        return this.map(child => child.toString(options, depth)).join('');
     }
 }

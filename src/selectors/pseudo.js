@@ -1,4 +1,5 @@
-import Container, {MAX_NESTING_DEPTH} from './container';
+import {resolveMaxNestingDepth} from '../util';
+import Container from './container';
 import {PSEUDO} from './types';
 
 export default class Pseudo extends Container {
@@ -7,14 +8,15 @@ export default class Pseudo extends Container {
         this.type = PSEUDO;
     }
 
-    toString (depth = 0) {
-        if (depth >= MAX_NESTING_DEPTH) {
+    toString (options = {}, depth = 0) {
+        let max = resolveMaxNestingDepth(options.maxNestingDepth);
+        if (depth >= max) {
             throw new Error(
-                `Cannot serialize selector: nesting depth exceeds the maximum of ${MAX_NESTING_DEPTH}.`
+                `Cannot serialize selector: nesting depth exceeds the maximum of ${max}.`
             );
         }
         let params = this.length
-            ? '(' + this.map(child => child.toString(depth + 1)).join(',') + ')'
+            ? '(' + this.map(child => child.toString(options, depth + 1)).join(',') + ')'
             : '';
         return [
             this.rawSpaceBefore,

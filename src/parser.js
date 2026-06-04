@@ -1,5 +1,4 @@
 import Root from './selectors/root';
-import {MAX_NESTING_DEPTH} from './selectors/container';
 import Selector from './selectors/selector';
 import ClassName from './selectors/className';
 import Comment from './selectors/comment';
@@ -17,7 +16,7 @@ import tokenize, {FIELDS as TOKEN} from './tokenize';
 
 import * as tokens from './tokenTypes';
 import * as types from './selectors/types';
-import {unesc, getProp, ensureObject} from './util';
+import {unesc, getProp, ensureObject, resolveMaxNestingDepth} from './util';
 
 const WHITESPACE_TOKENS = {
     [tokens.space]: true,
@@ -119,9 +118,7 @@ export default class Parser {
         this.options = Object.assign({lossy: false, safe: false}, options);
         this.position = 0;
         this.nestingDepth = 0;
-        this.maxNestingDepth = typeof this.options.maxNestingDepth === 'number'
-            ? this.options.maxNestingDepth
-            : MAX_NESTING_DEPTH;
+        this.maxNestingDepth = resolveMaxNestingDepth(this.options.maxNestingDepth);
 
         this.css = typeof this.rule === 'string' ? this.rule : this.rule.selector;
 
@@ -698,12 +695,6 @@ export default class Parser {
         let unbalanced = 1;
         this.position ++;
         if (last && last.type === types.PSEUDO) {
-            if (++this.nestingDepth > this.maxNestingDepth) {
-                this.error(
-                    `Cannot parse selector: nesting depth exceeds the maximum of ${this.maxNestingDepth}.`,
-                    {index: this.currToken[TOKEN.START_POS]}
-                );
-            }
             const selector = new Selector({
                 source: {start: tokenStart(this.tokens[this.position])},
                 sourceIndex: this.tokens[this.position][TOKEN.START_POS],
@@ -711,23 +702,37 @@ export default class Parser {
             const cache = this.current;
             last.append(selector);
             this.current = selector;
-            while (this.position < this.tokens.length && unbalanced) {
-                if (this.currToken[TOKEN.TYPE] === tokens.openParenthesis) {
-                    unbalanced ++;
+            // Track nesting depth so deeply nested pseudo selectors raise a
+            // catchable error instead of overflowing the call stack. The
+            // counter is restored in `finally` so the parser is never left in
+            // an inconsistent state, even on the error path.
+            this.nestingDepth ++;
+            try {
+                if (this.nestingDepth > this.maxNestingDepth) {
+                    this.error(
+                        `Cannot parse selector: nesting depth exceeds the maximum of ${this.maxNestingDepth}.`,
+                        {index: this.currToken[TOKEN.START_POS]}
+                    );
                 }
-                if (this.currToken[TOKEN.TYPE] === tokens.closeParenthesis) {
-                    unbalanced --;
+                while (this.position < this.tokens.length && unbalanced) {
+                    if (this.currToken[TOKEN.TYPE] === tokens.openParenthesis) {
+                        unbalanced ++;
+                    }
+                    if (this.currToken[TOKEN.TYPE] === tokens.closeParenthesis) {
+                        unbalanced --;
+                    }
+                    if (unbalanced) {
+                        this.parse();
+                    } else {
+                        this.current.source.end = tokenEnd(this.currToken);
+                        this.current.parent.source.end = tokenEnd(this.currToken);
+                        this.position ++;
+                    }
                 }
-                if (unbalanced) {
-                    this.parse();
-                } else {
-                    this.current.source.end = tokenEnd(this.currToken);
-                    this.current.parent.source.end = tokenEnd(this.currToken);
-                    this.position ++;
-                }
+            } finally {
+                this.nestingDepth --;
             }
             this.current = cache;
-            this.nestingDepth --;
         } else {
             // I think this case should be an error. It's used to implement a basic parse of media queries
             // but I don't think it's a good idea.

@@ -1,4 +1,5 @@
 import Root from './selectors/root';
+import {MAX_NESTING_DEPTH} from './selectors/container';
 import Selector from './selectors/selector';
 import ClassName from './selectors/className';
 import Comment from './selectors/comment';
@@ -117,6 +118,10 @@ export default class Parser {
         this.rule = rule;
         this.options = Object.assign({lossy: false, safe: false}, options);
         this.position = 0;
+        this.nestingDepth = 0;
+        this.maxNestingDepth = typeof this.options.maxNestingDepth === 'number'
+            ? this.options.maxNestingDepth
+            : MAX_NESTING_DEPTH;
 
         this.css = typeof this.rule === 'string' ? this.rule : this.rule.selector;
 
@@ -693,6 +698,12 @@ export default class Parser {
         let unbalanced = 1;
         this.position ++;
         if (last && last.type === types.PSEUDO) {
+            if (++this.nestingDepth > this.maxNestingDepth) {
+                this.error(
+                    `Cannot parse selector: nesting depth exceeds the maximum of ${this.maxNestingDepth}.`,
+                    {index: this.currToken[TOKEN.START_POS]}
+                );
+            }
             const selector = new Selector({
                 source: {start: tokenStart(this.tokens[this.position])},
                 sourceIndex: this.tokens[this.position][TOKEN.START_POS],
@@ -716,6 +727,7 @@ export default class Parser {
                 }
             }
             this.current = cache;
+            this.nestingDepth --;
         } else {
             // I think this case should be an error. It's used to implement a basic parse of media queries
             // but I don't think it's a good idea.

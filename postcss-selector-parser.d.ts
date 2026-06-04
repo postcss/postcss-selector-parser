@@ -94,6 +94,12 @@ declare namespace parser {
          * processing back onto the rule when done. Default: true.
          */
         updateSelector: boolean;
+        /**
+         * The maximum selector nesting depth allowed while parsing. Selectors
+         * nested deeper than this (e.g. `:not(:not(:not(…)))`) raise an error
+         * instead of overflowing the call stack. Default: 256.
+         */
+        maxNestingDepth: number;
     }
     class Processor<
         TransformType = never,

@@ -8,15 +8,14 @@ export default class Pseudo extends Container {
         this.type = PSEUDO;
     }
 
-    toString (options = {}, depth = 0) {
-        let max = resolveMaxNestingDepth(options.maxNestingDepth);
+    toString (options = {}, depth = 0, max = resolveMaxNestingDepth(options.maxNestingDepth)) {
         if (depth >= max) {
             throw new Error(
                 `Cannot serialize selector: nesting depth exceeds the maximum of ${max}.`
             );
         }
         let params = this.length
-            ? '(' + this.map(child => child.toString(options, depth + 1)).join(',') + ')'
+            ? '(' + this.map(child => child.toString(options, depth + 1, max)).join(',') + ')'
             : '';
         return [
             this.rawSpaceBefore,

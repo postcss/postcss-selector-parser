@@ -1,3 +1,4 @@
+import {resolveMaxNestingDepth} from '../util';
 import Node from './node';
 import * as types from './types';
 
@@ -324,7 +325,7 @@ export default class Container extends Node {
         return this.nodes.sort(callback);
     }
 
-    toString (options = {}, depth = 0) {
-        return this.map(child => child.toString(options, depth)).join('');
+    toString (options = {}, depth = 0, max = resolveMaxNestingDepth(options.maxNestingDepth)) {
+        return this.map(child => child.toString(options, depth, max)).join('');
     }
 }

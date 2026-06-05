@@ -1,6 +1,61 @@
 import Node from './node';
 import * as types from './types';
 
+export function toStringIterative (root) {
+    const parts = [];
+    const stack = [root];
+
+    while (stack.length > 0) {
+        const item = stack.pop();
+
+        if (typeof item === 'string') {
+            parts.push(item);
+            continue;
+        }
+
+        const node = item;
+
+        if (!node.nodes) {
+            parts.push(node.toString());
+            continue;
+        }
+
+        const children = node.nodes;
+
+        if (node.type === types.ROOT) {
+            if (node.trailingComma) {
+                stack.push(',');
+            }
+            for (let i = children.length - 1; i >= 0; i--) {
+                if (i < children.length - 1) {
+                    stack.push(',');
+                }
+                stack.push(children[i]);
+            }
+        } else if (node.type === types.PSEUDO) {
+            stack.push(node.rawSpaceAfter);
+            if (children.length > 0) {
+                stack.push(')');
+                for (let i = children.length - 1; i >= 0; i--) {
+                    if (i < children.length - 1) {
+                        stack.push(',');
+                    }
+                    stack.push(children[i]);
+                }
+                stack.push('(');
+            }
+            stack.push(node.stringifyProperty('value'));
+            stack.push(node.rawSpaceBefore);
+        } else {
+            for (let i = children.length - 1; i >= 0; i--) {
+                stack.push(children[i]);
+            }
+        }
+    }
+
+    return parts.join('');
+}
+
 export default class Container extends Node {
     constructor (opts) {
         super(opts);
@@ -325,6 +380,6 @@ export default class Container extends Node {
     }
 
     toString () {
-        return this.map(String).join('');
+        return toStringIterative(this);
     }
 }

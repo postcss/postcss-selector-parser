@@ -1,4 +1,4 @@
-import Container from './container';
+import Container, {toStringIterative} from './container';
 import {PSEUDO} from './types';
 
 export default class Pseudo extends Container {
@@ -8,12 +8,6 @@ export default class Pseudo extends Container {
     }
 
     toString () {
-        let params = this.length ? '(' + this.map(String).join(',') + ')' : '';
-        return [
-            this.rawSpaceBefore,
-            this.stringifyProperty("value"),
-            params,
-            this.rawSpaceAfter,
-        ].join('');
+        return toStringIterative(this);
     }
 }

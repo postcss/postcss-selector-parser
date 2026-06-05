@@ -6,22 +6,37 @@ let cloneNode = function (obj, parent) {
     }
 
     let cloned = new obj.constructor();
+    const workQueue = [{source: obj, cloned, parent}];
+    let head = 0;
 
-    for ( let i in obj ) {
-        if ( !obj.hasOwnProperty(i) ) {
-            continue;
-        }
-        let value = obj[i];
-        let type  = typeof value;
+    while (head < workQueue.length) {
+        const {source: src, cloned: dst, parent: p} = workQueue[head++];
 
-        if ( i === 'parent' && type === 'object' ) {
-            if (parent) {
-                cloned[i] = parent;
+        for (let i in src) {
+            if (!src.hasOwnProperty(i)) {
+                continue;
             }
-        } else if ( value instanceof Array ) {
-            cloned[i] = value.map( j => cloneNode(j, cloned) );
-        } else {
-            cloned[i] = cloneNode(value, cloned);
+            let value = src[i];
+            let type  = typeof value;
+
+            if (i === 'parent' && type === 'object') {
+                if (p) {
+                    dst[i] = p;
+                }
+            } else if (i === 'nodes' && value instanceof Array) {
+                dst[i] = value.map(j => {
+                    if (typeof j !== 'object' || j === null) {
+                        return j;
+                    }
+                    const childCloned = new j.constructor();
+                    workQueue.push({source: j, cloned: childCloned, parent: dst});
+                    return childCloned;
+                });
+            } else if (value instanceof Array) {
+                dst[i] = value.map(j => cloneNode(j, dst));
+            } else {
+                dst[i] = cloneNode(value, dst);
+            }
         }
     }
 

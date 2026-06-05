@@ -1,4 +1,4 @@
-import Container from './container';
+import Container, {toStringIterative} from './container';
 import {ROOT} from './types';
 
 export default class Root extends Container {
@@ -8,11 +8,7 @@ export default class Root extends Container {
     }
 
     toString () {
-        let str = this.reduce((memo, selector) => {
-            memo.push(String(selector));
-            return memo;
-        }, []).join(',');
-        return this.trailingComma ? str + ',' : str;
+        return toStringIterative(this);
     }
 
     error (message, options) {

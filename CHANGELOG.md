@@ -1,3 +1,7 @@
+# 7.1.2 - 2026-06-09
+
+- Fix [CVE-2026-9358](https://github.com/advisories/GHSA-w9m9-85wc-3x92) (NVD) / SNYK-JS-POSTCSSSELECTORPARSER-16873882 ([#316](https://github.com/postcss/postcss-selector-parser/pull/316) by [@MoOx](https://github.com/MoOx))
+
 # 7.1.1
 
 - perf: replace startsWith with strict equality (#308)

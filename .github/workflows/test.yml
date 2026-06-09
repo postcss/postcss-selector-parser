@@ -2,8 +2,8 @@ name: test
 on:
   push:
     branches:
-    - 'main'
-    - 'master'
+      - "main"
+      - "master"
   pull_request:
 
 defaults:
@@ -32,8 +32,8 @@ jobs:
       - name: test
         run: |
           case "${{ matrix.node }}" in "20"|"22"|"24")
-            npm run test:node22
+            npm test
           ;;*)
-          npm test
+          npm test:node-lt-20
           ;;
           esac

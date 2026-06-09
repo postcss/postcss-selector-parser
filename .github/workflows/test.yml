@@ -26,6 +26,10 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
 
+      - name: Upgrade npm for Node 14
+        if: matrix.node == 14
+        run: npm i -g npm@8
+
       - name: npm ci
         run: npm ci --ignore-scripts
 

@@ -34,6 +34,6 @@ jobs:
           case "${{ matrix.node }}" in "20"|"22"|"24")
             npm test
           ;;*)
-          npm test:node-lt-20
+          npm run test:node-lt-20
           ;;
           esac

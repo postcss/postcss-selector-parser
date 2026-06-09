@@ -86,7 +86,7 @@ test('attribute selector with quoted value', '[name="james"]', (t, tree) => {
 test('attribute selector with escaped quote', '[title="Something \\"weird\\""]', (t, tree) => {
     let attr = tree.nodes[0].nodes[0];
     t.deepEqual(attr.value, 'Something "weird"');
-    t.deepEqual(attr.getQuotedValue(), '\"Something \\"weird\\"\"');
+    t.deepEqual(attr.getQuotedValue(), '"Something \\"weird\\""');
     t.deepEqual(attr.getQuotedValue({smart: true}), '\'Something "weird"\'');
     t.deepEqual(attr.getQuotedValue({quoteMark: null}), 'Something\\ \\"weird\\"');
     t.deepEqual(attr.quoteMark, '"');

@@ -1,4 +1,4 @@
-import parser from '../index.js';
+import parser from '../../dist/index.js';
 import {test} from './util/helpers.mjs';
 
 const node = (tree, n = 0) => tree.nodes[0].nodes[n];

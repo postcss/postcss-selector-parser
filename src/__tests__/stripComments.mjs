@@ -1,5 +1,7 @@
-import ava from "ava";
-import stripComments from "../util/stripComments.js";
+import ava from "./util/runner.mjs";
+import stripCommentsModule from "../../dist/util/stripComments.js";
+
+const stripComments = stripCommentsModule.default;
 
 ava("stripComments()", (t) => {
     t.deepEqual(stripComments("aaa/**/bbb"), "aaabbb");

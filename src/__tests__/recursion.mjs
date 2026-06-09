@@ -1,5 +1,5 @@
-import ava from 'ava';
-import parser from '../index.js';
+import ava from './util/runner.mjs';
+import parser from '../../dist/index.js';
 
 // Regression tests for CVE-2026-9358 / SNYK-JS-POSTCSSSELECTORPARSER-16873882:
 // uncontrolled recursion when parsing or serializing deeply nested selectors

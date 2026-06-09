@@ -1,8 +1,7 @@
 import process from 'process';
 import util from 'util';
-import ava from 'ava';
-import semver from 'semver';
-import parser from '../../index.js';
+import ava from './runner.mjs';
+import parser from '../../../dist/index.js';
 
 export const parse = (input, transform) => {
     return parser(transform).processSync(input);
@@ -37,10 +36,26 @@ export const throws = (spec, input, validator) => {
     });
 };
 
+function compareVersions (a, b) {
+    const pa = a.split('.').map(Number);
+    const pb = b.split('.').map(Number);
+    for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
+        const na = pa[i] || 0;
+        const nb = pb[i] || 0;
+        if (na > nb) {
+            return 1;
+        }
+        if (na < nb) {
+            return -1;
+        }
+    }
+    return 0;
+}
+
 export function nodeVersionAtLeast (version) {
-    return semver.gte(process.versions.node, version);
+    return compareVersions(process.versions.node, version) >= 0;
 }
 
 export function nodeVersionBefore (version) {
-    return semver.lt(process.versions.node, version);
+    return compareVersions(process.versions.node, version) < 0;
 }

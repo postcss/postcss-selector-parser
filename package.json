@@ -1,5 +1,6 @@
 {
   "name": "postcss-selector-parser",
+  "description": "Selector parser with built in methods for working with selector strings.",
   "version": "7.1.2",
   "devDependencies": {
     "@babel/cli": "^7.11.6",
@@ -64,7 +65,10 @@
       "url": "http://twitter.com/chriseppstein"
     }
   ],
-  "repository": "postcss/postcss-selector-parser",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/postcss/postcss-selector-parser.git"
+  },
   "ava": {
     "require": [
       "@babel/register"

@@ -28,10 +28,12 @@
     "lint:fix": "oxlint --fix",
     "format": "oxfmt src",
     "format:check": "oxfmt --check src",
+    "pretests": "npm run build",
+    "tests": "node --test src/__tests__/*.mjs",
+    "precoverage": "npm run build",
+    "coverage": "c8 node --test src/__tests__/*.mjs",
     "pretest": "npm run build",
-    "test": "node --test src/__tests__/*.mjs",
-    "pretest:coverage": "npm run build",
-    "test:coverage": "c8 node --test src/__tests__/*.mjs",
+    "test": "npm run lint && npm run typecheck && npm run tests && npm run coverage",
     "prepare": "npm run build",
     "release": "npx npmpub"
   },
@@ -66,7 +68,8 @@
     ],
     "reporter": [
       "text",
-      "text-summary"
+      "text-summary",
+      "lcovonly"
     ],
     "all": true
   }

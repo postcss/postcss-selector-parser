@@ -1,40 +1,27 @@
-name: test
-on:
-  push:
-    branches:
-      - "main"
-      - "master"
-  pull_request:
+name: Test
 
-defaults:
-  run:
-    shell: bash
+on: [push, pull_request]
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
-        # Maintained Node.js LTS lines. The published es5 dist still runs on
-        # older Node, but the test runner (node:test) requires Node >= 18.
-        node: [22, 24]
+        os: [ubuntu-latest, windows-latest]
+        node-version: [lts/*, latest]
     steps:
       - uses: actions/checkout@v4
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
         with:
-          fetch-depth: 1
-      - uses: actions/setup-node@v4
+          node-version: ${{ matrix.node-version }}
+      - run: npm ci
+      - run: npm test
+      - name: Upload coverage to Codecov
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == 'lts/*'
+        uses: codecov/codecov-action@v5
         with:
-          node-version: ${{ matrix.node }}
-
-      - name: npm ci
-        run: npm ci --ignore-scripts
-
-      - name: test
-        run: npm run test:coverage
-
-      - name: lint
-        run: npm run lint
-
-      - name: typecheck
-        run: npm run typecheck
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage/lcov.info
+          fail_ci_if_error: false

@@ -188,4 +188,11 @@ export default class Node {
             this.rawSpaceAfter,
         ].join('');
     }
+
+    // Internal recursion entry point used by Container serialization. Leaf
+    // nodes don't recurse, so they ignore the depth/limit and stringify
+    // themselves. Containers override this to thread the nesting depth.
+    _stringify () {
+        return this.toString();
+    }
 }

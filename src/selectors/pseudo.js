@@ -7,8 +7,15 @@ export default class Pseudo extends Container {
         this.type = PSEUDO;
     }
 
-    toString () {
-        let params = this.length ? '(' + this.map(String).join(',') + ')' : '';
+    _stringify (options, depth, max) {
+        if (depth >= max) {
+            throw new Error(
+                `Cannot serialize selector: nesting depth exceeds the maximum of ${max}.`
+            );
+        }
+        let params = this.length
+            ? '(' + this.map(child => child._stringify(options, depth + 1, max)).join(',') + ')'
+            : '';
         return [
             this.rawSpaceBefore,
             this.stringifyProperty("value"),

@@ -94,6 +94,20 @@ declare namespace parser {
          * processing back onto the rule when done. Default: true.
          */
         updateSelector: boolean;
+        /**
+         * The maximum selector nesting depth allowed while parsing. Selectors
+         * nested deeper than this (e.g. `:not(:not(:not(…)))`) raise an error
+         * instead of overflowing the call stack. Default: 256.
+         */
+        maxNestingDepth: number;
+    }
+    interface StringifyOptions {
+        /**
+         * The maximum selector nesting depth allowed while serializing.
+         * Serializing an AST nested deeper than this raises an error instead of
+         * overflowing the call stack. Default: 256.
+         */
+        maxNestingDepth?: number;
     }
     class Processor<
         TransformType = never,
@@ -201,7 +215,7 @@ declare namespace parser {
          * @param {string} valueEscaped optional. the escaped value of the property.
          */
         appendToPropertyAndEscape(name: string, value: any, valueEscaped: string): void;
-        toString(): string;
+        toString(options?: StringifyOptions): string;
     }
     interface ContainerOptions extends NodeOptions {
         nodes?: Array<Node>;
@@ -296,7 +310,7 @@ declare namespace parser {
         some(callback: (node: Child) => boolean): boolean;
         filter(callback: (node: Child) => boolean): Child[];
         sort(callback: (nodeA: Child, nodeB: Child) => number): Child[];
-        toString(): string;
+        toString(options?: StringifyOptions): string;
     }
     function isContainer(node: any): node is Root | Selector | Pseudo;
 

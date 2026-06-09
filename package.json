@@ -30,7 +30,7 @@
     "pretests": "npm run build",
     "tests": "node --test src/__tests__/*.mjs",
     "precoverage": "npm run build",
-    "coverage": "node --enable-source-maps --test --experimental-test-coverage --test-coverage-exclude='**/__tests__/**' --test-coverage-lines=94 --test-coverage-branches=94 --test-coverage-functions=96 --test-reporter=spec src/__tests__/*.mjs",
+    "coverage": "node --enable-source-maps --test --experimental-test-coverage --test-coverage-exclude=\"**/__tests__/**\" --test-coverage-lines=94 --test-coverage-branches=94 --test-coverage-functions=96 --test-reporter=spec src/__tests__/*.mjs",
     "test": "npm run lint && npm run typecheck && npm run coverage",
     "prepare": "npm run build",
     "release": "npx npmpub"

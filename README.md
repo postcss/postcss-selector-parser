@@ -39,6 +39,39 @@ with the resulting selector string.
 
 Please see [API.md](API.md).
 
+## Security
+
+### Selector nesting depth (CVE-2026-9358)
+
+The parser walks the selector AST recursively, both when parsing and when
+serializing it back to a string (`.toString()`). In versions up to and
+including `7.1.1`, a selector with extreme nesting — for example thousands of
+nested `:not(...)` — could recurse deeply enough to overflow the call stack and
+throw `RangeError: Maximum call stack size exceeded`, a potential
+denial-of-service when processing untrusted CSS.
+
+This is now bounded by a maximum nesting depth (default: `256`). Beyond that
+depth, parsing and serialization throw a regular, catchable `Error` at a
+predictable point instead of relying on the runtime hitting its stack limit.
+The default is far above any realistic selector, so it does not affect normal
+use.
+
+**Practical impact is low.** The only attacker-controlled input is the selector
+string itself, which is now capped by the default limit. The limit is
+adjustable through the `maxNestingDepth` option, but that option is trusted
+configuration provided by the integrating code — it is never derived from the
+parsed CSS, so a malicious selector cannot change it:
+
+```js
+// Tighten the limit when parsing untrusted input:
+parser().processSync(untrustedSelector, {maxNestingDepth: 128});
+```
+
+Raising `maxNestingDepth` to a very large value is an explicit, informed choice
+and can reintroduce the stack-overflow risk in environments with a small call
+stack (e.g. browser workers). The default is recommended unless you have a
+specific need.
+
 ## Credits
 
 * Huge thanks to Andrey Sitnik (@ai) for work on PostCSS which helped

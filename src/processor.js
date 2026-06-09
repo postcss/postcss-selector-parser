@@ -31,8 +31,17 @@ export default class Processor {
     }
 
     _parseOptions (options) {
+        let merged = Object.assign({}, this.options, options);
         return {
-            lossy: this._isLossy(options),
+            lossy: this._isLossy(merged),
+            maxNestingDepth: merged.maxNestingDepth,
+        };
+    }
+
+    _stringifyOptions (options) {
+        let merged = Object.assign({}, this.options, options);
+        return {
+            maxNestingDepth: merged.maxNestingDepth,
         };
     }
 
@@ -43,7 +52,7 @@ export default class Processor {
                 Promise.resolve(this.func(root)).then(transform => {
                     let string = undefined;
                     if (this._shouldUpdateSelector(rule, options)) {
-                        string = root.toString();
+                        string = root.toString(this._stringifyOptions(options));
                         rule.selector = string;
                     }
                     return {transform, root, string};
@@ -63,7 +72,7 @@ export default class Processor {
         }
         let string = undefined;
         if (options.updateSelector && typeof rule !== "string") {
-            string = root.toString();
+            string = root.toString(this._stringifyOptions(options));
             rule.selector = string;
         }
         return {transform, root, string};
@@ -122,7 +131,7 @@ export default class Processor {
      */
     process (rule, options) {
         return this._run(rule, options)
-            .then((result) => result.string || result.root.toString());
+            .then((result) => result.string || result.root.toString(this._stringifyOptions(options)));
     }
 
     /**
@@ -134,6 +143,6 @@ export default class Processor {
      */
     processSync (rule, options) {
         let result = this._runSync(rule, options);
-        return result.string || result.root.toString();
+        return result.string || result.root.toString(this._stringifyOptions(options));
     }
 }

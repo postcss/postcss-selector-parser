@@ -7,9 +7,9 @@ export default class Root extends Container {
         this.type = ROOT;
     }
 
-    toString () {
+    _stringify (options, depth, max) {
         let str = this.reduce((memo, selector) => {
-            memo.push(String(selector));
+            memo.push(selector._stringify(options, depth, max));
             return memo;
         }, []).join(',');
         return this.trailingComma ? str + ',' : str;

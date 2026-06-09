@@ -1,4 +1,8 @@
-# postcss-selector-parser [![test](https://github.com/postcss/postcss-selector-parser/actions/workflows/test.yml/badge.svg)](https://github.com/postcss/postcss-selector-parser/actions/workflows/test.yml)
+# postcss-selector-parser
+
+[![npm package version](https://img.shields.io/github/package-json/v/postcss/postcss-selector-parser) ![npm downloads](https://img.shields.io/npm/dm/postcss-selector-parser)](https://www.npmjs.com/package/postcss-selector-parser)
+[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/postcss/postcss-selector-parser/test.yml)](https://github.com/postcss/postcss-selector-parser/actions)
+[![License](https://img.shields.io/github/license/postcss/postcss-selector-parser)](https://github.com/postcss/postcss-selector-parser)  
 
 > Selector parser with built in methods for working with selector strings.
 

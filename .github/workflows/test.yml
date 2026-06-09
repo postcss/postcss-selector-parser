@@ -18,10 +18,3 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - run: npm ci
       - run: npm test
-      - name: Upload coverage to Codecov
-        if: matrix.os == 'ubuntu-latest' && matrix.node-version == 'lts/*'
-        uses: codecov/codecov-action@v5
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          files: ./coverage/lcov.info
-          fail_ci_if_error: false

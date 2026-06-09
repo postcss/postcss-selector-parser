@@ -16,6 +16,6 @@ export const MAX_NESTING_DEPTH = 256;
  * @param {unknown} value the limit provided through the `maxNestingDepth` option
  * @returns {number} a safe, non-negative integer limit
  */
-export default function resolveMaxNestingDepth (value) {
-    return Number.isSafeInteger(value) && value >= 0 ? value : MAX_NESTING_DEPTH;
+export default function resolveMaxNestingDepth(value) {
+  return Number.isSafeInteger(value) && value >= 0 ? value : MAX_NESTING_DEPTH;
 }

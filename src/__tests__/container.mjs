@@ -1,461 +1,457 @@
-import test from './util/runner.mjs';
-import parser from '../../dist/index.js';
-import {parse} from './util/helpers.mjs';
+import test from "./util/runner.mjs";
+import parser from "../../dist/index.js";
+import { parse } from "./util/helpers.mjs";
 
-test('container#append', (t) => {
-    let out = parse('h1', (selectors) => {
-        let selector = selectors.first;
-        let clone = selector.first.clone({value: 'h2'});
-        selectors.append(clone);
-    });
-    t.deepEqual(out, 'h1,h2');
+test("container#append", (t) => {
+  let out = parse("h1", (selectors) => {
+    let selector = selectors.first;
+    let clone = selector.first.clone({ value: "h2" });
+    selectors.append(clone);
+  });
+  t.deepEqual(out, "h1,h2");
 });
 
-test('container#prepend', (t) => {
-    let out = parse('h2', (selectors) => {
-        let selector = selectors.first;
-        let clone = selector.first.clone({value: 'h1'});
-        selectors.prepend(clone);
-    });
-    t.deepEqual(out, 'h1,h2');
+test("container#prepend", (t) => {
+  let out = parse("h2", (selectors) => {
+    let selector = selectors.first;
+    let clone = selector.first.clone({ value: "h1" });
+    selectors.prepend(clone);
+  });
+  t.deepEqual(out, "h1,h2");
 });
 
-test('container#each', (t) => {
-    let str = '';
-    let indexes = [];
-    parse('h1, h2:not(h3, h4)', (selectors) => {
-        selectors.each((selector, index) => {
-            if (selector.first.type === 'tag') {
-                str += selector.first.value;
-            }
-            indexes.push(index);
-        });
+test("container#each", (t) => {
+  let str = "";
+  let indexes = [];
+  parse("h1, h2:not(h3, h4)", (selectors) => {
+    selectors.each((selector, index) => {
+      if (selector.first.type === "tag") {
+        str += selector.first.value;
+      }
+      indexes.push(index);
     });
-    t.deepEqual(str, 'h1h2');
-    t.deepEqual(indexes, [0, 1]);
+  });
+  t.deepEqual(str, "h1h2");
+  t.deepEqual(indexes, [0, 1]);
 });
 
-test('container#each (safe iteration w/ insertBefore)', (t) => {
-    let indexes = [];
-    let out = parse('.x,.z', (selectors) => {
-        selectors.each((selector, index) => {
-            if (index === 0) {
-                selectors.insertBefore(
-                    selectors.at(1),
-                    parser.className({ value: 'y' })
-                );
-            }
-            indexes.push(index);
-        });
+test("container#each (safe iteration w/ insertBefore)", (t) => {
+  let indexes = [];
+  let out = parse(".x,.z", (selectors) => {
+    selectors.each((selector, index) => {
+      if (index === 0) {
+        selectors.insertBefore(selectors.at(1), parser.className({ value: "y" }));
+      }
+      indexes.push(index);
     });
-    t.deepEqual(out, '.x,.y,.z');
-    t.deepEqual(indexes, [0, 1, 2]);
+  });
+  t.deepEqual(out, ".x,.y,.z");
+  t.deepEqual(indexes, [0, 1, 2]);
 });
 
-test('container#each (safe iteration w/ prepend)', (t) => {
-    let indexes = [];
-    let out = parse('.y,.z', (selectors) => {
-        selectors.each((selector, index) => {
-            if (index === 0) {
-                selectors.prepend(parser.className({ value: 'x' }));
-            }
-            indexes.push(index);
-        });
+test("container#each (safe iteration w/ prepend)", (t) => {
+  let indexes = [];
+  let out = parse(".y,.z", (selectors) => {
+    selectors.each((selector, index) => {
+      if (index === 0) {
+        selectors.prepend(parser.className({ value: "x" }));
+      }
+      indexes.push(index);
     });
-    t.deepEqual(out, '.x,.y,.z');
-    t.deepEqual(indexes, [0, 2]);
+  });
+  t.deepEqual(out, ".x,.y,.z");
+  t.deepEqual(indexes, [0, 2]);
 });
 
-test('container#each (safe iteration w/ insertAfter)', (t) => {
-    let indexes = [];
-    let out = parse('.x,.z', (selectors) => {
-        selectors.each((selector, index) => {
-            if (index === 0) {
-                selectors.insertAfter(
-                    selector,
-                    parser.className({ value: 'y' })
-                );
-            }
-            indexes.push(index);
-        });
+test("container#each (safe iteration w/ insertAfter)", (t) => {
+  let indexes = [];
+  let out = parse(".x,.z", (selectors) => {
+    selectors.each((selector, index) => {
+      if (index === 0) {
+        selectors.insertAfter(selector, parser.className({ value: "y" }));
+      }
+      indexes.push(index);
     });
-    t.deepEqual(out, '.x,.y,.z');
-    t.deepEqual(indexes, [0, 1, 2]);
+  });
+  t.deepEqual(out, ".x,.y,.z");
+  t.deepEqual(indexes, [0, 1, 2]);
 });
 
-test('container#each (early exit)', (t) => {
-    let str = '';
-    parse('h1, h2, h3, h4', (selectors) => {
-        const eachReturn = selectors.each((selector) => {
-            const tag = selector.first.value;
-            str += tag;
-            return tag !== 'h2';
-        });
-        t.false(eachReturn);
+test("container#each (early exit)", (t) => {
+  let str = "";
+  parse("h1, h2, h3, h4", (selectors) => {
+    const eachReturn = selectors.each((selector) => {
+      const tag = selector.first.value;
+      str += tag;
+      return tag !== "h2";
     });
-    t.deepEqual(str, 'h1h2');
+    t.false(eachReturn);
+  });
+  t.deepEqual(str, "h1h2");
 });
 
-test('container#walk', (t) => {
-    let str = '';
-    let indexes = [];
-    parse('h1, h2:not(h3, h4)', (selectors) => {
-        selectors.walk((selector, index) => {
-            if (selector.type === 'tag') {
-                str += selector.value;
-                indexes.push(index);
-            }
-        });
+test("container#walk", (t) => {
+  let str = "";
+  let indexes = [];
+  parse("h1, h2:not(h3, h4)", (selectors) => {
+    selectors.walk((selector, index) => {
+      if (selector.type === "tag") {
+        str += selector.value;
+        indexes.push(index);
+      }
     });
-    t.deepEqual(str, 'h1h2h3h4');
-    t.deepEqual(indexes, [0, 0, 0, 0]);
+  });
+  t.deepEqual(str, "h1h2h3h4");
+  t.deepEqual(indexes, [0, 0, 0, 0]);
 });
 
-test('container#walk (safe iteration)', (t) => {
-    let out = parse('[class] + *[href] *:not(*.green)', (selectors) => {
-        selectors.walkUniversals((selector) => {
-            let next = selector.next();
-            if (next && next.type !== 'combinator') {
-                selector.remove();
-            }
-        });
+test("container#walk (safe iteration)", (t) => {
+  let out = parse("[class] + *[href] *:not(*.green)", (selectors) => {
+    selectors.walkUniversals((selector) => {
+      let next = selector.next();
+      if (next && next.type !== "combinator") {
+        selector.remove();
+      }
     });
-    t.deepEqual(out, '[class] + [href] :not(.green)');
+  });
+  t.deepEqual(out, "[class] + [href] :not(.green)");
 });
 
-test('container#walk (early exit)', (t) => {
-    let str = '';
-    parse('h1, h2:not(h3, h4)', (selectors) => {
-        const walkReturn = selectors.walk((selector) => {
-            if (selector.type === 'tag') {
-                const tag = selector.value;
-                str += tag;
-                return tag !== 'h3';
-            }
-        });
-        t.false(walkReturn);
+test("container#walk (early exit)", (t) => {
+  let str = "";
+  parse("h1, h2:not(h3, h4)", (selectors) => {
+    const walkReturn = selectors.walk((selector) => {
+      if (selector.type === "tag") {
+        const tag = selector.value;
+        str += tag;
+        return tag !== "h3";
+      }
     });
-    t.deepEqual(str, 'h1h2h3');
+    t.false(walkReturn);
+  });
+  t.deepEqual(str, "h1h2h3");
 });
 
-test('container#walkAttribute', (t) => {
-    let out = parse('[href][class].class', (selectors) => {
-        selectors.walkAttributes((attr) => {
-            if (attr.attribute === 'class') {
-                attr.remove();
-            }
-        });
+test("container#walkAttribute", (t) => {
+  let out = parse("[href][class].class", (selectors) => {
+    selectors.walkAttributes((attr) => {
+      if (attr.attribute === "class") {
+        attr.remove();
+      }
     });
-    t.deepEqual(out, '[href].class');
+  });
+  t.deepEqual(out, "[href].class");
 });
 
-test('container#walkClass', (t) => {
-    let out = parse('.one, .two, .three:not(.four, .five)', (selectors) => {
-        selectors.walkClasses((className) => {
-            className.value = className.value.slice(0, 1);
-        });
+test("container#walkClass", (t) => {
+  let out = parse(".one, .two, .three:not(.four, .five)", (selectors) => {
+    selectors.walkClasses((className) => {
+      className.value = className.value.slice(0, 1);
     });
-    t.deepEqual(out, '.o, .t, .t:not(.f, .f)');
+  });
+  t.deepEqual(out, ".o, .t, .t:not(.f, .f)");
 });
 
-test('container#walkCombinator', (t) => {
-    let out = parse('h1 h2 h3 h4', (selectors) => {
-        selectors.walkCombinators((comment) => {
-            comment.remove();
-        });
+test("container#walkCombinator", (t) => {
+  let out = parse("h1 h2 h3 h4", (selectors) => {
+    selectors.walkCombinators((comment) => {
+      comment.remove();
     });
-    t.deepEqual(out, 'h1h2h3h4');
+  });
+  t.deepEqual(out, "h1h2h3h4");
 });
 
-test('container#walkComment', (t) => {
-    let out = parse('.one/*test*/.two', (selectors) => {
-        selectors.walkComments((comment) => {
-            comment.remove();
-        });
+test("container#walkComment", (t) => {
+  let out = parse(".one/*test*/.two", (selectors) => {
+    selectors.walkComments((comment) => {
+      comment.remove();
     });
-    t.deepEqual(out, '.one.two');
+  });
+  t.deepEqual(out, ".one.two");
 });
 
-test('container#walkId', (t) => {
-    let out = parse('h1#one, h2#two', (selectors) => {
-        selectors.walkIds((id) => {
-            id.value = id.value.slice(0, 1);
-        });
+test("container#walkId", (t) => {
+  let out = parse("h1#one, h2#two", (selectors) => {
+    selectors.walkIds((id) => {
+      id.value = id.value.slice(0, 1);
     });
-    t.deepEqual(out, 'h1#o, h2#t');
+  });
+  t.deepEqual(out, "h1#o, h2#t");
 });
 
-test('container#walkNesting', t => {
-    let out = parse('& h1', selectors => {
-        selectors.walkNesting(node => {
-            node.replaceWith(parser.tag({value: 'body'}));
-        });
+test("container#walkNesting", (t) => {
+  let out = parse("& h1", (selectors) => {
+    selectors.walkNesting((node) => {
+      node.replaceWith(parser.tag({ value: "body" }));
     });
-    t.deepEqual(out, 'body h1');
+  });
+  t.deepEqual(out, "body h1");
 });
 
-test('container#walkPseudo', (t) => {
-    let out = parse('a:before, a:after', (selectors) => {
-        selectors.walkPseudos((pseudo) => {
-            pseudo.value = pseudo.value.slice(0, 2);
-        });
+test("container#walkPseudo", (t) => {
+  let out = parse("a:before, a:after", (selectors) => {
+    selectors.walkPseudos((pseudo) => {
+      pseudo.value = pseudo.value.slice(0, 2);
     });
-    t.deepEqual(out, 'a:b, a:a');
+  });
+  t.deepEqual(out, "a:b, a:a");
 });
 
-test('container#walkTag', (t) => {
-    let out = parse('1 2 3', (selectors) => {
-        selectors.walkTags((tag) => {
-            tag.value = 'h' + tag.value;
-        });
+test("container#walkTag", (t) => {
+  let out = parse("1 2 3", (selectors) => {
+    selectors.walkTags((tag) => {
+      tag.value = "h" + tag.value;
     });
-    t.deepEqual(out, 'h1 h2 h3');
+  });
+  t.deepEqual(out, "h1 h2 h3");
 });
 
-test('container#walkUniversal', (t) => {
-    let out = parse('*.class,*.class,*.class', (selectors) => {
-        selectors.walkUniversals((universal) => {
-            universal.remove();
-        });
+test("container#walkUniversal", (t) => {
+  let out = parse("*.class,*.class,*.class", (selectors) => {
+    selectors.walkUniversals((universal) => {
+      universal.remove();
     });
-    t.deepEqual(out, '.class,.class,.class');
+  });
+  t.deepEqual(out, ".class,.class,.class");
 });
 
-test('container#map', (t) => {
-    parse('1 2 3', (selectors) => {
-        let arr = selectors.first.map((selector) => {
-            if (/[0-9]/.test(selector.value)) {
-                return 'h' + selector.value;
-            }
-            return selector.value;
-        });
-        t.deepEqual(arr, ['h1', ' ', 'h2', ' ', 'h3']);
+test("container#map", (t) => {
+  parse("1 2 3", (selectors) => {
+    let arr = selectors.first.map((selector) => {
+      if (/[0-9]/.test(selector.value)) {
+        return "h" + selector.value;
+      }
+      return selector.value;
     });
+    t.deepEqual(arr, ["h1", " ", "h2", " ", "h3"]);
+  });
 });
 
-test('container#every', (t) => {
-    parse('.one.two.three', (selectors) => {
-        let allClasses = selectors.first.every((selector) => {
-            return selector.type === 'class';
-        });
-        t.truthy(allClasses);
+test("container#every", (t) => {
+  parse(".one.two.three", (selectors) => {
+    let allClasses = selectors.first.every((selector) => {
+      return selector.type === "class";
     });
+    t.truthy(allClasses);
+  });
 });
 
-test('container#some', (t) => {
-    parse('one#two.three', (selectors) => {
-        let someClasses = selectors.first.some((selector) => {
-            return selector.type === 'class';
-        });
-        t.truthy(someClasses);
+test("container#some", (t) => {
+  parse("one#two.three", (selectors) => {
+    let someClasses = selectors.first.some((selector) => {
+      return selector.type === "class";
     });
+    t.truthy(someClasses);
+  });
 });
 
-test('container#reduce', (t) => {
-    parse('h1, h2, h3, h4', (selectors) => {
-        let str = selectors.reduce((memo, selector) => {
-            if (selector.first.type === 'tag') {
-                memo += selector.first.value;
-            }
-            return memo;
-        }, '');
-        t.deepEqual(str, 'h1h2h3h4');
-    });
+test("container#reduce", (t) => {
+  parse("h1, h2, h3, h4", (selectors) => {
+    let str = selectors.reduce((memo, selector) => {
+      if (selector.first.type === "tag") {
+        memo += selector.first.value;
+      }
+      return memo;
+    }, "");
+    t.deepEqual(str, "h1h2h3h4");
+  });
 });
 
-test('container#filter', (t) => {
-    parse('h1, h2, c1, c2', (selectors) => {
-        let ast = selectors.filter((selector) => {
-            return ~selector.first.value.indexOf('h');
-        });
-        t.deepEqual(String(ast), 'h1, h2');
+test("container#filter", (t) => {
+  parse("h1, h2, c1, c2", (selectors) => {
+    let ast = selectors.filter((selector) => {
+      return ~selector.first.value.indexOf("h");
     });
+    t.deepEqual(String(ast), "h1, h2");
+  });
 });
 
-test('container#split', (t) => {
-    parse('h1 h2 >> h3', (selectors) => {
-        let list = selectors.first.split((selector) => {
-            return selector.value === '>>';
-        }).map((group) => {
-            return group.map(String);
-        });
-        t.deepEqual(list, [['h1', ' ', 'h2', ' >> '], ['h3']]);
-        t.deepEqual(list.length, 2);
-    });
+test("container#split", (t) => {
+  parse("h1 h2 >> h3", (selectors) => {
+    let list = selectors.first
+      .split((selector) => {
+        return selector.value === ">>";
+      })
+      .map((group) => {
+        return group.map(String);
+      });
+    t.deepEqual(list, [["h1", " ", "h2", " >> "], ["h3"]]);
+    t.deepEqual(list.length, 2);
+  });
 });
 
-test('container#sort', (t) => {
-    let out = parse('h2,h3,h1,h4', (selectors) => {
-        selectors.sort((a, b) => {
-            return a.first.value.slice(-1) - b.first.value.slice(-1);
-        });
+test("container#sort", (t) => {
+  let out = parse("h2,h3,h1,h4", (selectors) => {
+    selectors.sort((a, b) => {
+      return a.first.value.slice(-1) - b.first.value.slice(-1);
     });
-    t.deepEqual(out, 'h1,h2,h3,h4');
+  });
+  t.deepEqual(out, "h1,h2,h3,h4");
 });
 
-test('container#at', (t) => {
-    parse('h1, h2, h3', (selectors) => {
-        t.deepEqual(selectors.at(1).first.value, 'h2');
-    });
+test("container#at", (t) => {
+  parse("h1, h2, h3", (selectors) => {
+    t.deepEqual(selectors.at(1).first.value, "h2");
+  });
 });
 
-test('container#first, container#last', (t) => {
-    parse('h1, h2, h3, h4', (selectors) => {
-        t.deepEqual(selectors.first.first.value, 'h1');
-        t.deepEqual(selectors.last.last.value, 'h4');
-    });
+test("container#first, container#last", (t) => {
+  parse("h1, h2, h3, h4", (selectors) => {
+    t.deepEqual(selectors.first.first.value, "h1");
+    t.deepEqual(selectors.last.last.value, "h4");
+  });
 });
 
-test('container#index', (t) => {
-    parse('h1 h2 h3', (selectors) => {
-        let middle = selectors.first.at(1);
-        t.deepEqual(selectors.first.index(middle), 1);
-    });
+test("container#index", (t) => {
+  parse("h1 h2 h3", (selectors) => {
+    let middle = selectors.first.at(1);
+    t.deepEqual(selectors.first.index(middle), 1);
+  });
 });
 
-test('container#length', (t) => {
-    parse('h1, h2, h3', (selectors) => {
-        t.deepEqual(selectors.length, 3);
-    });
+test("container#length", (t) => {
+  parse("h1, h2, h3", (selectors) => {
+    t.deepEqual(selectors.length, 3);
+  });
 });
 
-test('container#removeChild', (t) => {
-    let out = parse('h1.class h2.class h3.class', (selectors) => {
-        selectors.walk((selector) => {
-            if (selector.type === 'class') {
-                selector.parent.removeChild(selector);
-            }
-        });
+test("container#removeChild", (t) => {
+  let out = parse("h1.class h2.class h3.class", (selectors) => {
+    selectors.walk((selector) => {
+      if (selector.type === "class") {
+        selector.parent.removeChild(selector);
+      }
     });
-    t.deepEqual(out, 'h1 h2 h3');
+  });
+  t.deepEqual(out, "h1 h2 h3");
 });
 
-test('container#removeAll, container#empty', (t) => {
-    let wipe = (method) => {
-        return (selectors) => selectors[method]();
-    };
-    let out1 = parse('h1 h2, h2 h3, h3 h4', wipe('empty'));
-    let out2 = parse('h1 h2, h2 h3, h3 h4', wipe('removeAll'));
-    t.deepEqual(out1, '');
-    t.deepEqual(out2, '');
+test("container#removeAll, container#empty", (t) => {
+  let wipe = (method) => {
+    return (selectors) => selectors[method]();
+  };
+  let out1 = parse("h1 h2, h2 h3, h3 h4", wipe("empty"));
+  let out2 = parse("h1 h2, h2 h3, h3 h4", wipe("removeAll"));
+  t.deepEqual(out1, "");
+  t.deepEqual(out2, "");
 });
 
-test('container#insertBefore', (t) => {
-    let out = parse('h2', (selectors) => {
-        let selector = selectors.first;
-        let clone = selector.first.clone({value: 'h1'});
-        selectors.insertBefore(selector, clone);
-    });
-    t.deepEqual(out, 'h1,h2');
+test("container#insertBefore", (t) => {
+  let out = parse("h2", (selectors) => {
+    let selector = selectors.first;
+    let clone = selector.first.clone({ value: "h1" });
+    selectors.insertBefore(selector, clone);
+  });
+  t.deepEqual(out, "h1,h2");
 });
 
-test('container#insertBefore (multiple node)', (t) => {
-    let out = parse('h2', (selectors) => {
-        let selector = selectors.first;
-        let clone1 = selector.first.clone({value: 'h1'});
-        let clone2 = selector.first.clone({value: 'h0'});
-        selectors.insertBefore(selector, clone1, clone2);
-    });
-    t.deepEqual(out, 'h1,h0,h2');
+test("container#insertBefore (multiple node)", (t) => {
+  let out = parse("h2", (selectors) => {
+    let selector = selectors.first;
+    let clone1 = selector.first.clone({ value: "h1" });
+    let clone2 = selector.first.clone({ value: "h0" });
+    selectors.insertBefore(selector, clone1, clone2);
+  });
+  t.deepEqual(out, "h1,h0,h2");
 });
 
-test('container#insertBefore and node#remove', (t) => {
-    let out = parse('h2', (selectors) => {
-        let selector = selectors.first;
-        let newSel = parser.tag({value: 'h1'});
-        selectors.insertBefore(selector, newSel);
-        newSel.remove();
-    });
-    t.deepEqual(out, 'h2');
+test("container#insertBefore and node#remove", (t) => {
+  let out = parse("h2", (selectors) => {
+    let selector = selectors.first;
+    let newSel = parser.tag({ value: "h1" });
+    selectors.insertBefore(selector, newSel);
+    newSel.remove();
+  });
+  t.deepEqual(out, "h2");
 });
 
-test('container#insertAfter', (t) => {
-    let out = parse('h1', (selectors) => {
-        let selector = selectors.first;
-        let clone = selector.first.clone({value: 'h2'});
-        selectors.insertAfter(selector, clone);
-    });
-    t.deepEqual(out, 'h1,h2');
+test("container#insertAfter", (t) => {
+  let out = parse("h1", (selectors) => {
+    let selector = selectors.first;
+    let clone = selector.first.clone({ value: "h2" });
+    selectors.insertAfter(selector, clone);
+  });
+  t.deepEqual(out, "h1,h2");
 });
 
-test('container#insertAfter (multiple node)', (t) => {
-    let out = parse('h1', (selectors) => {
-        let selector = selectors.first;
-        let clone1 = selector.first.clone({value: 'h2'});
-        let clone2 = selector.first.clone({value: 'h3'});
-        selectors.insertAfter(selector, clone1, clone2);
-    });
-    t.deepEqual(out, 'h1,h2,h3');
-})
-
-test('container#insertAfter and node#remove', (t) => {
-    let out = parse('h2', (selectors) => {
-        let selector = selectors.first;
-        let newSel = parser.tag({value: 'h1'});
-        selectors.insertAfter(selector, newSel);
-        newSel.remove();
-    });
-    t.deepEqual(out, 'h2');
+test("container#insertAfter (multiple node)", (t) => {
+  let out = parse("h1", (selectors) => {
+    let selector = selectors.first;
+    let clone1 = selector.first.clone({ value: "h2" });
+    let clone2 = selector.first.clone({ value: "h3" });
+    selectors.insertAfter(selector, clone1, clone2);
+  });
+  t.deepEqual(out, "h1,h2,h3");
 });
 
-test('container#insertAfter (during iteration)', (t) => {
-    let out = parse('h1, h2, h3', (selectors) => {
-        selectors.walkTags(selector => {
-            let attribute = parser.attribute({attribute: 'class'});
-            selector.parent.insertAfter(selector, attribute);
-        });
-    });
-    t.deepEqual(out, 'h1[class], h2[class], h3[class]');
+test("container#insertAfter and node#remove", (t) => {
+  let out = parse("h2", (selectors) => {
+    let selector = selectors.first;
+    let newSel = parser.tag({ value: "h1" });
+    selectors.insertAfter(selector, newSel);
+    newSel.remove();
+  });
+  t.deepEqual(out, "h2");
 });
 
-test('Container#atPosition first pseudo', (t) => {
-    parse(':not(.foo),\n#foo > :matches(ol, ul)', (root) => {
-        let node = root.atPosition(1, 1);
-        t.deepEqual(node.type, "pseudo");
-        t.deepEqual(node.toString(), ":not(.foo)");
+test("container#insertAfter (during iteration)", (t) => {
+  let out = parse("h1, h2, h3", (selectors) => {
+    selectors.walkTags((selector) => {
+      let attribute = parser.attribute({ attribute: "class" });
+      selector.parent.insertAfter(selector, attribute);
     });
+  });
+  t.deepEqual(out, "h1[class], h2[class], h3[class]");
 });
 
-test('Container#atPosition class in pseudo', (t) => {
-    parse(':not(.foo),\n#foo > :matches(ol, ul)', (root) => {
-        let node = root.atPosition(1, 6);
-        t.deepEqual(node.type, "class");
-        t.deepEqual(node.toString(), ".foo");
-    });
+test("Container#atPosition first pseudo", (t) => {
+  parse(":not(.foo),\n#foo > :matches(ol, ul)", (root) => {
+    let node = root.atPosition(1, 1);
+    t.deepEqual(node.type, "pseudo");
+    t.deepEqual(node.toString(), ":not(.foo)");
+  });
 });
 
-test('Container#atPosition id in second selector', (t) => {
-    parse(':not(.foo),\n#foo > :matches(ol, ul)', (root) => {
-        let node = root.atPosition(2, 1);
-        t.deepEqual(node.type, "id");
-        t.deepEqual(node.toString(), "\n#foo");
-    });
+test("Container#atPosition class in pseudo", (t) => {
+  parse(":not(.foo),\n#foo > :matches(ol, ul)", (root) => {
+    let node = root.atPosition(1, 6);
+    t.deepEqual(node.type, "class");
+    t.deepEqual(node.toString(), ".foo");
+  });
 });
 
-test('Container#atPosition combinator in second selector', (t) => {
-    parse(':not(.foo),\n#foo > :matches(ol, ul)', (root) => {
-        let node = root.atPosition(2, 6);
-        t.deepEqual(node.type, "combinator");
-        t.deepEqual(node.toString(), " > ");
-
-        let nodeSpace = root.atPosition(2, 5);
-        t.deepEqual(nodeSpace.type, "selector");
-        t.deepEqual(nodeSpace.toString(), "\n#foo > :matches(ol, ul)");
-    });
+test("Container#atPosition id in second selector", (t) => {
+  parse(":not(.foo),\n#foo > :matches(ol, ul)", (root) => {
+    let node = root.atPosition(2, 1);
+    t.deepEqual(node.type, "id");
+    t.deepEqual(node.toString(), "\n#foo");
+  });
 });
 
-test('Container#atPosition tag in second selector pseudo', (t) => {
-    parse(':not(.foo),\n#foo > :matches(ol, ul)', (root) => {
-        let node = root.atPosition(2, 17);
-        t.deepEqual(node.type, "tag");
-        t.deepEqual(node.toString(), "ol");
-    });
+test("Container#atPosition combinator in second selector", (t) => {
+  parse(":not(.foo),\n#foo > :matches(ol, ul)", (root) => {
+    let node = root.atPosition(2, 6);
+    t.deepEqual(node.type, "combinator");
+    t.deepEqual(node.toString(), " > ");
+
+    let nodeSpace = root.atPosition(2, 5);
+    t.deepEqual(nodeSpace.type, "selector");
+    t.deepEqual(nodeSpace.toString(), "\n#foo > :matches(ol, ul)");
+  });
 });
 
-test('Container#atPosition comma in second selector pseudo', (t) => {
-    parse(':not(.foo),\n#foo > :matches(ol, ul)', (root) => {
-        let node = root.atPosition(2, 19);
-        t.deepEqual(node.type, "pseudo");
-        t.deepEqual(node.toString(), ":matches(ol, ul)");
-    });
+test("Container#atPosition tag in second selector pseudo", (t) => {
+  parse(":not(.foo),\n#foo > :matches(ol, ul)", (root) => {
+    let node = root.atPosition(2, 17);
+    t.deepEqual(node.type, "tag");
+    t.deepEqual(node.toString(), "ol");
+  });
+});
+
+test("Container#atPosition comma in second selector pseudo", (t) => {
+  parse(":not(.foo),\n#foo > :matches(ol, ul)", (root) => {
+    let node = root.atPosition(2, 19);
+    t.deepEqual(node.type, "pseudo");
+    t.deepEqual(node.toString(), ":matches(ol, ul)");
+  });
 });

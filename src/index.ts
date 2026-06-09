@@ -1,5 +1,5 @@
-import Processor from './processor';
-import * as selectors from './selectors';
+import Processor from "./processor";
+import * as selectors from "./selectors";
 
 const parser = (processor?: any) => new Processor(processor);
 

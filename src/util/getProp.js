@@ -1,13 +1,13 @@
-export default function getProp (obj, ...props) {
-    while (props.length > 0) {
-        const prop = props.shift();
+export default function getProp(obj, ...props) {
+  while (props.length > 0) {
+    const prop = props.shift();
 
-        if (!obj[prop]) {
-            return undefined;
-        }
-
-        obj = obj[prop];
+    if (!obj[prop]) {
+      return undefined;
     }
 
-    return obj;
+    obj = obj[prop];
+  }
+
+  return obj;
 }

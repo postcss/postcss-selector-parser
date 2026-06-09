@@ -16,8 +16,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest]
-        node: [18, 20, 22, 24]
+        # Maintained Node.js LTS lines. The published es5 dist still runs on
+        # older Node, but the test runner (node:test) requires Node >= 18.
+        node: [22, 24]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -26,37 +27,11 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
 
-      - name: Upgrade npm for Node 14
-        if: matrix.node == 14
-        run: npm i -g npm@8
-
       - name: npm ci
         run: npm ci --ignore-scripts
 
       - name: test
-        run: |
-          case "${{ matrix.node }}" in "24")
-            npm run test:coverage
-          ;;*)
-          npm test
-          ;;
-          esac
-
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 24
-
-      - name: npm ci
-        run: npm ci --ignore-scripts
-
-      - name: build
-        run: npm run build
+        run: npm run test:coverage
 
       - name: lint
         run: npm run lint

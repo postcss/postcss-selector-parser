@@ -1,4 +1,4 @@
-import selectorTypes from '../selectors/types.js';
+import selectorTypes from '../../dist/selectors/types.js';
 import {test} from './util/helpers.mjs';
 
 const COMBINATOR = selectorTypes.COMBINATOR;

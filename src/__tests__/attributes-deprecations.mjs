@@ -1,4 +1,4 @@
-import attribute from '../selectors/attribute.js';
+import attribute from '../../dist/selectors/attribute.js';
 import {test} from './util/helpers.mjs';
 const Attribute = attribute.default;
 
@@ -24,6 +24,7 @@ test.serial('deprecated get of raws.unquoted ', '', (t) => {
     const warningWaiter = waitForWarning();
 
     let attr = new Attribute({ value: 'foo', quoteMark: '"', attribute: "data-bar" });
+    // eslint-disable-next-line no-unused-expressions -- accessing the getter triggers the deprecation warning under test
     attr.raws.unquoted;
 
     return warningWaiter.then((warning) => {

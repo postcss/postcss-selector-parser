@@ -17,7 +17,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest]
-        node: [14, 16, 18, 20, 22, 24]
+        node: [18, 20, 22, 24]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -35,9 +35,31 @@ jobs:
 
       - name: test
         run: |
-          case "${{ matrix.node }}" in "20"|"22"|"24")
-            npm test
+          case "${{ matrix.node }}" in "24")
+            npm run test:coverage
           ;;*)
-          npm run test:node-lt-20
+          npm test
           ;;
           esac
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: npm ci
+        run: npm ci --ignore-scripts
+
+      - name: build
+        run: npm run build
+
+      - name: lint
+        run: npm run lint
+
+      - name: typecheck
+        run: npm run typecheck

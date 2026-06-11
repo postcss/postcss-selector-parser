@@ -47,6 +47,18 @@ ava('serializing a deeply nested AST throws instead of overflowing the stack', t
     t.false(error instanceof RangeError, 'should be a controlled error, not a stack overflow');
 });
 
+ava('cloning a deeply nested AST throws instead of overflowing the stack', t => {
+    const deep = buildDeepAst(1000);
+    const error = t.throws(() => deep.clone(), {instanceOf: Error});
+    t.false(error instanceof RangeError, 'should be a controlled error, not a stack overflow');
+});
+
+ava('walking a deeply nested AST throws instead of overflowing the stack', t => {
+    const deep = buildDeepAst(1000);
+    const error = t.throws(() => deep.walk(() => {}), {instanceOf: Error});
+    t.false(error instanceof RangeError, 'should be a controlled error, not a stack overflow');
+});
+
 ava('maxNestingDepth option controls the limit in both directions', t => {
     const input = nest(40);
     // A low limit rejects it and reports the configured value...

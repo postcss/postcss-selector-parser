@@ -1,4 +1,4 @@
-import {resolveMaxNestingDepth} from '../util';
+import {resolveMaxNestingDepth, MAX_NESTING_DEPTH} from '../util';
 import Node from './node';
 import * as types from './types';
 
@@ -189,12 +189,19 @@ export default class Container extends Node {
         }
     }
 
-    walk (callback) {
+    walk (callback, depth = 0) {
+        // Bound recursion so a pathologically deep node tree raises a catchable
+        // error instead of overflowing the call stack (CVE-2026-9358 / CWE-674).
+        if (depth > MAX_NESTING_DEPTH) {
+            throw new Error(
+                `Cannot walk selector: nesting depth exceeds the maximum of ${MAX_NESTING_DEPTH}.`
+            );
+        }
         return this.each((node, i) => {
             let result = callback(node, i);
 
             if (result !== false && node.length) {
-                result = node.walk(callback);
+                result = node.walk(callback, depth + 1);
             }
 
             if (result === false) {

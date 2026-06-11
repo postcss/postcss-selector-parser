@@ -1,6 +1,13 @@
-import {ensureObject} from "../util";
+import {ensureObject, MAX_NESTING_DEPTH} from "../util";
 
-let cloneNode = function (obj, parent) {
+let cloneNode = function (obj, parent, depth = 0) {
+    // Bound recursion so a pathologically deep node tree raises a catchable
+    // error instead of overflowing the call stack (CVE-2026-9358 / CWE-674).
+    if (depth > MAX_NESTING_DEPTH) {
+        throw new Error(
+            `Cannot clone selector: nesting depth exceeds the maximum of ${MAX_NESTING_DEPTH}.`
+        );
+    }
     if (typeof obj !== 'object' || obj === null) {
         return obj;
     }
@@ -19,9 +26,9 @@ let cloneNode = function (obj, parent) {
                 cloned[i] = parent;
             }
         } else if ( value instanceof Array ) {
-            cloned[i] = value.map( j => cloneNode(j, cloned) );
+            cloned[i] = value.map( j => cloneNode(j, cloned, depth + 1) );
         } else {
-            cloned[i] = cloneNode(value, cloned);
+            cloned[i] = cloneNode(value, cloned, depth + 1);
         }
     }
 

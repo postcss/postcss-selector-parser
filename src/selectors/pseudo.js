@@ -12,7 +12,9 @@ export default class Pseudo extends Container {
       throw new Error(`Cannot serialize selector: nesting depth exceeds the maximum of ${max}.`);
     }
     let params = this.length
-      ? "(" + this.map((child) => child._stringify(options, depth + 1, max)).join(",") + ")"
+      ? "(" +
+        this.map((child) => this._stringifyChild(child, options, depth + 1, max)).join(",") +
+        ")"
       : "";
     return [this.rawSpaceBefore, this.stringifyProperty("value"), params, this.rawSpaceAfter].join(
       "",

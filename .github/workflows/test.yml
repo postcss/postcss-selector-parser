@@ -1,33 +1,20 @@
-name: test
-on:
-  push:
-    branches:
-    - 'main'
-    - 'master'
-  pull_request:
+name: Test
 
-defaults:
-  run:
-    shell: bash
+on: [push, pull_request]
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         os: [ubuntu-latest]
-        node: [14, 16, 18, 20]
+        node-version: [lts/*, latest]
     steps:
       - uses: actions/checkout@v4
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
         with:
-          fetch-depth: 1
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix.node }}
-
-      - name: npm ci
-        run: npm ci --ignore-scripts
-
-      - name: test
-        run: npm test
+          node-version: ${{ matrix.node-version }}
+      - run: npm ci
+      - run: npm test

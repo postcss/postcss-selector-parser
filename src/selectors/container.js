@@ -326,6 +326,17 @@ export default class Container extends Node {
     }
 
     _stringify (options, depth, max) {
-        return this.map(child => child._stringify(options, depth, max)).join('');
+        return this.map(child => this._stringifyChild(child, options, depth, max)).join('');
+    }
+
+    // Serialize a child node. Historically `toString` used `this.map(String)`,
+    // which leniently coerced anything — including raw arrays inserted via
+    // `replaceWith(array)` / `insertBefore` / `insertAfter` (e.g. Tailwind's
+    // `:merge()` expansion). Fall back to `String(child)` for values that are
+    // not parser nodes so that behaviour is preserved.
+    _stringifyChild (child, options, depth, max) {
+        return typeof child._stringify === 'function'
+            ? child._stringify(options, depth, max)
+            : String(child);
     }
 }

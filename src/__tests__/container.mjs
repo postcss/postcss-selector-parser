@@ -407,3 +407,17 @@ test('Container#atPosition comma in second selector pseudo', (t) => {
         t.deepEqual(node.toString(), ":matches(ol, ul)");
     });
 });
+
+// Regression for #320/#321/#322: passing an array to replaceWith() stores a
+// raw Array (not a Node) inside `nodes`. Serialization must tolerate it, as it
+// did before the recursion fix — this is how Tailwind v3 expands `:merge()`
+// for every group-* / peer-* variant.
+test('Container#toString tolerates a raw array child from replaceWith(array)', (t) => {
+    const ast = parser().astSync(':merge(.group):hover .foo');
+    ast.walkPseudos((p) => {
+        if (p.value === ':merge') {
+            p.replaceWith(p.nodes); // array passed directly, not spread
+        }
+    });
+    t.deepEqual(ast.toString(), '.group:hover .foo');
+});

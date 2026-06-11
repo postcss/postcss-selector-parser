@@ -14,7 +14,7 @@ export default class Pseudo extends Container {
             );
         }
         let params = this.length
-            ? '(' + this.map(child => child._stringify(options, depth + 1, max)).join(',') + ')'
+            ? '(' + this.map(child => this._stringifyChild(child, options, depth + 1, max)).join(',') + ')'
             : '';
         return [
             this.rawSpaceBefore,

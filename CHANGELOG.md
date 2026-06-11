@@ -1,3 +1,7 @@
+# 6.1.3
+
+- Fix [CVE-2026-9358](https://github.com/advisories/GHSA-w9m9-85wc-3x92) (NVD) / SNYK-JS-POSTCSSSELECTORPARSER-16873882 via backport of ([#316](https://github.com/postcss/postcss-selector-parser/pull/316) by [@MoOx](https://github.com/MoOx))
+
 # 6.1.2
 
 - Fixed: erroneous trailing combinators in pseudos

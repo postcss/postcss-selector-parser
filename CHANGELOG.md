@@ -1,3 +1,7 @@
+# 7.1.4 - 2026-06-11
+
+- fix: tolerate non-node children when serializing selectors
+
 # 7.1.3 - 2026-06-11
 
 - Improve fix CVE-2026-9358 (NVD) / SNYK-JS-POSTCSSSELECTORPARSER-16873882 (clone/walk)

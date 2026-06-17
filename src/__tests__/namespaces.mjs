@@ -77,6 +77,21 @@ test("ns alias for namespace", "f\\oo|h1.foo", (t, tree) => {
   t.deepEqual(tag.ns, "bar");
 });
 
+test("empty namespace after a comment is not a prefix", "/* c */|b", (t, tree) => {
+  t.deepEqual(tree.nodes[0].nodes[1].namespace, true);
+  t.deepEqual(tree.nodes[0].nodes[1].value, "b");
+});
+
+test("empty namespace after a comma is not a prefix", ".a,|b", (t, tree) => {
+  t.deepEqual(tree.nodes[1].nodes[0].namespace, true);
+  t.deepEqual(tree.nodes[1].nodes[0].value, "b");
+});
+
+test("empty namespace after a combinator is not a prefix", ".a > |b", (t, tree) => {
+  t.deepEqual(tree.nodes[0].nodes[2].namespace, true);
+  t.deepEqual(tree.nodes[0].nodes[2].value, "b");
+});
+
 throws("lone pipe symbol", "|");
 throws("lone pipe symbol with leading spaces", " |");
 throws("lone pipe symbol with trailing spaces", "| ");

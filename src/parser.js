@@ -228,7 +228,7 @@ export default class Parser {
             }
             if (commentBefore) {
               ensureObject(node, "raws", "spaces", "attribute");
-              node.raws.spaces.attribute.before = spaceBefore;
+              node.raws.spaces.attribute.before = commentBefore;
               commentBefore = "";
             }
             node.namespace = (node.namespace || "") + content;

@@ -5,6 +5,15 @@ test("id selector", "#one", (t, tree) => {
   t.deepEqual(tree.nodes[0].nodes[0].type, "id");
 });
 
+test("ID#set value", "#fo\\o", (t, selectors) => {
+  let id = selectors.first.first;
+  t.deepEqual(id.raws, { value: "fo\\o" });
+  id.value = "bar";
+  t.deepEqual(id.raws, {});
+  id.value = "foo.bar";
+  t.deepEqual(id.raws, { value: "foo\\.bar" });
+});
+
 test("id selector with universal", "*#z98y ", (t, tree) => {
   t.deepEqual(tree.nodes[0].nodes[0].value, "*");
   t.deepEqual(tree.nodes[0].nodes[0].type, "universal");

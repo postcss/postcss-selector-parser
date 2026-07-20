@@ -244,6 +244,10 @@ export default class Attribute extends Namespace {
     return this.insensitive ? "i" : "";
   }
 
+  get sensitiveFlag() {
+    return this.sensitive ? "s" : "";
+  }
+
   get value() {
     return this._value;
   }
@@ -271,6 +275,31 @@ export default class Attribute extends Namespace {
     }
 
     this._insensitive = insensitive;
+  }
+
+  get sensitive() {
+    return this._sensitive;
+  }
+
+  /**
+   * Set the explicit case sensitive flag (Selectors Level 4 `s`).
+   * If the case sensitive flag changes, the raw (escaped) value at `attr.raws.sensitiveFlag`
+   * of the attribute is updated accordingly.
+   *
+   * @param {true | false} sensitive true if the attribute should match case-sensitively.
+   */
+  set sensitive(sensitive) {
+    if (!sensitive) {
+      this._sensitive = false;
+
+      // "s" and "S" can be used in "this.raws.sensitiveFlag" to store the original notation.
+      // When setting `attr.sensitive = false` both should be erased to ensure correct serialization.
+      if (this.raws && (this.raws.sensitiveFlag === "S" || this.raws.sensitiveFlag === "s")) {
+        this.raws.sensitiveFlag = undefined;
+      }
+    }
+
+    this._sensitive = sensitive;
   }
 
   /**
@@ -403,8 +432,13 @@ export default class Attribute extends Namespace {
     if (this.operator && (this.value || this.value === "")) {
       selector.push(this._stringFor("operator"));
       selector.push(this._stringFor("value"));
+      // The case-sensitivity flag occupies a single slot after the value.
+      // Prefer the explicit case-sensitive flag ("s"/"S") when present,
+      // otherwise fall back to the case-insensitive flag ("i"/"I") or any
+      // non-standard flag preserved in `raws.insensitiveFlag`.
+      let flagProperty = this.sensitive ? "sensitiveFlag" : "insensitiveFlag";
       selector.push(
-        this._stringFor("insensitiveFlag", "insensitive", (attrValue, attrSpaces) => {
+        this._stringFor(flagProperty, "insensitive", (attrValue, attrSpaces) => {
           if (
             attrValue.length > 0 &&
             !this.quoted &&

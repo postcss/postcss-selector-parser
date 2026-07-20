@@ -387,6 +387,7 @@ declare namespace parser {
         attribute: string;
         operator?: AttributeOperator;
         insensitive?: boolean;
+        sensitive?: boolean;
         quoteMark?: QuoteMark;
         /** @deprecated Use quoteMark instead. */
         quoted?: boolean;
@@ -404,6 +405,8 @@ declare namespace parser {
             operator?: string;
             value?: string;
             insensitive?: string;
+            insensitiveFlag?: string;
+            sensitiveFlag?: string;
             spaces?: {
                 attribute?: Partial<Spaces>;
                 operator?: Partial<Spaces>;
@@ -417,6 +420,7 @@ declare namespace parser {
         attribute: string;
         operator?: AttributeOperator;
         insensitive?: boolean;
+        sensitive?: boolean;
         quoteMark: QuoteMark;
         quoted?: boolean;
         spaces: {
@@ -435,6 +439,8 @@ declare namespace parser {
             /** The value of the attribute with quotes and escapes. */
             value?: string;
             insensitive?: string;
+            insensitiveFlag?: string;
+            sensitiveFlag?: string;
             spaces?: {
                 attribute?: Partial<Spaces>;
                 operator?: Partial<Spaces>;
@@ -452,6 +458,12 @@ declare namespace parser {
          * attribute is case insensitive.
          */
         readonly insensitiveFlag : 'i' | '';
+
+        /**
+         * The explicit case sensitivity flag (Selectors Level 4 `s`) or an empty
+         * string depending on whether this attribute is explicitly case sensitive.
+         */
+        readonly sensitiveFlag : 's' | '';
 
         /**
          * Returns the attribute's value quoted such that it would be legal to use

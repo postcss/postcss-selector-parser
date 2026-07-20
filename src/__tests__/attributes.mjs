@@ -487,6 +487,43 @@ test("non standard modifiers", '[href="foo" y]', (t, tree) => {
   t.deepEqual(tree.toString(), '[href="foo" y]');
 });
 
+// https://github.com/postcss/postcss-selector-parser/issues/309
+test("case sensitive attribute selector", '[href="foo" s]', (t, tree) => {
+  let attr = tree.atPosition(1, 13);
+  t.deepEqual(attr.sensitive, true);
+  t.deepEqual(attr.sensitiveFlag, "s");
+  t.deepEqual(attr.insensitive, false);
+  t.deepEqual(attr.insensitiveFlag, "");
+  // The `s` flag must be modeled explicitly, not mis-filed into raws.insensitiveFlag.
+  t.is(attr.raws.insensitiveFlag, undefined);
+  t.deepEqual(tree.toString(), '[href="foo" s]');
+});
+
+test("capitalized case sensitive attribute selector", '[href="foo" S]', (t, tree) => {
+  let attr = tree.atPosition(1, 13);
+  t.deepEqual(attr.sensitive, true);
+  t.deepEqual(attr.sensitiveFlag, "s");
+  t.deepEqual(attr.insensitive, false);
+  t.is(attr.raws.insensitiveFlag, undefined);
+  t.deepEqual(attr.raws.sensitiveFlag, "S");
+  t.deepEqual(tree.toString(), '[href="foo" S]');
+
+  // Clearing the flag must erase the original "S" notation from raws.
+  attr.sensitive = false;
+  t.is(attr.raws.sensitiveFlag, undefined);
+  t.deepEqual(tree.toString(), '[href="foo" ]');
+});
+
+test("case sensitive attribute selector (unquoted)", "[href=test s]", (t, tree) => {
+  let attr = tree.nodes[0].nodes[0];
+  t.deepEqual(attr.value, "test");
+  t.deepEqual(attr.sensitive, true);
+
+  attr.sensitive = false;
+
+  t.deepEqual(tree.toString(), "[href=test ]");
+});
+
 test("comment after insensitive(non space)", '[href="foo" i/**/]', (t, tree) => {
   // https://github.com/postcss/postcss-selector-parser/issues/150
   let attr = tree.atPosition(1, 13);

@@ -7,6 +7,28 @@ throws("unclosed pseudo element", "button::");
 throws("unclosed pseudo class", "a:");
 throws("unclosed attribute selector", '[name="james"][href');
 
+// Constructs left open at end of input. These threw a raw TypeError before
+// `attribute`, `namespace` and `parentheses` guarded against running out of
+// tokens. Asserted by message rather than by type: the default
+// `{instanceOf: Error}` check is satisfied by a TypeError, which is why the
+// existing "unclosed attribute selector" case above passed throughout.
+throws(
+  "unclosed attribute at end of input",
+  "a[href",
+  "Expected a closing square bracket.",
+);
+throws(
+  "unclosed attribute with value at end of input",
+  "a[href=x",
+  "Expected a closing square bracket.",
+);
+throws("trailing namespace pipe", ".foo|", "Unexpected '|'.");
+throws(
+  "unclosed parenthesis at end of input",
+  "a(",
+  "Expected a closing parenthesis.",
+);
+
 throws("no opening parenthesis", ")");
 throws("no opening parenthesis (2)", ":global.foo)");
 throws("no opening parenthesis (3)", "h1:not(h2:not(h3)))");

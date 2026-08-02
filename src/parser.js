@@ -161,6 +161,11 @@ export default class Parser {
       attr.push(this.currToken);
       this.position++;
     }
+    if (!this.currToken) {
+      // Ran off the end of the token stream: the attribute was never closed.
+      // Point at the opening bracket, which is where the author needs to look.
+      return this.expected("closing square bracket", startingToken[TOKEN.START_POS]);
+    }
     if (this.currToken[TOKEN.TYPE] !== tokens.closeSquare) {
       return this.expected("closing square bracket", this.currToken[TOKEN.START_POS]);
     }
@@ -697,6 +702,11 @@ export default class Parser {
 
   namespace() {
     const before = (this.prevToken && this.content(this.prevToken)) || true;
+    if (!this.nextToken) {
+      // A trailing `|` with nothing after it. `unexpectedPipe` reports against
+      // `currToken`, which is the pipe itself and always present here.
+      return this.unexpectedPipe();
+    }
     if (this.nextToken[TOKEN.TYPE] === tokens.word) {
       this.position++;
       return this.word(before);
@@ -730,6 +740,7 @@ export default class Parser {
   parentheses() {
     let last = this.current.last;
     let unbalanced = 1;
+    const openingToken = this.currToken;
     this.position++;
     if (last && last.type === types.PSEUDO) {
       const selector = new Selector({
@@ -805,7 +816,12 @@ export default class Parser {
       }
     }
     if (unbalanced) {
-      return this.expected("closing parenthesis", this.currToken[TOKEN.START_POS]);
+      // `currToken` is undefined when the token stream ran out before the
+      // parenthesis was closed; fall back to the opening one.
+      return this.expected(
+        "closing parenthesis",
+        (this.currToken || openingToken)[TOKEN.START_POS],
+      );
     }
   }
 

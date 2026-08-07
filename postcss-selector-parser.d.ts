@@ -517,7 +517,7 @@ declare namespace parser {
          * @param part One of the possible values inside an attribute.
          * @returns -1 if the name is invalid or the value doesn't exist in this attribute.
          */
-        offsetOf(part: "ns" | "namespace" | "attribute" | "attributeNS" | "operator" | "value" | "insensitive"): number;
+        offsetOf(part: "ns" | "namespace" | "attribute" | "attributeNS" | "operator" | "value" | "insensitive" | "sensitive"): number;
     }
     function attribute(opts: AttributeOptions): Attribute;
     function isAttribute(node: any): node is Attribute;

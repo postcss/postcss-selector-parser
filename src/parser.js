@@ -219,7 +219,7 @@ export default class Parser {
           }
           break;
         case tokens.asterisk:
-          if (next[TOKEN.TYPE] === tokens.equals) {
+          if (next && next[TOKEN.TYPE] === tokens.equals) {
             node.operator = content;
             lastAdded = "operator";
           } else if (
@@ -256,14 +256,14 @@ export default class Parser {
           }
         // Falls through
         case tokens.caret:
-          if (next[TOKEN.TYPE] === tokens.equals) {
+          if (next && next[TOKEN.TYPE] === tokens.equals) {
             node.operator = content;
             lastAdded = "operator";
           }
           spaceAfterMeaningfulToken = false;
           break;
         case tokens.combinator:
-          if (content === "~" && next[TOKEN.TYPE] === tokens.equals) {
+          if (content === "~" && next && next[TOKEN.TYPE] === tokens.equals) {
             node.operator = content;
             lastAdded = "operator";
           }
@@ -271,7 +271,7 @@ export default class Parser {
             spaceAfterMeaningfulToken = false;
             break;
           }
-          if (next[TOKEN.TYPE] === tokens.equals) {
+          if (next && next[TOKEN.TYPE] === tokens.equals) {
             node.operator = content;
             lastAdded = "operator";
           } else if (!node.namespace && !node.attribute) {
@@ -414,6 +414,14 @@ export default class Parser {
           return this.error(`Unexpected "${content}" found.`, { index: token[TOKEN.START_POS] });
       }
       pos++;
+    }
+    if (!node.attribute) {
+      // Every token inside the brackets was consumed without one of them
+      // supplying an attribute name. Stringifying now would interpolate the
+      // string "undefined" into the output, so report it as a parse error
+      // instead. Points at the opening bracket, which is where the author
+      // needs to look.
+      return this.expected("attribute", startingToken[TOKEN.START_POS]);
     }
     unescapeProp(node, "attribute");
     unescapeProp(node, "namespace");

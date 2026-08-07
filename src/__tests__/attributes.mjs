@@ -1,4 +1,6 @@
 import { test, nodeVersionAtLeast, nodeVersionBefore } from "./util/helpers.mjs";
+import ava from "./util/runner.mjs";
+import parser from "../../dist/index.js";
 
 test("attribute selector", "[href]", (t, tree) => {
   t.deepEqual(tree.nodes[0].nodes[0].attribute, "href");
@@ -556,3 +558,20 @@ testDeprecation("set Attribute#quoteMark", "[data-foo=bar]", (t, tree) => {
   attr.quoteMark = '"';
   t.deepEqual(attr.toString(), '[data-foo="has space"]');
 });
+
+// A trailing `* $ ^ ~ |` immediately before the closing bracket used to look
+// ahead past the end of the token stream and throw a raw TypeError. None of
+// them is a valid operator without a following `=`, so the token is dropped,
+// which matches how `[href=]` already drops an operator that has no value.
+// Asserted with `ava` rather than `test` because the output is intentionally
+// not a round-trip, and pinning it with `test` would assert the lossy form is
+// correct.
+for (const trailing of ["*", "$", "^", "~", "|"]) {
+  ava(`attribute name followed by a trailing ${trailing}`, (t) => {
+    const tree = parser().astSync(`[href${trailing}]`);
+    const attr = tree.nodes[0].nodes[0];
+    t.deepEqual(attr.attribute, "href");
+    t.deepEqual(attr.operator, undefined);
+    t.deepEqual(tree.toString(), "[href]");
+  });
+}

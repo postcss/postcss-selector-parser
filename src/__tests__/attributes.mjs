@@ -28,6 +28,13 @@ test("attribute selector spaces with namespace (both)", "[  foo|bar   ]", (t, tr
   t.deepEqual(tree.nodes[0].nodes[0].type, "attribute");
   t.falsy(tree.nodes[0].nodes[0].quoted);
 });
+test("attribute selector spaces with universal namespace (both)", "[  *|bar   ]", (t, tree) => {
+  t.deepEqual(tree.nodes[0].nodes[0].namespace, "*");
+  t.deepEqual(tree.nodes[0].nodes[0].attribute, "bar");
+  t.deepEqual(tree.nodes[0].nodes[0].spaces.attribute.before, "  ");
+  t.deepEqual(tree.nodes[0].nodes[0].spaces.attribute.after, "   ");
+  t.deepEqual(tree.nodes[0].nodes[0].type, "attribute");
+});
 test("attribute selector spaces (both)", "[  href   ]", (t, tree) => {
   t.deepEqual(tree.nodes[0].nodes[0].attribute, "href");
   t.deepEqual(tree.nodes[0].nodes[0].spaces.attribute.before, "  ");

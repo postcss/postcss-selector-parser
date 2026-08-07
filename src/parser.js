@@ -938,6 +938,17 @@ export default class Parser {
       }
       nextToken = this.nextToken;
     }
+    // Support class prefix selectors like .foo-*
+    const wordStartToken = this.currToken;
+    if (
+      nextToken &&
+      nextToken[TOKEN.TYPE] === tokens.asterisk &&
+      word.endsWith("-") &&
+      word.indexOf(".") !== -1
+    ) {
+      this.position++;
+      word += "*";
+    }
     const hasClass = indexesOf(word, ".").filter((i) => {
       // Allow escaped dot within class name
       const escapedDot = word[i - 1] === "\\";
@@ -959,7 +970,7 @@ export default class Parser {
         return firstCallback.call(this, value, indices.length);
       }
       let node;
-      const current = this.currToken;
+      const current = wordStartToken;
       const sourceIndex = current[TOKEN.START_POS] + indices[i];
       const source = getSource(current[1], current[2] + ind, current[3], current[2] + (index - 1));
       if (~hasClass.indexOf(ind)) {

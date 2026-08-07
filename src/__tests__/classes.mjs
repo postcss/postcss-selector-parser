@@ -274,3 +274,22 @@ test("class selector with escaping (36)", ".not-pseudo\\:\\:focus", (t, tree) =>
   t.deepEqual(tree.nodes[0].nodes[0].type, "class");
   t.deepEqual(tree.nodes[0].nodes[0].raws.value, "not-pseudo\\:\\:focus");
 });
+
+test("class prefix selector", ".foo-*", (t, tree) => {
+  t.deepEqual(tree.nodes[0].nodes[0].type, "class");
+  t.deepEqual(tree.nodes[0].nodes[0].value, "foo-*");
+});
+
+test("class prefix selector with tag", "div.foo-*", (t, tree) => {
+  t.deepEqual(tree.nodes[0].nodes[0].type, "tag");
+  t.deepEqual(tree.nodes[0].nodes[0].value, "div");
+  t.deepEqual(tree.nodes[0].nodes[1].type, "class");
+  t.deepEqual(tree.nodes[0].nodes[1].value, "foo-*");
+});
+
+test("multiple class prefix selectors", ".foo-*.bar-*", (t, tree) => {
+  t.deepEqual(tree.nodes[0].nodes[0].type, "class");
+  t.deepEqual(tree.nodes[0].nodes[0].value, "foo-*");
+  t.deepEqual(tree.nodes[0].nodes[1].type, "class");
+  t.deepEqual(tree.nodes[0].nodes[1].value, "bar-*");
+});

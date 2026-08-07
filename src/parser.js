@@ -324,12 +324,21 @@ export default class Parser {
             lastAdded = "value";
           } else {
             let insensitive = content === "i" || content === "I";
+            let sensitive = content === "s" || content === "S";
             if (
               (node.value || node.value === "") &&
               (node.quoteMark || spaceAfterMeaningfulToken)
             ) {
               node.insensitive = insensitive;
-              if (!insensitive || content === "I") {
+              node.sensitive = sensitive;
+              if (sensitive) {
+                // "s" is the canonical case-sensitive flag; store the original
+                // notation in "raws.sensitiveFlag" only for the "S" variant.
+                if (content === "S") {
+                  ensureObject(node, "raws");
+                  node.raws.sensitiveFlag = content;
+                }
+              } else if (!insensitive || content === "I") {
                 ensureObject(node, "raws");
                 node.raws.insensitiveFlag = content;
               }

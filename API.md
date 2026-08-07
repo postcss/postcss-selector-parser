@@ -618,6 +618,49 @@ Remains `undefined` if there is no attribute value.
 
 Returns the attribute name qualified with the namespace if one is given.
 
+### `attribute.insensitive` and `attribute.sensitive`
+
+The two case sensitivity flags defined by
+[Selectors Level 4](https://www.w3.org/TR/selectors-4/#attribute-case):
+
+* `attribute.insensitive` is `true` for the case insensitive flag, `[href="foo" i]`.
+* `attribute.sensitive` is `true` for the explicit case sensitive flag, `[href="foo" s]`.
+
+Both remain `undefined` if the attribute carries no flag at all.
+
+`attribute.insensitiveFlag` and `attribute.sensitiveFlag` are read-only and return
+the canonical lowercase flag (`"i"` / `"s"`) when the corresponding boolean is set,
+otherwise an empty string.
+
+```css
+[href="foo"]   /* insensitive: undefined, sensitive: undefined */
+[href="foo" i] /* insensitive: true,      sensitive: false     */
+[href="foo" s] /* insensitive: false,     sensitive: true      */
+```
+
+A selector cannot request both case sensitivities at once, so the two properties
+are mutually exclusive: setting either one to `true` clears the other, along with
+any capitalized notation stored for it in
+[`attribute.raws`](#attributeraws).
+
+```js
+let attr = parser().astSync('[href="foo" I]').first.first;
+attr.sensitive = true;
+attr.insensitive; // false
+attr.raws.insensitiveFlag; // undefined
+attr.toString(); // '[href="foo" s]'
+```
+
+Because a flag can only ever appear in one place in the output, the two flags
+share a single slot. The whitespace and comments around either flag live in
+`attribute.spaces.insensitive` and `attribute.raws.spaces.insensitive`, and
+`attribute.offsetOf()` reports the position of that slot under whichever of
+`"insensitive"` or `"sensitive"` is actually present.
+
+Non-standard flags are not modeled as booleans. They are preserved verbatim in
+`attribute.raws.insensitiveFlag` (see [`attribute.raws`](#attributeraws)) and are
+left untouched by both setters.
+
 ### `attribute.offsetOf(part)`
 
  Returns the offset of the attribute part specified relative to the
@@ -637,6 +680,10 @@ Returns the attribute name qualified with the namespace if one is given.
  * `"operator"` - the match operator of the attribute
  * `"value"` - The value (string or identifier)
  * `"insensitive"` - the case insensitivity flag
+ * `"sensitive"` - the explicit case sensitivity flag
+
+ The two case sensitivity flags share one slot in the output, so at most one of
+ `"insensitive"` and `"sensitive"` resolves to an offset; the other returns `-1`.
 
 ### `attribute.raws.unquoted`
 
@@ -674,6 +721,18 @@ or `value` then a property is placed in the raws for that value containing the f
 
 If a comment is embedded within the space between parts of the attribute
 then the raw for that space is set accordingly.
+
+The case sensitivity flags are stored here when the source used a notation that
+does not round-trip from the boolean alone:
+
+* `attribute.raws.insensitiveFlag` holds `"I"` for `[href="foo" I]`. It also holds
+  any non-standard flag verbatim — `"y"` for `[href="foo" y]` — which is how such
+  a flag survives serialization even though neither `attribute.insensitive` nor
+  `attribute.sensitive` is `true`.
+* `attribute.raws.sensitiveFlag` holds `"S"` for `[href="foo" S]`.
+
+The canonical lowercase forms are not stored, since `attribute.insensitive` and
+`attribute.sensitive` already render them.
 
 Setting an attribute's property `raws` value to be deleted.
 

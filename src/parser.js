@@ -696,7 +696,17 @@ export default class Parser {
   }
 
   namespace() {
-    const before = (this.prevToken && this.content(this.prevToken)) || true;
+    const prev = this.prevToken;
+    // Only treat the previous token as a namespace prefix when it can actually
+    // be one (a type/word or the universal `*`). A comment, comma, combinator
+    // or whitespace before `|` means an empty namespace, not a prefix.
+    const before =
+      prev &&
+      (prev[TOKEN.TYPE] === tokens.word ||
+        prev[TOKEN.TYPE] === tokens.asterisk ||
+        prev[TOKEN.TYPE] === tokens.ampersand)
+        ? this.content(prev)
+        : true;
     if (this.nextToken[TOKEN.TYPE] === tokens.word) {
       this.position++;
       return this.word(before);

@@ -1,5 +1,9 @@
 # Changelog of `postcss-selector-parser`
 
+## 7.1.6 - 2026-09-03
+
+- fix: parse flat selectors in linear time, closing a CPU exhaustion vulnerability ([GHSA-rj75-hqrm-r3gf](https://github.com/advisories/GHSA-rj75-hqrm-r3gf), reported by Wayde Shi)
+
 ## 7.1.5 - 2026-08-07
 
 - fix: don't treat a non-prefix token before `|` as a namespace ([#324](https://github.com/postcss/postcss-selector-parser/pull/324) by [@spokodev](https://github.com/spokodev))

@@ -641,7 +641,37 @@ export default class Parser {
     return this.newNode(node);
   }
 
+  // Whitespace is only ever stored on a node, as `spaces.before` or
+  // `spaces.after`. `space()` parks leading whitespace on `this.spaces` for the
+  // next node to claim, so a selector that ends before any node is created --
+  // `:not(a, )`, `:not( )`, a trailing `a, ` -- drops it. Park it on an empty
+  // string node instead, which is what `parseWhitespaceEquivalentTokens`
+  // already does for the comment-adjacent case.
+  flushPendingSpaces() {
+    if (!this.spaces) {
+      return;
+    }
+    const last = this.current.last;
+    if (last) {
+      // `space()` routes trailing whitespace to `this.spaces` whenever the
+      // selector so far holds nothing but comments, so `:not( /*c*/ )` lands
+      // here rather than on the `spaces.after` path.
+      last.spaces.after += this.spaces;
+      this.spaces = "";
+      return;
+    }
+    const token = this.currToken || this.prevToken;
+    this.newNode(
+      new Str({
+        value: "",
+        source: token ? getTokenSource(token) : undefined,
+        sourceIndex: token ? token[TOKEN.START_POS] : 0,
+      }),
+    );
+  }
+
   comma() {
+    this.flushPendingSpaces();
     if (this.position === this.tokens.length - 1) {
       this.root.trailingComma = true;
       this.position++;
@@ -782,6 +812,7 @@ export default class Parser {
           if (unbalanced) {
             this.parse();
           } else {
+            this.flushPendingSpaces();
             this.current.source.end = tokenEnd(this.currToken);
             this.current.parent.source.end = tokenEnd(this.currToken);
             this.position++;
@@ -1011,6 +1042,7 @@ export default class Parser {
     while (this.position < this.tokens.length) {
       this.parse(true);
     }
+    this.flushPendingSpaces();
     this.current._inferEndPosition();
     return this.root;
   }

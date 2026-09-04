@@ -29,6 +29,37 @@ throws(
   "Expected a closing parenthesis.",
 );
 
+// An attribute selector whose last token before `]` is one of `* $ ^ ~ |`.
+// The `attribute` token loop looked ahead to `next` without checking it
+// existed, so these threw a raw TypeError. Asserted by message for the same
+// reason as the cases above.
+throws(
+  "namespaced attribute name is an asterisk",
+  "[ns|*]",
+  "Expected an attribute.",
+);
+throws("default namespace with asterisk name", "[|*]", "Expected an attribute.");
+throws("any namespace with asterisk name", "[*|*]", "Expected an attribute.");
+throws(
+  "namespaced attribute ending in a dollar",
+  "[ns|$]",
+  "Expected an attribute.",
+);
+throws(
+  "namespaced attribute ending in a caret",
+  "[ns|^]",
+  "Expected an attribute.",
+);
+
+// A bracket pair that contains no attribute name at all. `toString` used to
+// interpolate the string "undefined" into the output.
+throws("universal selector as an attribute", "[ * ]", "Expected an attribute.");
+throws(
+  "asterisk name with trailing space",
+  "[ns|* ]",
+  "Expected an attribute.",
+);
+
 throws("no opening parenthesis", ")");
 throws("no opening parenthesis (2)", ":global.foo)");
 throws("no opening parenthesis (3)", "h1:not(h2:not(h3)))");

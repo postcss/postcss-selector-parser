@@ -254,6 +254,22 @@ export default class Parser {
             }
             break;
           }
+          if (
+            (lastAdded === "attribute" || !node.attribute) &&
+            !(next && next[TOKEN.TYPE] === tokens.equals)
+          ) {
+            // A `$` that is not followed by `=` is part of the attribute name
+            // rather than the suffix match operator. Preprocessors emit these
+            // through interpolation, e.g. `[#{$var}]` in SCSS.
+            let oldRawAttribute = getProp(node, "raws", "attribute");
+            node.attribute = (node.attribute || "") + "$";
+            if (oldRawAttribute) {
+              node.raws.attribute = oldRawAttribute + "$";
+            }
+            lastAdded = "attribute";
+            spaceAfterMeaningfulToken = false;
+            break;
+          }
         // Falls through
         case tokens.caret:
           if (next[TOKEN.TYPE] === tokens.equals) {

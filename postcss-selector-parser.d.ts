@@ -144,11 +144,15 @@ declare namespace parser {
     interface NodeSource {
         start?: {
             line: number,
-            column: number
+            column: number,
+            /** Zero-based UTF-16 offset into the original selector. */
+            offset?: number
         },
         end?: {
             line: number,
-            column: number
+            column: number,
+            /** Zero-based, inclusive UTF-16 offset into the original selector. */
+            offset?: number
         }
     }
     interface SpaceAround {

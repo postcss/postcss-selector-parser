@@ -8,6 +8,8 @@ parser((root) => {
     root.walk((node, index) => {
         node satisfies parser.Node;
         index satisfies number;
+        node.source?.start?.offset satisfies number | undefined;
+        node.source?.end?.offset satisfies number | undefined;
 
         if (node.type === 'selector') {
             node satisfies parser.Selector;

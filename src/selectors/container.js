@@ -81,6 +81,7 @@ export default class Container extends Node {
     let oldIndex = this.index(oldNode);
     const resetNode = [];
     for (let i = 2; i < arguments.length; i++) {
+      arguments[i].parent = this;
       resetNode.push(arguments[i]);
     }
     this.nodes.splice(oldIndex + 1, 0, newNode, ...resetNode);
@@ -103,6 +104,7 @@ export default class Container extends Node {
     let oldIndex = this.index(oldNode);
     const resetNode = [];
     for (let i = 2; i < arguments.length; i++) {
+      arguments[i].parent = this;
       resetNode.push(arguments[i]);
     }
     this.nodes.splice(oldIndex, 0, newNode, ...resetNode);

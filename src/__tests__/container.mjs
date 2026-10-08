@@ -2,6 +2,20 @@ import test from "./util/runner.mjs";
 import parser from "../../dist/index.js";
 import { parse } from "./util/helpers.mjs";
 
+for (const method of ["insertBefore", "insertAfter"]) {
+  test(`container#${method} sets parents of every inserted node`, (t) => {
+    const selector = parser().astSync("a").first;
+    const first = parser.className({ value: "first" });
+    const second = parser.className({ value: "second" });
+    selector[method](selector.first, first, second);
+    t.is(first.parent, selector);
+    t.is(second.parent, selector);
+    second.remove();
+    t.is(selector.nodes.includes(second), false);
+    t.is(second.parent, undefined);
+  });
+}
+
 test("container#append", (t) => {
   let out = parse("h1", (selectors) => {
     let selector = selectors.first;

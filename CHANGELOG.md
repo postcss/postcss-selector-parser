@@ -2,7 +2,7 @@
 
 ## 7.1.6 - 2026-09-03
 
-- fix: parse flat selectors in linear time, closing a CPU exhaustion vulnerability ([GHSA-rj75-hqrm-r3gf](https://github.com/advisories/GHSA-rj75-hqrm-r3gf), reported by Wayde Shi)
+- fix: parse flat selectors in linear time, closing a CPU exhaustion vulnerability ([CVE-2026-104844](https://github.com/advisories/GHSA-rj75-hqrm-r3gf) / GHSA-rj75-hqrm-r3gf, reported by Wayde Shi)
 
 ## 7.1.5 - 2026-08-07
 

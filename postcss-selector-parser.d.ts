@@ -14,9 +14,6 @@
  */
 export = parser;
 
-// A type that's T but not U.
-type Diff<T, U> = T extends U ? never : T;
-
 // TODO: Conditional types in TS 1.8 will really clean this up.
 declare function parser(): parser.Processor<never>;
 declare function parser<Transform>(processor: parser.AsyncProcessor<Transform>): parser.Processor<Transform, never>;
@@ -347,10 +344,9 @@ declare namespace parser {
     function root(opts: ContainerOptions): Root;
     function isRoot(node: any): node is Root;
 
-    interface _Selector<S> extends Container<string, Diff<Node, S>> {
+    interface Selector extends Container<string, Node> {
         type: "selector";
     }
-    type Selector = _Selector<Selector>;
     function selector(opts: ContainerOptions): Selector;
     function isSelector(node: any): node is Selector;
 

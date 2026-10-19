@@ -1,5 +1,13 @@
 # Changelog of `postcss-selector-parser`
 
+## 7.1.7 - 2026-10-19
+
+- fix: `lossless: true` preserves trailing whitespace in a selector that ends empty, such as `:not(a, )`. Note that `:not( )` now yields a selector holding one empty string node rather than an empty selector ([#337](https://github.com/postcss/postcss-selector-parser/pull/337) by [@theRizwan](https://github.com/theRizwan))
+- fix: consume the whitespace that terminates a hexadecimal escape, so `[x="\000061 b"]` unescapes to `ab` ([#340](https://github.com/postcss/postcss-selector-parser/pull/340) by [@jakezwang](https://github.com/jakezwang))
+- fix: set the parent on every node passed to `insertBefore` and `insertAfter`, not only the first ([#343](https://github.com/postcss/postcss-selector-parser/pull/343) by [@feritcemkahraman](https://github.com/feritcemkahraman))
+- fix: assigning `combinator.value` clears the stale raw spelling instead of being ignored ([#342](https://github.com/postcss/postcss-selector-parser/pull/342) by [@SAY-5](https://github.com/SAY-5))
+- fix: keep whitespace around the namespace separator in attribute selectors, so `[ foo | bar ]` round-trips ([#339](https://github.com/postcss/postcss-selector-parser/pull/339) by [@dkryaklin](https://github.com/dkryaklin))
+
 ## 7.1.6 - 2026-09-03
 
 - fix: parse flat selectors in linear time, closing a CPU exhaustion vulnerability ([CVE-2026-104844](https://github.com/advisories/GHSA-rj75-hqrm-r3gf) / GHSA-rj75-hqrm-r3gf, reported by Wayde Shi)

@@ -1,3 +1,23 @@
+# 6.1.5 - 2026-10-19
+
+- fix: parse flat selectors in linear time, closing a CPU exhaustion vulnerability ([CVE-2026-104844](https://github.com/advisories/GHSA-rj75-hqrm-r3gf) / GHSA-rj75-hqrm-r3gf, reported by Wayde Shi), backported from 7.1.6 ([#346](https://github.com/postcss/postcss-selector-parser/pull/346) by [@bradyshutt](https://github.com/bradyshutt))
+
+### The 6.x line is now in security-only maintenance
+
+This release exists because the advisory above covers every published 6.x
+version, and until now the only remediation on offer was an upgrade to 7.x.
+**6.1.5 is the patched version for the 6.x line.**
+
+The line is kept alive for the installed base that cannot move to 7 yet, Tailwind
+CSS 3 in particular, which depends on `^6.1.2`. From here on it receives security
+fixes only: no features, no other bug fixes, no type changes. Everything else
+goes to 7.x, where this package is actively developed. Tailwind CSS 4 no longer
+depends on this package at all, so this line is expected to retire on its own.
+
+6.1.5 is published under the `legacy-v6` npm dist-tag, so
+`npm install postcss-selector-parser` keeps resolving to 7.x. Existing `^6`
+ranges pick up 6.1.5 as usual.
+
 # 6.1.4 - 2026-06-11
 
 - fix: tolerate non-node children when serializing selectors

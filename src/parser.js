@@ -444,6 +444,9 @@ export default class Parser {
       }
       pos++;
     }
+    if (node.operator && node.value === undefined) {
+      return this.expected("attribute value", this.currToken[TOKEN.START_POS]);
+    }
     unescapeProp(node, "attribute");
     unescapeProp(node, "namespace");
     this.newNode(new Attribute(node));

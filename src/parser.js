@@ -150,6 +150,24 @@ export default class Parser {
     };
   }
 
+  namespaceSeparatorFollows(attr, pos) {
+    let next = pos;
+    while (attr[next] && attr[next][TOKEN.TYPE] === tokens.space) {
+      next++;
+    }
+    if (!attr[next] || this.content(attr[next]) !== "|") {
+      return false;
+    }
+    next++;
+    if (attr[next] && attr[next][TOKEN.TYPE] === tokens.equals) {
+      return false;
+    }
+    while (attr[next] && attr[next][TOKEN.TYPE] === tokens.space) {
+      next++;
+    }
+    return Boolean(attr[next]);
+  }
+
   attribute() {
     const attr = [];
     const startingToken = this.currToken;
@@ -185,6 +203,7 @@ export default class Parser {
     let commentBefore = "";
     let lastAdded = null;
     let spaceAfterMeaningfulToken = false;
+    let namespaceSpaces = null;
 
     while (pos < len) {
       const token = attr[pos];
@@ -201,6 +220,15 @@ export default class Parser {
           // }
           spaceAfterMeaningfulToken = true;
           if (this.options.lossy) {
+            break;
+          }
+          if (namespaceSpaces !== null) {
+            namespaceSpaces += content;
+            break;
+          }
+          if (lastAdded === "namespace") {
+            ensureObject(node, "raws");
+            node.raws.namespace = (node.raws.namespace || node.namespace) + content;
             break;
           }
           if (lastAdded) {
@@ -226,6 +254,11 @@ export default class Parser {
             (!node.namespace || (lastAdded === "namespace" && !spaceAfterMeaningfulToken)) &&
             next
           ) {
+            node.namespace = (node.namespace || "") + content;
+            const rawValue = getProp(node, "raws", "namespace") || null;
+            if (rawValue) {
+              node.raws.namespace += content;
+            }
             if (spaceBefore) {
               ensureObject(node, "spaces", "attribute");
               node.spaces.attribute.before = spaceBefore;
@@ -235,11 +268,6 @@ export default class Parser {
               ensureObject(node, "raws", "spaces", "attribute");
               node.raws.spaces.attribute.before = commentBefore;
               commentBefore = "";
-            }
-            node.namespace = (node.namespace || "") + content;
-            const rawValue = getProp(node, "raws", "namespace") || null;
-            if (rawValue) {
-              node.raws.namespace += content;
             }
             lastAdded = "namespace";
           }
@@ -274,20 +302,16 @@ export default class Parser {
           if (next[TOKEN.TYPE] === tokens.equals) {
             node.operator = content;
             lastAdded = "operator";
-          } else if (!node.namespace && !node.attribute) {
-            node.namespace = true;
+          } else if (!node.operator) {
+            if (!node.namespace && !node.attribute) {
+              node.namespace = true;
+            }
+            namespaceSpaces = "";
           }
           spaceAfterMeaningfulToken = false;
           break;
         case tokens.word:
-          if (
-            next &&
-            this.content(next) === "|" &&
-            attr[pos + 2] &&
-            attr[pos + 2][TOKEN.TYPE] !== tokens.equals && // this look-ahead probably fails with comment nodes involved.
-            !node.operator &&
-            !node.namespace
-          ) {
+          if (this.namespaceSeparatorFollows(attr, pos + 1) && !node.operator && !node.namespace) {
             node.namespace = content;
             lastAdded = "namespace";
           } else if (!node.attribute || (lastAdded === "attribute" && !spaceAfterMeaningfulToken)) {
@@ -302,6 +326,11 @@ export default class Parser {
               node.raws.spaces.attribute.before = commentBefore;
               commentBefore = "";
             }
+            if (namespaceSpaces) {
+              ensureObject(node, "raws");
+              node.raws.attribute = namespaceSpaces + (node.raws.attribute || node.attribute || "");
+            }
+            namespaceSpaces = null;
             node.attribute = (node.attribute || "") + content;
             const rawValue = getProp(node, "raws", "attribute") || null;
             if (rawValue) {

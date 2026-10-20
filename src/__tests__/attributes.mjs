@@ -437,7 +437,8 @@ test("extraneous non-combinating whitespace", "  [href]   ,  [class]   ", (t, tr
 test("newline in attribute selector", '[class="woop \\\nwoop woop"]', (t, tree) => {
   t.deepEqual(tree.nodes[0].nodes[0].attribute, "class");
   t.deepEqual(tree.nodes[0].nodes[0].operator, "=");
-  t.deepEqual(tree.nodes[0].nodes[0].value, "woop \nwoop woop");
+  // CSS string continuations do not contribute a character to the value.
+  t.deepEqual(tree.nodes[0].nodes[0].value, "woop woop woop");
   t.true(tree.nodes[0].nodes[0].quoted);
 });
 

@@ -32,7 +32,7 @@ export function unescapeValue(value) {
     quoteMark = m[1];
     unescaped = m[2];
   }
-  unescaped = unesc(unescaped);
+  unescaped = unesc(unescaped, quoteMark !== null);
   if (unescaped !== value) {
     deprecatedUsage = true;
   }

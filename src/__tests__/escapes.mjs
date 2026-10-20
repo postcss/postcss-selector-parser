@@ -43,3 +43,33 @@ for (const [value, expected] of [
     t.is(tree.first.first.value, expected);
   });
 }
+
+for (const quoteMark of ['"', "'"]) {
+  for (const newline of ["\n", "\r\n", "\r", "\f"]) {
+    const value = `a\\${newline}b`;
+    const selector = `[title=${quoteMark}${value}${quoteMark}]`;
+    test(
+      `quoted line continuation ${JSON.stringify(quoteMark)} ${JSON.stringify(newline)}`,
+      selector,
+      (t, tree) => {
+        const attribute = tree.first.first;
+        t.is(attribute.value, "ab");
+        t.is(attribute.raws.value, `${quoteMark}${value}${quoteMark}`);
+        t.is(attribute.getQuotedValue(), `${quoteMark}ab${quoteMark}`);
+        attribute.setValue(attribute.value);
+        t.is(tree.toString(), `[title=${quoteMark}ab${quoteMark}]`);
+      },
+    );
+  }
+}
+
+for (const [value, expected] of [
+  [`a${"\\".repeat(3)}\nb`, "a\\b"],
+  ["a\\\tb", "a\tb"],
+  ["a\\ b", "a b"],
+  ["a\\a b", "a\nb"],
+]) {
+  test(`quoted continuation boundary ${JSON.stringify(value)}`, `[x="${value}"]`, (t, tree) => {
+    t.is(tree.first.first.value, expected);
+  });
+}

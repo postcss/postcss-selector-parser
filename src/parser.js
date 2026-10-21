@@ -1035,6 +1035,11 @@ export default class Parser {
           sourceIndex,
         };
         node = new ClassName(unescapeProp(classNameOpts, "value"));
+        // Preserve the parsed spelling, including non-standard syntax, rather
+        // than the automatic escaping used for API-created class names.
+        if (!classNameOpts.raws) {
+          delete node.raws;
+        }
       } else if (idIndexes.has(ind)) {
         let idOpts = {
           value: value.slice(1),

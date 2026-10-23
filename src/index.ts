@@ -1,7 +1,7 @@
 import Processor from "./processor";
 import * as selectors from "./selectors";
 
-const parser = (processor?: any) => new Processor(processor);
+const parser = (processor?: any, options?: any) => new Processor(processor, options);
 
 Object.assign(parser, selectors);
 

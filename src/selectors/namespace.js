@@ -1,4 +1,4 @@
-import cssesc from "cssesc";
+import cssesc from "../util/cssesc";
 import { ensureObject } from "../util";
 import Node from "./node";
 

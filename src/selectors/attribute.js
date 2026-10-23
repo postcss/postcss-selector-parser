@@ -1,4 +1,4 @@
-import cssesc from "cssesc";
+import cssesc from "../util/cssesc";
 import unesc from "../util/unesc";
 import Namespace from "./namespace";
 import { ATTRIBUTE } from "./types";

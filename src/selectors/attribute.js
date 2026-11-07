@@ -1,9 +1,25 @@
-import cssesc from "cssesc";
+import cssesc from "../util/cssesc";
 import unesc from "../util/unesc";
 import Namespace from "./namespace";
 import { ATTRIBUTE } from "./types";
 
-const deprecate = require("util-deprecate");
+function deprecate(fn, msg) {
+  let warned = false;
+  return function () {
+    if (!warned) {
+      warned = true;
+      // Match util-deprecate: emit a process warning on Node (so --no-deprecation,
+      // --throw-deprecation and process.on("warning") keep working), and fall back
+      // to console.warn in browsers.
+      if (typeof process !== "undefined" && process.emitWarning) {
+        process.emitWarning(msg, "DeprecationWarning");
+      } else if (typeof console !== "undefined" && console.warn) {
+        console.warn(msg);
+      }
+    }
+    return fn.apply(this, arguments);
+  };
+}
 
 const WRAPPED_IN_QUOTES = /^('|")([^]*)\1$/;
 

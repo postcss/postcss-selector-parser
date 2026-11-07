@@ -35,13 +35,10 @@
     "prepare": "npm run build",
     "release": "npx npmpub"
   },
-  "dependencies": {
-    "cssesc": "^3.0.0",
-    "util-deprecate": "^1.0.2"
-  },
+  "dependencies": {},
   "license": "MIT",
   "engines": {
-    "node": ">=4"
+    "node": ">=6"
   },
   "homepage": "https://github.com/postcss/postcss-selector-parser",
   "contributors": [

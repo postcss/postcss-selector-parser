@@ -1,4 +1,6 @@
 import { test } from "./util/helpers.mjs";
+import apiTest from "./util/runner.mjs";
+import parser from "../../dist/index.js";
 
 test("id selector", "#one", (t, tree) => {
   t.deepEqual(tree.nodes[0].nodes[0].value, "one");
@@ -296,4 +298,43 @@ test("id selector with escaping (37)", "#f\\+o\\+o", (t, tree) => {
   t.deepEqual(tree.nodes[0].nodes[0].value, "f+o+o");
   t.deepEqual(tree.nodes[0].nodes[0].type, "id");
   t.deepEqual(tree.nodes[0].nodes[0].raws.value, "f\\+o\\+o");
+});
+
+for (const [value, escaped] of [
+  ["hover:bg-blue", "hover\\:bg-blue"],
+  ["1abc", "\\31 abc"],
+  ["foo.bar", "foo\\.bar"],
+  ["foo\\bar", "foo\\\\bar"],
+  ["♥", "\\2665"],
+]) {
+  apiTest(`ID constructor escapes ${value}`, (t) => {
+    const id = parser.id({ value });
+    t.is(id.value, value);
+    t.is(id.toString(), `#${escaped}`, "constructor must escape the semantic value");
+    t.is(parser().astSync(id.toString()).first.first.value, value);
+  });
+}
+
+apiTest("ID constructor preserves explicit raw spelling", (t) => {
+  const id = parser.id({ value: "hover:bg-blue", raws: { value: "hover\\3A bg-blue" } });
+  t.is(id.value, "hover:bg-blue");
+  t.is(id.toString(), "#hover\\3A bg-blue");
+});
+
+apiTest("ID constructor leaves a plain identifier without raws", (t) => {
+  const id = parser.id({ value: "main" });
+  t.is(id.toString(), "#main");
+  t.is(id.raws, undefined);
+});
+
+apiTest("Parsed ids keep their original raw state when cloned", (t) => {
+  for (const input of ["#main", "#♥", "#foo@{bar}", "#hover\\3A bg-blue"]) {
+    const original = parser().astSync(input).first.first;
+    const clone = original.clone();
+    t.is(clone.toString(), input);
+    t.deepEqual(clone.raws, original.raws);
+    if (!input.includes("\\")) {
+      t.is(original.raws, undefined);
+    }
+  }
 });

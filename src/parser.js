@@ -1156,6 +1156,10 @@ export default class Parser {
           sourceIndex,
         };
         node = new ID(unescapeProp(idOpts, "value"));
+        // Preserve the parsed spelling, as for class names above.
+        if (!idOpts.raws) {
+          delete node.raws;
+        }
       } else {
         let tagOpts = {
           value,

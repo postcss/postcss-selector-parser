@@ -1,4 +1,6 @@
 import selectorTypes from "../../dist/selectors/types.js";
+import parser from "../../dist/index.js";
+import ava from "./util/runner.mjs";
 import { test } from "./util/helpers.mjs";
 
 const COMBINATOR = selectorTypes.COMBINATOR;
@@ -163,4 +165,67 @@ test(
 test("with a comment in the middle of a descendant selector", "div/* wtf */ .foo", (t, tree) => {
   let nodeTypes = tree.nodes[0].map((n) => n.type);
   t.deepEqual(nodeTypes, ["tag", "comment", "combinator", "class"]);
+});
+
+for (const [title, input, value, expected] of [
+  ["replaces a tab descendant", "a\tb", ">", "a>b"],
+  ["normalizes a newline descendant", "a\nb", " ", "a b"],
+  ["replaces mixed descendant whitespace", "a\r\n\tb", "+", "a+b"],
+  ["replaces an escaped named combinator", "a /DeE\\p/ b", ">", "a > b"],
+  ["replaces comments embedded in the raw value", "a\t/*raw*/\nb", ">", "a>b"],
+  [
+    "keeps comments in separate spaces",
+    "a /*before*/ > /*after*/ b",
+    "+",
+    "a /*before*/ + /*after*/ b",
+  ],
+]) {
+  test(`Combinator#set value ${title}`, input, (t, tree) => {
+    tree.first.nodes[1].value = value;
+    t.is(tree.toString(), expected, "the assigned value must be serialized");
+    t.is(
+      parser().astSync(expected).first.nodes[1].value,
+      value,
+      "the selector must keep the new semantics",
+    );
+  });
+}
+
+ava("Combinator constructor preserves raw values in either option order", (t) => {
+  for (const options of [
+    { value: " ", raws: { value: "\t" } },
+    { raws: { value: "\t" }, value: " " },
+  ]) {
+    const combinator = parser.combinator(options);
+    t.is(combinator.toString(), "\t", "constructor options must preserve raw spelling");
+    combinator.value = ">";
+    t.is(combinator.toString(), ">", "later assignments must replace raw spelling");
+  }
+});
+
+test(
+  "Combinator#clone value overrides invalidate only the clone's raw value",
+  "a\nb",
+  (t, tree) => {
+    const combinator = tree.first.nodes[1];
+    t.is(combinator.clone().toString(), "\n", "ordinary clones preserve raw spelling");
+    t.is(combinator.clone({ value: ">" }).toString(), ">", "value overrides replace raw spelling");
+    t.is(combinator.toString(), "\n", "clone overrides leave the original unchanged");
+  },
+);
+
+test("Combinator raw helpers replace or extend embedded comments", "a\t/*raw*/\nb", (t, tree) => {
+  const combinator = tree.first.nodes[1];
+  const escaped = combinator.clone();
+  escaped.setPropertyAndEscape("value", " ", "\t/*new*/\n");
+  t.is(escaped.toString(), "\t/*new*/\n", "the helper can replace raw spelling");
+
+  const appended = combinator.clone();
+  appended.appendToPropertyAndEscape("value", " ", "\t");
+  t.is(appended.toString(), "\t/*raw*/\n\t", "appending preserves each embedded comment once");
+
+  const unescaped = combinator.clone();
+  unescaped.setPropertyWithoutEscape("value", ">");
+  t.is(unescaped.toString(), ">", "the helper can discard raw spelling");
+  t.is(combinator.toString(), "\t/*raw*/\n", "helpers on clones leave the original unchanged");
 });

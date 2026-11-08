@@ -28,6 +28,12 @@ ava("attribute, insensitive flag 2", testLossy, "[href=TEsT i  ]", "[href=TEsT i
 ava("attribute, insensitive flag 3", testLossy, "[href=test i  ]", "[href=test i]");
 ava("attribute, extreneous whitespace", testLossy, "  [href]   ,  [class]   ", "[href],[class]");
 
+ava("attribute namespace, space before separator", testLossy, "[foo |bar]", "[foo|bar]");
+ava("attribute namespace, space after separator", testLossy, "[foo| bar]", "[foo|bar]");
+ava("attribute namespace, spaces around separator", testLossy, "[ foo | bar ]", "[foo|bar]");
+ava("any attribute namespace, spaces around separator", testLossy, "[ * | href ]", "[*|href]");
+ava("empty attribute namespace, space after separator", testLossy, "[ | href ]", "[|href]");
+
 ava("namespace, space before", testLossy, "   postcss|button", "postcss|button");
 ava("namespace, space after", testLossy, "postcss|button     ", "postcss|button");
 ava("namespace - all elements, space before", testLossy, "   postcss|*", "postcss|*");

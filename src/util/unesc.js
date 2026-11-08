@@ -9,13 +9,11 @@
 function gobbleHex(str) {
   const lower = str.toLowerCase();
   let hex = "";
-  let spaceTerminated = false;
   for (let i = 0; i < 6 && lower[i] !== undefined; i++) {
     const code = lower.charCodeAt(i);
     // check to see if we are dealing with a valid hex char [a-f|0-9]
     const valid = (code >= 97 && code <= 102) || (code >= 48 && code <= 57);
     // https://drafts.csswg.org/css-syntax/#consume-escaped-code-point
-    spaceTerminated = code === 32;
     if (!valid) {
       break;
     }
@@ -25,6 +23,12 @@ function gobbleHex(str) {
   if (hex.length === 0) {
     return undefined;
   }
+  let consumed = hex.length;
+  const next = str[consumed];
+  if (next === " " || next === "\t" || next === "\n" || next === "\r" || next === "\f") {
+    // CSS preprocessing treats CRLF as a single newline.
+    consumed += next === "\r" && str[consumed + 1] === "\n" ? 2 : 1;
+  }
   const codePoint = parseInt(hex, 16);
 
   const isSurrogate = codePoint >= 0xd800 && codePoint <= 0xdfff;
@@ -32,10 +36,10 @@ function gobbleHex(str) {
   // "If this number is zero, or is for a surrogate, or is greater than the maximum allowed code point"
   // https://drafts.csswg.org/css-syntax/#maximum-allowed-code-point
   if (isSurrogate || codePoint === 0x0000 || codePoint > 0x10ffff) {
-    return ["\uFFFD", hex.length + (spaceTerminated ? 1 : 0)];
+    return ["\uFFFD", consumed];
   }
 
-  return [String.fromCodePoint(codePoint), hex.length + (spaceTerminated ? 1 : 0)];
+  return [String.fromCodePoint(codePoint), consumed];
 }
 
 const CONTAINS_ESCAPE = /\\/;
@@ -49,7 +53,7 @@ export default function unesc(str) {
 
   for (let i = 0; i < str.length; i++) {
     if (str[i] === "\\") {
-      const gobbled = gobbleHex(str.slice(i + 1, i + 7));
+      const gobbled = gobbleHex(str.slice(i + 1, i + 9));
       if (gobbled !== undefined) {
         ret += gobbled[0];
         i += gobbled[1];

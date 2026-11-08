@@ -184,3 +184,20 @@ test("nested pseudo classes", "section:not( :has(h1, h2 ) )", (t, tree) => {
   t.deepEqual(tree.nodes[0].nodes[1].nodes[0].nodes[0].nodes[1].nodes[0].type, "tag");
   t.deepEqual(tree.nodes[0].nodes[1].nodes[0].nodes[0].nodes[1].nodes[0].value, "h2");
 });
+
+// Whitespace is stored on nodes, so a selector that ends before any node is
+// created had nowhere to keep it and lost it. `test` asserts the round-trip.
+test("trailing space after a comma inside a pseudo", ":not(a, )", (t, tree) => {
+  const args = tree.nodes[0].nodes[0].nodes;
+  t.deepEqual(args.length, 2);
+  t.deepEqual(args[1].toString(), " ");
+});
+
+test("trailing space in a nested pseudo", "div:has(a, )");
+test("trailing space after several commas", ":not(a, b, )");
+test("space before a trailing comma", ":not(a , )");
+test("whitespace-only pseudo argument", ":not( )");
+test("multiple spaces in a whitespace-only argument", ":not(  )");
+test("trailing space after a top-level comma", "a, ");
+test("space around a comment in a pseudo argument", ":not( /*c*/ )");
+

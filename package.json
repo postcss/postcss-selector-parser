@@ -1,9 +1,9 @@
 {
   "name": "postcss-selector-parser",
   "description": "Selector parser with built in methods for working with selector strings.",
-  "version": "7.1.5",
+  "version": "7.1.8",
   "devDependencies": {
-    "oxfmt": "^0.54.0",
+    "oxfmt": "^0.74.0",
     "oxlint": "^1.69.0",
     "postcss": "^8.4.31",
     "typescript": "^5.4.0"
@@ -36,7 +36,6 @@
     "release": "npx npmpub"
   },
   "dependencies": {
-    "cssesc": "^3.0.0",
     "util-deprecate": "^1.0.2"
   },
   "license": "MIT",

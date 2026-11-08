@@ -105,6 +105,14 @@ function indexesOf(array, item) {
   return indexes;
 }
 
+function isEscaped(word, index) {
+  let escapeStart = index;
+  while (word[escapeStart - 1] === "\\") {
+    escapeStart--;
+  }
+  return (index - escapeStart) % 2 === 1;
+}
+
 // A preprocessor interpolation (`#{...}` in SCSS, `@{...}` in Less) is open
 // when an opener has been consumed and its closing brace has not.
 function insideInterpolation(text) {
@@ -120,9 +128,9 @@ function insideInterpolation(text) {
 }
 
 function uniqs() {
-  const list = Array.prototype.concat.apply([], arguments);
-
-  return list.filter((item, i) => i === list.indexOf(item));
+  // A Set keeps the first-occurrence order the previous filter/indexOf pass
+  // produced, without its quadratic cost on long index lists.
+  return Array.from(new Set(Array.prototype.concat.apply([], arguments)));
 }
 
 export default class Parser {
@@ -132,6 +140,9 @@ export default class Parser {
     this.position = 0;
     this.nestingDepth = 0;
     this.maxNestingDepth = resolveMaxNestingDepth(this.options.maxNestingDepth);
+    // Length of the comment-only prefix already checked, per container. See
+    // currentHasOnlyComments().
+    this.commentPrefixes = new WeakMap();
 
     this.css = typeof this.rule === "string" ? this.rule : this.rule.selector;
 
@@ -162,6 +173,24 @@ export default class Parser {
       }
       return this.rule.error(message, errorOptions);
     };
+  }
+
+  namespaceSeparatorFollows(attr, pos) {
+    let next = pos;
+    while (attr[next] && attr[next][TOKEN.TYPE] === tokens.space) {
+      next++;
+    }
+    if (!attr[next] || this.content(attr[next]) !== "|") {
+      return false;
+    }
+    next++;
+    if (attr[next] && attr[next][TOKEN.TYPE] === tokens.equals) {
+      return false;
+    }
+    while (attr[next] && attr[next][TOKEN.TYPE] === tokens.space) {
+      next++;
+    }
+    return Boolean(attr[next]);
   }
 
   attribute() {
@@ -199,6 +228,7 @@ export default class Parser {
     let commentBefore = "";
     let lastAdded = null;
     let spaceAfterMeaningfulToken = false;
+    let namespaceSpaces = null;
 
     while (pos < len) {
       const token = attr[pos];
@@ -215,6 +245,15 @@ export default class Parser {
           // }
           spaceAfterMeaningfulToken = true;
           if (this.options.lossy) {
+            break;
+          }
+          if (namespaceSpaces !== null) {
+            namespaceSpaces += content;
+            break;
+          }
+          if (lastAdded === "namespace") {
+            ensureObject(node, "raws");
+            node.raws.namespace = (node.raws.namespace || node.namespace) + content;
             break;
           }
           if (lastAdded) {
@@ -240,6 +279,11 @@ export default class Parser {
             (!node.namespace || (lastAdded === "namespace" && !spaceAfterMeaningfulToken)) &&
             next
           ) {
+            node.namespace = (node.namespace || "") + content;
+            const rawValue = getProp(node, "raws", "namespace") || null;
+            if (rawValue) {
+              node.raws.namespace += content;
+            }
             if (spaceBefore) {
               ensureObject(node, "spaces", "attribute");
               node.spaces.attribute.before = spaceBefore;
@@ -249,11 +293,6 @@ export default class Parser {
               ensureObject(node, "raws", "spaces", "attribute");
               node.raws.spaces.attribute.before = commentBefore;
               commentBefore = "";
-            }
-            node.namespace = (node.namespace || "") + content;
-            const rawValue = getProp(node, "raws", "namespace") || null;
-            if (rawValue) {
-              node.raws.namespace += content;
             }
             lastAdded = "namespace";
           }
@@ -305,20 +344,16 @@ export default class Parser {
           if (next[TOKEN.TYPE] === tokens.equals) {
             node.operator = content;
             lastAdded = "operator";
-          } else if (!node.namespace && !node.attribute) {
-            node.namespace = true;
+          } else if (!node.operator) {
+            if (!node.namespace && !node.attribute) {
+              node.namespace = true;
+            }
+            namespaceSpaces = "";
           }
           spaceAfterMeaningfulToken = false;
           break;
         case tokens.word:
-          if (
-            next &&
-            this.content(next) === "|" &&
-            attr[pos + 2] &&
-            attr[pos + 2][TOKEN.TYPE] !== tokens.equals && // this look-ahead probably fails with comment nodes involved.
-            !node.operator &&
-            !node.namespace
-          ) {
+          if (this.namespaceSeparatorFollows(attr, pos + 1) && !node.operator && !node.namespace) {
             node.namespace = content;
             lastAdded = "namespace";
           } else if (!node.attribute || (lastAdded === "attribute" && !spaceAfterMeaningfulToken)) {
@@ -333,6 +368,11 @@ export default class Parser {
               node.raws.spaces.attribute.before = commentBefore;
               commentBefore = "";
             }
+            if (namespaceSpaces) {
+              ensureObject(node, "raws");
+              node.raws.attribute = namespaceSpaces + (node.raws.attribute || node.attribute || "");
+            }
+            namespaceSpaces = null;
             node.attribute = (node.attribute || "") + content;
             const rawValue = getProp(node, "raws", "attribute") || null;
             if (rawValue) {
@@ -355,12 +395,21 @@ export default class Parser {
             lastAdded = "value";
           } else {
             let insensitive = content === "i" || content === "I";
+            let sensitive = content === "s" || content === "S";
             if (
               (node.value || node.value === "") &&
               (node.quoteMark || spaceAfterMeaningfulToken)
             ) {
               node.insensitive = insensitive;
-              if (!insensitive || content === "I") {
+              node.sensitive = sensitive;
+              if (sensitive) {
+                // "s" is the canonical case-sensitive flag; store the original
+                // notation in "raws.sensitiveFlag" only for the "S" variant.
+                if (content === "S") {
+                  ensureObject(node, "raws");
+                  node.raws.sensitiveFlag = content;
+                }
+              } else if (!insensitive || content === "I") {
                 ensureObject(node, "raws");
                 node.raws.insensitiveFlag = content;
               }
@@ -672,7 +721,37 @@ export default class Parser {
     return this.newNode(node);
   }
 
+  // Whitespace is only ever stored on a node, as `spaces.before` or
+  // `spaces.after`. `space()` parks leading whitespace on `this.spaces` for the
+  // next node to claim, so a selector that ends before any node is created --
+  // `:not(a, )`, `:not( )`, a trailing `a, ` -- drops it. Park it on an empty
+  // string node instead, which is what `parseWhitespaceEquivalentTokens`
+  // already does for the comment-adjacent case.
+  flushPendingSpaces() {
+    if (!this.spaces) {
+      return;
+    }
+    const last = this.current.last;
+    if (last) {
+      // `space()` routes trailing whitespace to `this.spaces` whenever the
+      // selector so far holds nothing but comments, so `:not( /*c*/ )` lands
+      // here rather than on the `spaces.after` path.
+      last.spaces.after += this.spaces;
+      this.spaces = "";
+      return;
+    }
+    const token = this.currToken || this.prevToken;
+    this.newNode(
+      new Str({
+        value: "",
+        source: token ? getTokenSource(token) : undefined,
+        sourceIndex: token ? token[TOKEN.START_POS] : 0,
+      }),
+    );
+  }
+
   comma() {
+    this.flushPendingSpaces();
     if (this.position === this.tokens.length - 1) {
       this.root.trailingComma = true;
       this.position++;
@@ -781,7 +860,7 @@ export default class Parser {
   parentheses() {
     let last = this.current.last;
     let unbalanced = 1;
-    const openingToken = this.currToken;
+    let openingToken = this.currToken;
     this.position++;
     if (last && last.type === types.PSEUDO) {
       const selector = new Selector({
@@ -813,6 +892,7 @@ export default class Parser {
           if (unbalanced) {
             this.parse();
           } else {
+            this.flushPendingSpaces();
             this.current.source.end = tokenEnd(this.currToken);
             this.current.parent.source.end = tokenEnd(this.currToken);
             this.position++;
@@ -828,15 +908,33 @@ export default class Parser {
       let parenStart = this.currToken;
       let parenValue = "(";
       let parenEnd;
-      while (this.position < this.tokens.length && unbalanced) {
-        if (this.currToken[TOKEN.TYPE] === tokens.openParenthesis) {
-          unbalanced++;
+      for (;;) {
+        while (this.position < this.tokens.length && unbalanced) {
+          if (this.currToken[TOKEN.TYPE] === tokens.openParenthesis) {
+            unbalanced++;
+          }
+          if (this.currToken[TOKEN.TYPE] === tokens.closeParenthesis) {
+            unbalanced--;
+          }
+          parenEnd = this.currToken;
+          parenValue += this.parseParenthesisToken(this.currToken);
+          this.position++;
         }
-        if (this.currToken[TOKEN.TYPE] === tokens.closeParenthesis) {
-          unbalanced--;
+        // Gather consecutive groups such as `a()()()` into one value that is
+        // appended once. Appending them one by one re-assigned the growing
+        // value through the node's setter, which escapes it in full, so the
+        // cost grew quadratically with the number of groups.
+        if (
+          unbalanced ||
+          !last ||
+          !this.currToken ||
+          this.currToken[TOKEN.TYPE] !== tokens.openParenthesis
+        ) {
+          break;
         }
-        parenEnd = this.currToken;
-        parenValue += this.parseParenthesisToken(this.currToken);
+        openingToken = this.currToken;
+        parenValue += "(";
+        unbalanced = 1;
         this.position++;
       }
       if (last) {
@@ -897,6 +995,24 @@ export default class Parser {
     }
   }
 
+  /**
+   * Whether every node of the current container is a comment.
+   *
+   * Nodes are only ever appended while parsing, never removed or inserted
+   * earlier, so the comment-only prefix already checked is cached per
+   * container and only the nodes added since are inspected. Rescanning the
+   * whole list for every space token made comment-only selectors quadratic.
+   */
+  currentHasOnlyComments() {
+    const nodes = this.current.nodes;
+    let checked = this.commentPrefixes.get(this.current) || 0;
+    while (checked < nodes.length && nodes[checked].type === types.COMMENT) {
+      checked++;
+    }
+    this.commentPrefixes.set(this.current, checked);
+    return checked === nodes.length;
+  }
+
   space() {
     const content = this.content();
     // Handle space before and after the selector
@@ -904,7 +1020,7 @@ export default class Parser {
       this.position === 0 ||
       this.prevToken[TOKEN.TYPE] === tokens.comma ||
       this.prevToken[TOKEN.TYPE] === tokens.openParenthesis ||
-      this.current.nodes.every((node) => node.type === "comment")
+      this.currentHasOnlyComments()
     ) {
       this.spaces = this.optionalSpace(content);
       this.position++;
@@ -969,19 +1085,26 @@ export default class Parser {
       }
       nextToken = this.nextToken;
     }
-    const hasClass = indexesOf(word, ".").filter((i) => {
-      // Allow escaped dot within class name
-      const escapedDot = word[i - 1] === "\\";
-      // Allow decimal numbers percent in @keyframes
-      const isKeyframesPercent = /^\d+\.\d+%$/.test(word);
-      return !escapedDot && !isKeyframesPercent;
-    });
-    let hasId = indexesOf(word, "#").filter((i) => word[i - 1] !== "\\");
+    // Allow decimal numbers percent in @keyframes. The test spans the whole
+    // word, so it runs once here: evaluating it for every `.` index made a
+    // digit-prefixed word such as `111...1.a.a.a` quadratic.
+    const isKeyframesPercent = /^\d+\.\d+%$/.test(word);
+    // Allow escaped dot within class name
+    const hasClass = isKeyframesPercent
+      ? []
+      : indexesOf(word, ".").filter((i) => !isEscaped(word, i));
+    let hasId = indexesOf(word, "#").filter((i) => !isEscaped(word, i));
     // Eliminate Sass interpolations from the list of id indexes
     const interpolations = indexesOf(word, "#{");
     if (interpolations.length) {
-      hasId = hasId.filter((hashIndex) => !~interpolations.indexOf(hashIndex));
+      const interpolationIndexes = new Set(interpolations);
+      hasId = hasId.filter((hashIndex) => !interpolationIndexes.has(hashIndex));
     }
+    // Membership tests are built once. Scanning the arrays per index would make
+    // a flat selector such as `.a.a.a...` quadratic in its number of class/id
+    // indexes, which is enough to pin a CPU core on attacker-supplied input.
+    const classIndexes = new Set(hasClass);
+    const idIndexes = new Set(hasId);
     let indices = sortAsc(uniqs([0, ...hasClass, ...hasId]));
     indices.forEach((ind, i) => {
       const index = indices[i + 1] || word.length;
@@ -993,14 +1116,19 @@ export default class Parser {
       const current = this.currToken;
       const sourceIndex = current[TOKEN.START_POS] + indices[i];
       const source = getSource(current[1], current[2] + ind, current[3], current[2] + (index - 1));
-      if (~hasClass.indexOf(ind)) {
+      if (classIndexes.has(ind)) {
         let classNameOpts = {
           value: value.slice(1),
           source,
           sourceIndex,
         };
         node = new ClassName(unescapeProp(classNameOpts, "value"));
-      } else if (~hasId.indexOf(ind)) {
+        // Preserve the parsed spelling, including non-standard syntax, rather
+        // than the automatic escaping used for API-created class names.
+        if (!classNameOpts.raws) {
+          delete node.raws;
+        }
+      } else if (idIndexes.has(ind)) {
         let idOpts = {
           value: value.slice(1),
           source,
@@ -1036,6 +1164,7 @@ export default class Parser {
     while (this.position < this.tokens.length) {
       this.parse(true);
     }
+    this.flushPendingSpaces();
     this.current._inferEndPosition();
     return this.root;
   }

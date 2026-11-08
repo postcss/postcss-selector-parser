@@ -1,3 +1,8 @@
+# 6.1.6 - 2026-11-08
+
+- fix: parse selectors in linear time on four more kinds of crafted input, closing a CPU exhaustion vulnerability (reported by [@zachariah-mithani](https://github.com/zachariah-mithani))
+- chore: replace the `cssesc` dependency with an internal copy, whose redundant space removal is linear
+
 # 6.1.5 - 2026-10-19
 
 - fix: parse flat selectors in linear time, closing a CPU exhaustion vulnerability ([CVE-2026-104844](https://github.com/advisories/GHSA-rj75-hqrm-r3gf) / GHSA-rj75-hqrm-r3gf, reported by Wayde Shi), backported from 7.1.6 ([#346](https://github.com/postcss/postcss-selector-parser/pull/346) by [@bradyshutt](https://github.com/bradyshutt))

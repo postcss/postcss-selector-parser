@@ -31,6 +31,23 @@ test("sass escapes (2)", "[lang=#{$locale}]", (t, tree) => {
   t.deepEqual(tree.nodes[0].nodes[0].value, "#{$locale}");
 });
 
+test("sass interpolation as an attribute name", "[#{$attr}]", (t, tree) => {
+  t.deepEqual(tree.nodes[0].nodes[0].type, "attribute");
+  t.deepEqual(tree.nodes[0].nodes[0].attribute, "#{$attr}");
+  t.deepEqual(tree.nodes[0].nodes[0].operator, undefined);
+  t.deepEqual(tree.nodes[0].nodes[0].value, undefined);
+});
+
+test(
+  "sass interpolation on both sides of an attribute selector",
+  "[#{$attr}=#{$value}]",
+  (t, tree) => {
+    t.deepEqual(tree.nodes[0].nodes[0].attribute, "#{$attr}");
+    t.deepEqual(tree.nodes[0].nodes[0].operator, "=");
+    t.deepEqual(tree.nodes[0].nodes[0].value, "#{$value}");
+  },
+);
+
 test("placeholder", "%foo", (t, tree) => {
   t.deepEqual(tree.nodes[0].nodes[0].type, "tag");
   t.deepEqual(tree.nodes[0].nodes[0].value, "%foo");

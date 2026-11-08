@@ -113,6 +113,20 @@ function isEscaped(word, index) {
   return (index - escapeStart) % 2 === 1;
 }
 
+// A preprocessor interpolation (`#{...}` in SCSS, `@{...}` in Less) is open
+// when an opener has been consumed and its closing brace has not.
+function insideInterpolation(text) {
+  if (!text) {
+    return false;
+  }
+  const open = text.lastIndexOf("{");
+  if (open < 1 || text.indexOf("}", open) !== -1) {
+    return false;
+  }
+  const prefix = text[open - 1];
+  return prefix === "#" || prefix === "@";
+}
+
 function uniqs() {
   // A Set keeps the first-occurrence order the previous filter/indexOf pass
   // produced, without its quadratic cost on long index lists.
@@ -291,6 +305,23 @@ export default class Parser {
             if (oldRawValue) {
               node.raws.value = oldRawValue + "$";
             }
+            break;
+          }
+          if (
+            lastAdded === "attribute" &&
+            insideInterpolation(node.attribute) &&
+            !(next && next[TOKEN.TYPE] === tokens.equals)
+          ) {
+            // A `$` inside an open interpolation in the attribute name, such as
+            // `[#{$var}]` in SCSS, belongs to the name rather than being the
+            // suffix match operator.
+            let oldRawAttribute = getProp(node, "raws", "attribute");
+            node.attribute = (node.attribute || "") + "$";
+            if (oldRawAttribute) {
+              node.raws.attribute = oldRawAttribute + "$";
+            }
+            lastAdded = "attribute";
+            spaceAfterMeaningfulToken = false;
             break;
           }
         // Falls through

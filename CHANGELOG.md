@@ -1,5 +1,10 @@
 # Changelog of `postcss-selector-parser`
 
+## 7.1.8 - 2026-11-08
+
+- fix: parse selectors in linear time on four more kinds of crafted input, closing a CPU exhaustion vulnerability (reported by [@zachariah-mithani](https://github.com/zachariah-mithani))
+- chore: replace the `cssesc` dependency with an internal copy, whose redundant space removal is linear
+
 ## 7.1.7 - 2026-10-19
 
 - fix: `lossless: true` preserves trailing whitespace in a selector that ends empty, such as `:not(a, )`. Note that `:not( )` now yields a selector holding one empty string node rather than an empty selector ([#337](https://github.com/postcss/postcss-selector-parser/pull/337) by [@theRizwan](https://github.com/theRizwan))

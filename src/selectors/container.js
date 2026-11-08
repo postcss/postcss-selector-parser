@@ -339,7 +339,8 @@ export default class Container extends Node {
   }
 
   _stringify(options, depth, max) {
-    return this.map((child) => this._stringifyChild(child, options, depth, max)).join("");
+    const str = this.map((child) => this._stringifyChild(child, options, depth, max)).join("");
+    return [this.rawSpaceBefore, str, this.rawSpaceAfter].join("");
   }
 
   // Serialize a child node. Historically `toString` used `this.map(String)`,

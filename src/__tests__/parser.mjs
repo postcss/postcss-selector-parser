@@ -49,6 +49,42 @@ test("no operation", (t) => {
   t.notThrows(() => parser().processSync("h1 h2 h3"));
 });
 
+test("default options work sync and can be overridden", (t) => {
+  const processor = parser(undefined, { lossless: false });
+  t.is(processor.processSync("a > b"), "a>b");
+  t.is(processor.processSync("a > b", { lossless: true }), "a > b");
+  t.is(processor.processSync("a > b"), "a>b");
+});
+
+test("default options work async and can be overridden", async (t) => {
+  const processor = parser(undefined, { lossless: false });
+  t.is(await processor.process("a > b"), "a>b");
+  t.is(await processor.process("a > b", { lossless: true }), "a > b");
+  t.is(await processor.process("a > b"), "a>b");
+});
+
+test("default maxNestingDepth works and can be overridden", (t) => {
+  const processor = parser(undefined, { maxNestingDepth: 1 });
+  const selector = ":not(:not(a))";
+  t.throws(() => processor.processSync(selector), { instanceOf: Error });
+  t.is(processor.processSync(selector, { maxNestingDepth: 10 }), selector);
+});
+
+test("default updateSelector works async and can be overridden", async (t) => {
+  const processor = parser(
+    (root) =>
+      root.walkClasses((node) => {
+        node.value = "bar";
+      }),
+    { updateSelector: false },
+  );
+  const rule = { selector: ".foo" };
+  t.is(await processor.process(rule), ".bar");
+  t.is(rule.selector, ".foo");
+  t.is(await processor.process(rule, { updateSelector: true }), ".bar");
+  t.is(rule.selector, ".bar");
+});
+
 test("empty selector string", (t) => {
   t.notThrows(() => {
     return parser((selectors) => {

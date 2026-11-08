@@ -201,3 +201,23 @@ throws("lone pipe symbol with trailing spaces", "| ");
 throws("lone pipe symbol with surrounding spaces", " | ");
 throws("trailing pipe symbol with a namespace", "foo| ");
 throws("trailing pipe symbol with any namespace", "*| ");
+
+test("`|` after a pseudo-class does not reuse its name as a namespace", "a:hover|b", (t, tree) => {
+  t.deepEqual(tree.nodes[0].nodes.length, 3);
+  t.deepEqual(tree.nodes[0].nodes[1].type, "pseudo");
+  t.deepEqual(tree.nodes[0].nodes[1].value, ":hover");
+  t.deepEqual(tree.nodes[0].nodes[2].type, "tag");
+  t.deepEqual(tree.nodes[0].nodes[2].namespace, true);
+  t.deepEqual(tree.nodes[0].nodes[2].value, "b");
+});
+
+test(
+  "`|*` after a pseudo-element does not reuse its name as a namespace",
+  "::before|*",
+  (t, tree) => {
+    t.deepEqual(tree.nodes[0].nodes.length, 2);
+    t.deepEqual(tree.nodes[0].nodes[0].value, "::before");
+    t.deepEqual(tree.nodes[0].nodes[1].type, "universal");
+    t.deepEqual(tree.nodes[0].nodes[1].namespace, true);
+  },
+);

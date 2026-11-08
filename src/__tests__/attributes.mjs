@@ -691,3 +691,43 @@ for (const trailing of ["*", "$", "^", "~", "|"]) {
     t.deepEqual(tree.toString(), "[href]");
   });
 }
+
+for (const [quoteMark, value, expected] of [
+  ['"', "foo", '[href="foo"]'],
+  ['"', "foo bar", '[href="foo bar"]'],
+  ['"', 'say "hi"', '[href="say \\"hi\\""]'],
+  ["'", "it's", "[href='it\\'s']"],
+  [null, "foo bar", "[href=foo\\ bar]"],
+  [null, "foo", "[href=foo]"],
+]) {
+  ava(`Attribute constructor applies quoteMark ${quoteMark} to ${value}`, (t) => {
+    const attr = parser.attribute({ attribute: "href", operator: "=", value, quoteMark });
+    t.deepEqual(attr.quoteMark, quoteMark);
+    t.deepEqual(attr.toString(), expected);
+    const reparsed = parser().astSync(attr.toString()).first.first;
+    t.deepEqual(reparsed.value, value);
+    t.deepEqual(reparsed.quoteMark, quoteMark);
+  });
+}
+
+ava("Attribute constructor keeps an explicit raw value", (t) => {
+  const attr = parser.attribute({
+    attribute: "href",
+    operator: "=",
+    value: "a:b",
+    quoteMark: '"',
+    raws: { value: '"a\\3A b"' },
+  });
+  t.deepEqual(attr.toString(), '[href="a\\3A b"]');
+});
+
+ava("Parsed attributes keep their original raw value state", (t) => {
+  for (const input of ["[href=foo]", '[href="foo"]', "[href=@{foo}]", "[href=a\\:b]"]) {
+    const attr = parser().astSync(input).first.first;
+    t.deepEqual(attr.toString(), input);
+    t.deepEqual(attr.clone().toString(), input);
+    if (!input.includes("\\") && !input.includes('"')) {
+      t.deepEqual(attr.raws.value, undefined);
+    }
+  }
+});

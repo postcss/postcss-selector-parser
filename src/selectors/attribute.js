@@ -82,6 +82,11 @@ export default class Attribute extends Namespace {
       ),
     });
     this._constructed = true;
+    // A value given with a quote mark is unescaped, so it still needs quoting
+    // and escaping for that quote mark, unless its raw spelling was given too.
+    if (typeof this._value === "string" && this.raws.value === undefined) {
+      this._syncRawValue();
+    }
   }
 
   /**

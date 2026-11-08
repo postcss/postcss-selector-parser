@@ -518,7 +518,14 @@ export default class Parser {
     }
     unescapeProp(node, "attribute");
     unescapeProp(node, "namespace");
-    this.newNode(new Attribute(node));
+    const hasRawValue = node.raws && node.raws.value !== undefined;
+    const attribute = new Attribute(node);
+    // Preserve the parsed spelling, including non-standard syntax, rather
+    // than the quoting and escaping used for API-created attributes.
+    if (!hasRawValue) {
+      delete attribute.raws.value;
+    }
+    this.newNode(attribute);
     this.position++;
   }
 

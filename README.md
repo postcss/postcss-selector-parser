@@ -76,6 +76,19 @@ and can reintroduce the stack-overflow risk in environments with a small call
 stack (e.g. browser workers). The default is recommended unless you have a
 specific need.
 
+### Parsing untrusted selectors
+
+This package parses CSS selectors written by developers. If yours come from
+untrusted sources, bound their length with the `maxInputLength` option, which
+is off by default:
+
+```js
+parser().processSync(untrustedSelector, {maxInputLength: 65536});
+```
+
+It applies to one selector list, the text of a single rule before its `{`,
+never to a whole stylesheet. See the threat model in [SECURITY.md](SECURITY.md).
+
 ## Credits
 
 * Huge thanks to Andrey Sitnik (@ai) for work on PostCSS which helped

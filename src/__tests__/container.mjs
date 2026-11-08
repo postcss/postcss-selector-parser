@@ -2,6 +2,88 @@ import test from "./util/runner.mjs";
 import parser from "../../dist/index.js";
 import { parse } from "./util/helpers.mjs";
 
+for (const type of ["selector", "root"]) {
+  test(`${type}#toString preserves container spaces before children are appended`, (t) => {
+    const container = parser[type]({ spaces: { before: " ", after: "\t" } });
+    t.is(container.toString(), " \t");
+    container.append(parser.tag({ value: "a" }));
+    t.is(container.toString(), " a\t");
+    t.is(container.first.toString(), "a");
+  });
+
+  test(`${type}#toString uses raw spaces in preference to container spaces`, (t) => {
+    const container = parser[type]({
+      nodes: [parser.tag({ value: "a" })],
+      spaces: { before: " ", after: " " },
+    });
+    container.rawSpaceBefore = "/*before*/\n";
+    container.rawSpaceAfter = "\t/*after*/";
+    t.is(container.toString(), "/*before*/\na\t/*after*/");
+    container.rawSpaceBefore = "";
+    container.rawSpaceAfter = "";
+    t.is(container.toString(), "a");
+  });
+
+  test(`${type}#toString includes both container and child spaces`, (t) => {
+    const container = parser[type]({
+      nodes: [parser.tag({ value: "a", spaces: { before: "\t", after: "\n" } })],
+      spaces: { before: " ", after: " " },
+    });
+    t.is(container.toString(), " \ta\n ");
+    const clone = container.clone({ spaces: { before: "\n", after: "\t" } });
+    t.is(clone.toString(), "\n\ta\n\t");
+    t.is(container.toString(), " \ta\n ");
+  });
+}
+
+test("pseudo#toString preserves spaces on each nested selector", (t) => {
+  const pseudo = parser.pseudo({
+    value: ":not",
+    nodes: ["span", "a"].map((value) =>
+      parser.selector({
+        nodes: [parser.tag({ value })],
+        spaces: { before: " ", after: " " },
+      }),
+    ),
+  });
+  t.is(pseudo.toString(), ":not( span , a )");
+});
+
+test("root#toString places root spaces outside the selector list and trailing comma", (t) => {
+  const root = parser().astSync("a,b,");
+  root.spaces.before = "\n";
+  root.spaces.after = "\t";
+  root.first.spaces.before = " ";
+  root.last.spaces.after = " ";
+  t.is(root.toString(), "\n a,b ,\t");
+});
+
+test("replacing a pseudo with its selector preserves transferred spaces", (t) => {
+  const root = parser().astSync("a:global(.b)");
+  const pseudo = root.first.last;
+  pseudo.spaces.before = " ";
+  pseudo.spaces.after = "\t";
+  const expected = root.toString().replace(":global(", "").replace(")", "");
+  const replacement = pseudo.first.clone({ spaces: { ...pseudo.spaces } });
+  pseudo.replaceWith(replacement);
+  t.is(root.toString(), expected);
+  t.is(root.toString(), "a .b\t");
+});
+
+for (const method of ["insertBefore", "insertAfter"]) {
+  test(`container#${method} sets parents of every inserted node`, (t) => {
+    const selector = parser().astSync("a").first;
+    const first = parser.className({ value: "first" });
+    const second = parser.className({ value: "second" });
+    selector[method](selector.first, first, second);
+    t.is(first.parent, selector);
+    t.is(second.parent, selector);
+    second.remove();
+    t.is(selector.nodes.includes(second), false);
+    t.is(second.parent, undefined);
+  });
+}
+
 test("container#append", (t) => {
   let out = parse("h1", (selectors) => {
     let selector = selectors.first;

@@ -49,6 +49,42 @@ test("no operation", (t) => {
   t.notThrows(() => parser().processSync("h1 h2 h3"));
 });
 
+test("default options work sync and can be overridden", (t) => {
+  const processor = parser(undefined, { lossless: false });
+  t.is(processor.processSync("a > b"), "a>b");
+  t.is(processor.processSync("a > b", { lossless: true }), "a > b");
+  t.is(processor.processSync("a > b"), "a>b");
+});
+
+test("default options work async and can be overridden", async (t) => {
+  const processor = parser(undefined, { lossless: false });
+  t.is(await processor.process("a > b"), "a>b");
+  t.is(await processor.process("a > b", { lossless: true }), "a > b");
+  t.is(await processor.process("a > b"), "a>b");
+});
+
+test("default maxNestingDepth works and can be overridden", (t) => {
+  const processor = parser(undefined, { maxNestingDepth: 1 });
+  const selector = ":not(:not(a))";
+  t.throws(() => processor.processSync(selector), { instanceOf: Error });
+  t.is(processor.processSync(selector, { maxNestingDepth: 10 }), selector);
+});
+
+test("default updateSelector works async and can be overridden", async (t) => {
+  const processor = parser(
+    (root) =>
+      root.walkClasses((node) => {
+        node.value = "bar";
+      }),
+    { updateSelector: false },
+  );
+  const rule = { selector: ".foo" };
+  t.is(await processor.process(rule), ".bar");
+  t.is(rule.selector, ".foo");
+  t.is(await processor.process(rule, { updateSelector: true }), ".bar");
+  t.is(rule.selector, ".bar");
+});
+
 test("empty selector string", (t) => {
   t.notThrows(() => {
     return parser((selectors) => {
@@ -244,4 +280,33 @@ test("get AST a selector asynchronously", (t) => {
       t.deepEqual(ast.nodes[0].nodes[0].value, "bar");
       t.deepEqual(rule.selector, ".bar");
     });
+});
+
+// The processor's entry points keep their receiver when taken off the
+// processor, which is how issue #145 reported using them.
+const destructurable = ["ast", "astSync", "transform", "transformSync", "process", "processSync"];
+
+destructurable.forEach((name) => {
+  test(`destructured processor#${name}`, (t) => {
+    const method = parser()[name];
+    t.truthy(typeof method === "function");
+    // Calling it is the point: unbound, every one of these threw a TypeError
+    // before reaching its own work. What it returns is covered below.
+    method("button:not([disabled])");
+  });
+});
+
+test("destructured processSync returns the selector", (t) => {
+  const { processSync } = parser();
+  t.deepEqual(processSync("a > b"), "a > b");
+});
+
+test("destructured astSync returns a root", (t) => {
+  const { astSync } = parser();
+  t.deepEqual(astSync(".a").type, "root");
+});
+
+test("destructured process resolves", async (t) => {
+  const { process } = parser();
+  t.deepEqual(await process("a  b"), "a  b");
 });

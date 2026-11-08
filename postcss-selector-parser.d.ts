@@ -15,12 +15,12 @@
 export = parser;
 
 // TODO: Conditional types in TS 1.8 will really clean this up.
-declare function parser(): parser.Processor<never>;
-declare function parser<Transform>(processor: parser.AsyncProcessor<Transform>): parser.Processor<Transform, never>;
-declare function parser(processor: parser.AsyncProcessor<void>): parser.Processor<never, never>;
-declare function parser<Transform>(processor: parser.SyncProcessor<Transform>): parser.Processor<Transform>;
-declare function parser(processor: parser.SyncProcessor<void>): parser.Processor<never>;
-declare function parser<Transform>(processor?: parser.SyncProcessor<Transform> | parser.AsyncProcessor<Transform>): parser.Processor<Transform>;
+declare function parser(processor?: undefined, options?: Partial<parser.Options>): parser.Processor<never>;
+declare function parser<Transform>(processor: parser.AsyncProcessor<Transform>, options?: Partial<parser.Options>): parser.Processor<Transform, never>;
+declare function parser(processor: parser.AsyncProcessor<void>, options?: Partial<parser.Options>): parser.Processor<never, never>;
+declare function parser<Transform>(processor: parser.SyncProcessor<Transform>, options?: Partial<parser.Options>): parser.Processor<Transform>;
+declare function parser(processor: parser.SyncProcessor<void>, options?: Partial<parser.Options>): parser.Processor<never>;
+declare function parser<Transform>(processor?: parser.SyncProcessor<Transform> | parser.AsyncProcessor<Transform>, options?: Partial<parser.Options>): parser.Processor<Transform>;
 
 /*~ If you want to expose types from your module as well, you can
  *~ place them in this block. Often you will want to describe the
@@ -97,6 +97,12 @@ declare namespace parser {
          * instead of overflowing the call stack. Default: 256.
          */
         maxNestingDepth: number;
+        /**
+         * The maximum length of the selector to parse, as measured by
+         * `String#length`. A longer selector raises an error before it is
+         * parsed. Set it when parsing untrusted input. Default: no limit.
+         */
+        maxInputLength: number;
     }
     interface StringifyOptions {
         /**
@@ -383,6 +389,7 @@ declare namespace parser {
         attribute: string;
         operator?: AttributeOperator;
         insensitive?: boolean;
+        sensitive?: boolean;
         quoteMark?: QuoteMark;
         /** @deprecated Use quoteMark instead. */
         quoted?: boolean;
@@ -400,6 +407,8 @@ declare namespace parser {
             operator?: string;
             value?: string;
             insensitive?: string;
+            insensitiveFlag?: string;
+            sensitiveFlag?: string;
             spaces?: {
                 attribute?: Partial<Spaces>;
                 operator?: Partial<Spaces>;
@@ -413,6 +422,7 @@ declare namespace parser {
         attribute: string;
         operator?: AttributeOperator;
         insensitive?: boolean;
+        sensitive?: boolean;
         quoteMark: QuoteMark;
         quoted?: boolean;
         spaces: {
@@ -431,6 +441,8 @@ declare namespace parser {
             /** The value of the attribute with quotes and escapes. */
             value?: string;
             insensitive?: string;
+            insensitiveFlag?: string;
+            sensitiveFlag?: string;
             spaces?: {
                 attribute?: Partial<Spaces>;
                 operator?: Partial<Spaces>;
@@ -448,6 +460,12 @@ declare namespace parser {
          * attribute is case insensitive.
          */
         readonly insensitiveFlag : 'i' | '';
+
+        /**
+         * The explicit case sensitivity flag (Selectors Level 4 `s`) or an empty
+         * string depending on whether this attribute is explicitly case sensitive.
+         */
+        readonly sensitiveFlag : 's' | '';
 
         /**
          * Returns the attribute's value quoted such that it would be legal to use
@@ -501,7 +519,7 @@ declare namespace parser {
          * @param part One of the possible values inside an attribute.
          * @returns -1 if the name is invalid or the value doesn't exist in this attribute.
          */
-        offsetOf(part: "ns" | "namespace" | "attribute" | "attributeNS" | "operator" | "value" | "insensitive"): number;
+        offsetOf(part: "ns" | "namespace" | "attribute" | "attributeNS" | "operator" | "value" | "insensitive" | "sensitive"): number;
     }
     function attribute(opts: AttributeOptions): Attribute;
     function isAttribute(node: any): node is Attribute;

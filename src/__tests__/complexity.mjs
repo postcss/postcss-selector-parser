@@ -1,4 +1,5 @@
 import ava from "./util/runner.mjs";
+import postcss from "postcss";
 import parser from "../../dist/index.js";
 
 // Regression tests for the quadratic parsing of flat selectors: `.` and `#` are
@@ -55,6 +56,100 @@ for (const [label, atom] of [
     );
   });
 }
+
+// Further quadratic sites, outside the index passes above. Each payload is
+// compared with a control of the same size that takes the linear path, since
+// the space-separated control above does not apply to all of them (spaces
+// between comments still form a comment-only selector).
+//
+//   - splitWord evaluated the whole-word @keyframes percent test once per `.`
+//     index, and the regex backtracks across a leading run of digits.
+//   - space() checked that the current selector held only comments by
+//     scanning all of its nodes for every space token.
+//   - parentheses() appended each group following a node to that node's
+//     value one at a time, and the value setter of class and attribute nodes
+//     escapes the whole value on every assignment.
+//   - cssesc, which escapes namespaces as they are parsed, removed redundant
+//     spaces with a regular expression that backtracks quadratically on runs
+//     of backslashes. It is now vendored in src/util/cssesc.js with a linear
+//     replacement.
+//
+// Healthy ratios sit around 1 or below; they ranged from 40 to 240 while
+// these passes were quadratic.
+for (const [label, size, hostile, control] of [
+  [
+    "a digit-prefixed flat selector",
+    20000,
+    (n) => "1".repeat(n) + ".a".repeat(n),
+    (n) => "a".repeat(n) + ".a".repeat(n),
+  ],
+  ["a comment-only selector", 20000, (n) => "/**/ ".repeat(n), (n) => "a " + "/**/ ".repeat(n - 1)],
+  [
+    "a run of parenthesis groups after a class",
+    4000,
+    (n) => ".a" + "( )".repeat(n),
+    (n) => ".a( )".repeat(n),
+  ],
+  [
+    "a run of parenthesis groups after an attribute",
+    4000,
+    (n) => "[a=b]" + "( )".repeat(n),
+    (n) => "[a=b]( )".repeat(n),
+  ],
+  [
+    "a namespace made of backslashes",
+    8000,
+    (n) => "\\".repeat(n) + "|a",
+    (n) => "a".repeat(n) + "|a",
+  ],
+  [
+    "an attribute namespace made of backslashes",
+    8000,
+    (n) => "[" + "\\".repeat(n) + "|a]",
+    (n) => "[" + "a".repeat(n) + "|a]",
+  ],
+]) {
+  ava(`${label} parses in time proportional to its size`, (t) => {
+    const ratio = fastest(hostile(size)) / Math.max(fastest(control(size)), 1);
+    t.true(
+      ratio < 5,
+      `${label} cost ${ratio.toFixed(1)}x a control of the same size, which suggests a super-linear pass`,
+    );
+  });
+}
+
+ava("consecutive parenthesis groups are appended to the preceding node", (t) => {
+  const nodes = parser().astSync(".a( )(b)").first.nodes;
+  t.is(nodes.length, 1);
+  t.is(nodes[0].type, "class");
+  t.is(nodes[0].value, "a( )(b)");
+});
+
+ava("an unclosed group after complete ones reports its own opening parenthesis", (t) => {
+  const rule = postcss.parse("x{}").first;
+  rule.selector = "a()()(";
+  const error = t.throws(() => parser().astSync(rule), { message: /closing parenthesis/ });
+  // Column 6 is the last `(`, not the first group's.
+  t.is(error.column, 6);
+});
+
+ava("decimal percentages are still kept as a single tag", (t) => {
+  const nodes = parser().astSync("12.5%").first.nodes;
+  t.is(nodes.length, 1);
+  t.is(nodes[0].type, "tag");
+  t.is(nodes[0].value, "12.5%");
+});
+
+ava("spaces after leading comments stay attached to the selector", (t) => {
+  const input = "/**/ /**/ a";
+  t.is(parser().processSync(input), input);
+  t.is(
+    parser()
+      .astSync(input)
+      .first.nodes.filter((node) => node.type === "comment").length,
+    2,
+  );
+});
 
 ava("a large flat selector still produces one node per class", (t) => {
   const tree = parser().astSync(".a".repeat(20000));

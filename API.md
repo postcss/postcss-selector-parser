@@ -68,6 +68,11 @@ Arguments:
 
 * `props (object)`: The new node's properties.
 
+Notes:
+* Assigning to `value` escapes characters that aren't valid in an identifier
+  (`node.value = 'foo.bar'` stringifies as `.foo\.bar`). To assign a
+  pre-escaped value, use `node.setPropertyWithoutEscape('value', v)` instead.
+
 ### `parser.combinator([props])`
 
 Creates a new selector combinator.
@@ -91,6 +96,10 @@ Notes:
   named combinators like `/deep/` and `/for/` are parsed as combinators. The
   `node.value` is name after being unescaped and normalized as lowercase. The
   original value for the combinator name is stored in `node.raws.value`.
+* Assigning `node.value` replaces its raw spelling, including whitespace or
+  comments stored in `node.raws.value`. Comments and spacing stored separately
+  in `node.spaces` or `node.raws.spaces` are preserved. Raw values supplied to
+  the constructor are preserved until a later value assignment.
 
 
 ### `parser.comment([props])`
@@ -118,6 +127,12 @@ parser.id({value: 'search'});
 Arguments:
 
 * `props (object)`: The new node's properties.
+
+Notes:
+* Assigning to `value` escapes characters that aren't valid in an identifier
+  (`node.value = 'foo.bar'` stringifies as `#foo\.bar`), matching
+  `parser.className`. To assign a pre-escaped value, use
+  `node.setPropertyWithoutEscape('value', v)` instead.
 
 ### `parser.nesting([props])`
 
@@ -289,6 +304,18 @@ original might have had.
 const cloned = node.clone();
 ```
 
+`opts` is an optional object whose properties are assigned onto the copy once it
+has been made, which saves a second statement when cloning a node with one
+value changed:
+
+```js
+const renamed = classNode.clone({ value: "other" });
+```
+
+Those assignments go through the node's own setters, so a property that escapes
+on assignment escapes here too. `parser.className({ value: "foo" }).clone({
+value: "a.b" })` stringifies as `.a\.b`.
+
 ### `node.isAtPosition(line, column)`
 
 Return a `boolean` indicating whether this node includes the character at the
@@ -317,6 +344,13 @@ h1        h2 {}
 ```
 
 Additional whitespace is found in either the `node.spaces.before` and `node.spaces.after` depending on the presence of comments or other whitespace characters. If the actual whitespace does not start or end with a single space, the node's raw value is set to the actual space(s) found in the source.
+
+Spaces set on a `Selector` or `Root` container surround its serialized contents,
+including when it has no children. They are added to any spaces on the children;
+setting container spaces does not replace or move child spaces. For a `Root`,
+the trailing space follows its trailing comma, if present. As with other nodes,
+`raws.spaces.before` and `raws.spaces.after` take precedence over the corresponding
+`spaces` values.
 
 ### `node.source`
 
@@ -353,6 +387,77 @@ Within the following CSS, the `.baz` class node will have a `sourceIndex` of `12
 ```css
 .foo, .bar, .baz {}
 ```
+
+## Values and raw values
+
+A node keeps two views of each property: the value you read and write, and the
+raw text used when serializing. `node.raws[name]` holds that raw text when it
+differs from the value, and the stringifier prefers it when it is there.
+
+This is what lets a selector round-trip unchanged while its value stays
+readable. Parsing `.foo\.bar` gives a `className` whose `value` is `foo.bar`
+and whose `raws.value` is `foo\.bar`.
+
+The methods below exist for non-standard syntax, where the escaped form cannot
+be derived from the value by CSS escaping rules: SCSS and Less interpolation,
+placeholders, template-language output. For ordinary values, assigning to
+`value` is enough.
+
+### `node.stringifyProperty(name)`
+
+Returns the raw text of a property when there is one, and the value otherwise.
+This is what the stringifier reads.
+
+```js
+const node = parser().astSync(".foo\\.bar").first.first;
+node.value; // => "foo.bar"
+node.stringifyProperty("value"); // => "foo\\.bar"
+```
+
+### `node.valueToString()`
+
+Returns the value portion of the node as it will be serialized, including the
+marker the node type adds: a `.` for a class, a `#` for an id, the namespace
+prefix for an attribute or a tag. For the whole node, including its surrounding
+whitespace, use `node.toString()`.
+
+```js
+parser().astSync(".foo\\.bar").first.first.valueToString(); // => ".foo\\.bar"
+parser().astSync("#foo").first.first.valueToString(); // => "#foo"
+```
+
+### `node.setPropertyAndEscape(name, value, valueEscaped)`
+
+Sets a property and the exact text to serialize for it.
+
+```js
+const node = parser.className({ value: "foo" });
+node.setPropertyAndEscape("value", "#{$name}", "#{$name}");
+String(node); // => ".#{$name}"
+```
+
+### `node.appendToPropertyAndEscape(name, value, valueEscaped)`
+
+Appends to a property and to its raw text in one step, keeping the two in step.
+When the property had no raw text and the appended value needs no escaping, no
+raw text is created.
+
+### `node.setPropertyWithoutEscape(name, value)`
+
+Sets a property and deletes its raw text, so the value reaches the output
+verbatim. This is the escape hatch for a value that is already escaped, or that
+must not be escaped at all.
+
+```js
+const a = parser.className({ value: "foo" });
+a.value = "a.b"; // escaped:  ".a\\.b"
+
+const b = parser.className({ value: "foo" });
+b.setPropertyWithoutEscape("value", "a.b"); // verbatim: ".a.b"
+```
+
+The second form can produce a selector that does not parse back to the same
+AST. That is what it is for, and checking the output is up to you.
 
 ## Container types
 
@@ -618,6 +723,49 @@ Remains `undefined` if there is no attribute value.
 
 Returns the attribute name qualified with the namespace if one is given.
 
+### `attribute.insensitive` and `attribute.sensitive`
+
+The two case sensitivity flags defined by
+[Selectors Level 4](https://www.w3.org/TR/selectors-4/#attribute-case):
+
+* `attribute.insensitive` is `true` for the case insensitive flag, `[href="foo" i]`.
+* `attribute.sensitive` is `true` for the explicit case sensitive flag, `[href="foo" s]`.
+
+Both remain `undefined` if the attribute carries no flag at all.
+
+`attribute.insensitiveFlag` and `attribute.sensitiveFlag` are read-only and return
+the canonical lowercase flag (`"i"` / `"s"`) when the corresponding boolean is set,
+otherwise an empty string.
+
+```css
+[href="foo"]   /* insensitive: undefined, sensitive: undefined */
+[href="foo" i] /* insensitive: true,      sensitive: false     */
+[href="foo" s] /* insensitive: false,     sensitive: true      */
+```
+
+A selector cannot request both case sensitivities at once, so the two properties
+are mutually exclusive: setting either one to `true` clears the other, along with
+any capitalized notation stored for it in
+[`attribute.raws`](#attributeraws).
+
+```js
+let attr = parser().astSync('[href="foo" I]').first.first;
+attr.sensitive = true;
+attr.insensitive; // false
+attr.raws.insensitiveFlag; // undefined
+attr.toString(); // '[href="foo" s]'
+```
+
+Because a flag can only ever appear in one place in the output, the two flags
+share a single slot. The whitespace and comments around either flag live in
+`attribute.spaces.insensitive` and `attribute.raws.spaces.insensitive`, and
+`attribute.offsetOf()` reports the position of that slot under whichever of
+`"insensitive"` or `"sensitive"` is actually present.
+
+Non-standard flags are not modeled as booleans. They are preserved verbatim in
+`attribute.raws.insensitiveFlag` (see [`attribute.raws`](#attributeraws)) and are
+left untouched by both setters.
+
 ### `attribute.offsetOf(part)`
 
  Returns the offset of the attribute part specified relative to the
@@ -637,6 +785,10 @@ Returns the attribute name qualified with the namespace if one is given.
  * `"operator"` - the match operator of the attribute
  * `"value"` - The value (string or identifier)
  * `"insensitive"` - the case insensitivity flag
+ * `"sensitive"` - the explicit case sensitivity flag
+
+ The two case sensitivity flags share one slot in the output, so at most one of
+ `"insensitive"` and `"sensitive"` resolves to an offset; the other returns `-1`.
 
 ### `attribute.raws.unquoted`
 
@@ -675,6 +827,18 @@ or `value` then a property is placed in the raws for that value containing the f
 If a comment is embedded within the space between parts of the attribute
 then the raw for that space is set accordingly.
 
+The case sensitivity flags are stored here when the source used a notation that
+does not round-trip from the boolean alone:
+
+* `attribute.raws.insensitiveFlag` holds `"I"` for `[href="foo" I]`. It also holds
+  any non-standard flag verbatim — `"y"` for `[href="foo" y]` — which is how such
+  a flag survives serialization even though neither `attribute.insensitive` nor
+  `attribute.sensitive` is `true`.
+* `attribute.raws.sensitiveFlag` holds `"S"` for `[href="foo" S]`.
+
+The canonical lowercase forms are not stored, since `attribute.insensitive` and
+`attribute.sensitive` already render them.
+
 Setting an attribute's property `raws` value to be deleted.
 
 For now, changing the spaces required also updating or removing any of the
@@ -708,6 +872,46 @@ Example: `[ /*before*/ href /* after-attr */ = /* after-operator */ te/*inside-v
 }
 ```
 
+## Type guards
+
+Every node type has a guard on the `parser` object. Each returns a boolean, and
+each narrows the node's type in TypeScript, which is usually why you want them
+over comparing `node.type` by hand.
+
+```js
+const parser = require("postcss-selector-parser");
+
+parser().astSync(".foo[href]").walk((node) => {
+  if (parser.isClassName(node)) {
+    // node is a ClassName here, in TypeScript too
+  }
+});
+```
+
+| guard | true for |
+| --- | --- |
+| `parser.isNode(node)` | any node this parser produces |
+| `parser.isAttribute(node)` | `[href]` |
+| `parser.isClassName(node)` | `.foo` |
+| `parser.isCombinator(node)` | `>`, `+`, `~`, and a descendant space |
+| `parser.isComment(node)` | `/* a */` |
+| `parser.isIdentifier(node)` | `#foo` |
+| `parser.isNesting(node)` | `&` |
+| `parser.isPseudo(node)` | any `:` or `::` node |
+| `parser.isPseudoClass(node)` | `:hover`, and any pseudo that is not an element |
+| `parser.isPseudoElement(node)` | `::before`, plus the legacy `:before`, `:after`, `:first-letter` and `:first-line` |
+| `parser.isRoot(node)` | the root of a parsed selector list |
+| `parser.isSelector(node)` | one selector within that list |
+| `parser.isString(node)` | a quoted string inside a pseudo |
+| `parser.isTag(node)` | `div` |
+| `parser.isUniversal(node)` | `*` |
+| `parser.isContainer(node)` | a node with children: a root, a selector or a pseudo |
+| `parser.isNamespace(node)` | a node that can carry a namespace: an attribute or a tag |
+
+Two names are worth knowing in advance. The guard for an id selector is
+`isIdentifier`, not `isId`. And `isPseudoClass` is defined as a pseudo that is
+not a pseudo-element, so it is true for an unknown `:whatever`.
+
 ## `Processor`
 
 ### `ProcessorOptions`
@@ -716,6 +920,11 @@ Example: `[ /*before*/ href /* after-attr */ = /* after-operator */ te/*inside-v
 * `updateSelector` - When `true`, if any processor methods are passed a postcss
   `Rule` node instead of a string, then that Rule's selector is updated
   with the results of the processing. Defaults to `true`.
+
+* `maxInputLength` - The maximum length of the selector to parse, as measured
+  by `String#length`. A longer selector raises an error before it is parsed.
+  An invalid value throws a `TypeError`. Defaults to no limit. See the threat
+  model in `SECURITY.md` when parsing untrusted input.
 
 ### `process|processSync(selectors, [options])`
 

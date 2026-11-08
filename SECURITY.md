@@ -9,6 +9,27 @@ That said, if an unsupported version still has significant download numbers and
 you believe a vulnerability could have real impact, please report it anyway —
 it will be considered.
 
+## Threat model
+
+postcss-selector-parser parses CSS selectors written by developers. It is not
+designed to process untrusted input of unbounded size, and parsing time is not
+guaranteed to be linear in the input length.
+
+If your application parses selectors coming from untrusted sources (user
+input, third-party stylesheets, network requests), you are responsible for
+bounding that input before it reaches the parser, for example with the
+`maxInputLength` option or a request size limit.
+
+Reports of excessive CPU or memory consumption caused by large or crafted
+input, including algorithmic complexity, regular expression backtracking and
+stack exhaustion, are handled as regular bugs: they are fixed in the next
+release of the latest major version, without a security advisory, a CVE or a
+backport. Please open a regular issue for those.
+
+This exclusion does not apply when `maxInputLength` is set to 65536 or lower
+and a selector within that limit keeps the parser busy for more than one second
+on current hardware. We treat that as a security vulnerability.
+
 ## Reporting a Vulnerability
 
 To report a security vulnerability, please use the

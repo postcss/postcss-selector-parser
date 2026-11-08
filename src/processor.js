@@ -1,10 +1,19 @@
 import Parser from "./parser";
 
+// The entry points a caller may reasonably take off a processor, as in
+// `const { process } = parser()`. They are bound per instance in the
+// constructor: unbound, they lost their receiver and threw a TypeError on
+// `this._run`.
+const BOUND_METHODS = ["ast", "astSync", "transform", "transformSync", "process", "processSync"];
+
 export default class Processor {
   constructor(func, options) {
     this.func = func || function noop() {};
     this.funcRes = null;
     this.options = options;
+    for (const name of BOUND_METHODS) {
+      this[name] = this[name].bind(this);
+    }
   }
 
   _shouldUpdateSelector(rule, options = {}) {
@@ -35,6 +44,7 @@ export default class Processor {
     return {
       lossy: this._isLossy(merged),
       maxNestingDepth: merged.maxNestingDepth,
+      maxInputLength: merged.maxInputLength,
     };
   }
 

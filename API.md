@@ -798,6 +798,11 @@ Example: `[ /*before*/ href /* after-attr */ = /* after-operator */ te/*inside-v
   `Rule` node instead of a string, then that Rule's selector is updated
   with the results of the processing. Defaults to `true`.
 
+* `maxInputLength` - The maximum length of the selector to parse, as measured
+  by `String#length`. A longer selector raises an error before it is parsed.
+  An invalid value throws a `TypeError`. Defaults to no limit. See the threat
+  model in `SECURITY.md` when parsing untrusted input.
+
 ### `process|processSync(selectors, [options])`
 
 Processes the `selectors`, returning a string from the result of processing.

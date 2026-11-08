@@ -16,7 +16,13 @@ import tokenize, { FIELDS as TOKEN } from "./tokenize";
 
 import * as tokens from "./tokenTypes";
 import * as types from "./selectors/types";
-import { unesc, getProp, ensureObject, resolveMaxNestingDepth } from "./util";
+import {
+  unesc,
+  getProp,
+  ensureObject,
+  resolveMaxNestingDepth,
+  resolveMaxInputLength,
+} from "./util";
 
 const WHITESPACE_TOKENS = {
   [tokens.space]: true,
@@ -145,6 +151,13 @@ export default class Parser {
     this.commentPrefixes = new WeakMap();
 
     this.css = typeof this.rule === "string" ? this.rule : this.rule.selector;
+
+    const maxInputLength = resolveMaxInputLength(this.options.maxInputLength);
+    if (this.css && this.css.length > maxInputLength) {
+      throw this._errorGenerator()(
+        `Cannot parse selector: its length of ${this.css.length} exceeds the maximum of ${maxInputLength}.`,
+      );
+    }
 
     this.tokens = tokenize({
       css: this.css,

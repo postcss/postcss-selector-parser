@@ -100,6 +100,12 @@ declare namespace parser {
          * instead of overflowing the call stack. Default: 256.
          */
         maxNestingDepth: number;
+        /**
+         * The maximum length of the selector to parse, as measured by
+         * `String#length`. A longer selector raises an error before it is
+         * parsed. Set it when parsing untrusted input. Default: no limit.
+         */
+        maxInputLength: number;
     }
     interface StringifyOptions {
         /**

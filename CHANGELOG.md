@@ -1,8 +1,13 @@
 # Changelog of `postcss-selector-parser`
 
+## 7.2.0 - 2026-11-08
+
+- feat: add the opt-in `maxInputLength` option, which rejects a selector longer than the limit before parsing it
+- docs: add a threat model to `SECURITY.md`: resource consumption caused by unbounded untrusted input is now handled as a regular bug
+
 ## 7.1.8 - 2026-11-08
 
-- fix: parse selectors in linear time on four more kinds of crafted input, closing a CPU exhaustion vulnerability (reported by [@zachariah-mithani](https://github.com/zachariah-mithani))
+- fix: parse selectors in linear time on four more kinds of crafted input, closing a CPU exhaustion vulnerability ([GHSA-67xj-gfww-g738](https://github.com/advisories/GHSA-67xj-gfww-g738), reported by [@zachariah-mithani](https://github.com/zachariah-mithani))
 - chore: replace the `cssesc` dependency with an internal copy, whose redundant space removal is linear
 
 ## 7.1.7 - 2026-10-19

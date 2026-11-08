@@ -26,4 +26,4 @@ parser((root) => {
     root.walkUniversals((node) => {
         node satisfies parser.Universal;
     });
-}).processSync("a b > c");
+}).processSync("a b > c", { maxInputLength: 65536 });

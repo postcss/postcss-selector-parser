@@ -1,7 +1,7 @@
 {
   "name": "postcss-selector-parser",
   "description": "Selector parser with built in methods for working with selector strings.",
-  "version": "7.1.8",
+  "version": "7.2.0",
   "devDependencies": {
     "oxfmt": "^0.74.0",
     "oxlint": "^1.69.0",

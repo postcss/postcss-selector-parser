@@ -3,7 +3,24 @@
 ## 7.2.0 - 2026-11-08
 
 - feat: add the opt-in `maxInputLength` option, which rejects a selector longer than the limit before parsing it
+- feat: support the case-sensitive attribute flag `s` per Selectors Level 4, on `Attribute#sensitive` and `Attribute#sensitiveFlag`. `[a=b s]` previously left `insensitive: false` and filed the flag in `raws.insensitiveFlag` ([#327](https://github.com/postcss/postcss-selector-parser/pull/327) by [@abhu85](https://github.com/abhu85))
 - docs: add a threat model to `SECURITY.md`: resource consumption caused by unbounded untrusted input is now handled as a regular bug
+- docs: document the raw-value helpers (`stringifyProperty`, `valueToString`, `setPropertyAndEscape`, `appendToPropertyAndEscape`, `setPropertyWithoutEscape`), the seventeen type guards, and the `clone()` overrides argument ([#231](https://github.com/postcss/postcss-selector-parser/issues/231))
+- fix: forward the default options given to the parser factory, so `parser(fn, { maxInputLength })` and the other options take effect there as documented ([#345](https://github.com/postcss/postcss-selector-parser/pull/345) by [@Aurantium-47](https://github.com/Aurantium-47))
+- fix: preserve the spaces declared on selector and root containers, through `rawSpaceBefore` and `rawSpaceAfter` ([#356](https://github.com/postcss/postcss-selector-parser/pull/356) by [@Aschenbath](https://github.com/Aschenbath))
+- fix: preserve selector delimiters after an escaped backslash, so `.a\\.b` parses as two classes ([#354](https://github.com/postcss/postcss-selector-parser/pull/354) by [@wozhenbang2004](https://github.com/wozhenbang2004))
+- fix: escape class values supplied to the constructor, matching what the `value` setter already did ([#349](https://github.com/postcss/postcss-selector-parser/pull/349) by [@SAY-5](https://github.com/SAY-5))
+- fix: escape values assigned to an id through the `value` setter, and replace a stale `raws.value` on assignment ([#326](https://github.com/postcss/postcss-selector-parser/pull/326) by [@mahirhir](https://github.com/mahirhir))
+- fix: keep `$` in an attribute name inside a preprocessor interpolation, so `[#{$attr}]` in SCSS and `[@{attr}]` in Less round-trip ([#336](https://github.com/postcss/postcss-selector-parser/pull/336) by [@theRizwan](https://github.com/theRizwan))
+- fix: reject an attribute selector with no valid attribute name, instead of throwing a raw `TypeError` or emitting the literal text `undefined` ([#335](https://github.com/postcss/postcss-selector-parser/pull/335) by [@theRizwan](https://github.com/theRizwan))
+- fix: keep the processor's entry points usable when destructured, as in `const { process } = parser()` ([#145](https://github.com/postcss/postcss-selector-parser/issues/145))
+
+### Behaviour notes
+
+- `className` and `id` values are escaped when passed to a constructor or assigned through `value`, so an already-escaped value is now escaped twice. `setPropertyWithoutEscape()` is the escape hatch.
+- `[a=b s]` sets `sensitive: true` rather than filing the flag in `raws.insensitiveFlag`. Serialization is byte-identical for `i`, `I`, `s`, `S` and non-standard flags.
+- `Selector` and `Root` emit their own `rawSpaceBefore` and `rawSpaceAfter`, which changes serialization for ASTs that set them.
+- An attribute selector with no attribute name raises the parser's own error rather than throwing a raw `TypeError` or serializing the text `undefined`: `[ns|*]` and `[ * ]` are affected. A trailing `*`, `$`, `^`, `~` or `|` after a valid name is dropped, as `[href=]` already was.
 
 ## 7.1.8 - 2026-11-08
 

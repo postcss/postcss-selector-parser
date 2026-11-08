@@ -322,6 +322,13 @@ h1        h2 {}
 
 Additional whitespace is found in either the `node.spaces.before` and `node.spaces.after` depending on the presence of comments or other whitespace characters. If the actual whitespace does not start or end with a single space, the node's raw value is set to the actual space(s) found in the source.
 
+Spaces set on a `Selector` or `Root` container surround its serialized contents,
+including when it has no children. They are added to any spaces on the children;
+setting container spaces does not replace or move child spaces. For a `Root`,
+the trailing space follows its trailing comma, if present. As with other nodes,
+`raws.spaces.before` and `raws.spaces.after` take precedence over the corresponding
+`spaces` values.
+
 ### `node.source`
 
 An object describing the node's start/end, line/column source position.

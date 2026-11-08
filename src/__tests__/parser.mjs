@@ -281,3 +281,32 @@ test("get AST a selector asynchronously", (t) => {
       t.deepEqual(rule.selector, ".bar");
     });
 });
+
+// The processor's entry points keep their receiver when taken off the
+// processor, which is how issue #145 reported using them.
+const destructurable = ["ast", "astSync", "transform", "transformSync", "process", "processSync"];
+
+destructurable.forEach((name) => {
+  test(`destructured processor#${name}`, (t) => {
+    const method = parser()[name];
+    t.truthy(typeof method === "function");
+    // Calling it is the point: unbound, every one of these threw a TypeError
+    // before reaching its own work. What it returns is covered below.
+    method("button:not([disabled])");
+  });
+});
+
+test("destructured processSync returns the selector", (t) => {
+  const { processSync } = parser();
+  t.deepEqual(processSync("a > b"), "a > b");
+});
+
+test("destructured astSync returns a root", (t) => {
+  const { astSync } = parser();
+  t.deepEqual(astSync(".a").type, "root");
+});
+
+test("destructured process resolves", async (t) => {
+  const { process } = parser();
+  t.deepEqual(await process("a  b"), "a  b");
+});

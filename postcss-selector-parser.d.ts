@@ -18,12 +18,12 @@ export = parser;
 type Diff<T, U> = T extends U ? never : T;
 
 // TODO: Conditional types in TS 1.8 will really clean this up.
-declare function parser(): parser.Processor<never>;
-declare function parser<Transform>(processor: parser.AsyncProcessor<Transform>): parser.Processor<Transform, never>;
-declare function parser(processor: parser.AsyncProcessor<void>): parser.Processor<never, never>;
-declare function parser<Transform>(processor: parser.SyncProcessor<Transform>): parser.Processor<Transform>;
-declare function parser(processor: parser.SyncProcessor<void>): parser.Processor<never>;
-declare function parser<Transform>(processor?: parser.SyncProcessor<Transform> | parser.AsyncProcessor<Transform>): parser.Processor<Transform>;
+declare function parser(processor?: undefined, options?: Partial<parser.Options>): parser.Processor<never>;
+declare function parser<Transform>(processor: parser.AsyncProcessor<Transform>, options?: Partial<parser.Options>): parser.Processor<Transform, never>;
+declare function parser(processor: parser.AsyncProcessor<void>, options?: Partial<parser.Options>): parser.Processor<never, never>;
+declare function parser<Transform>(processor: parser.SyncProcessor<Transform>, options?: Partial<parser.Options>): parser.Processor<Transform>;
+declare function parser(processor: parser.SyncProcessor<void>, options?: Partial<parser.Options>): parser.Processor<never>;
+declare function parser<Transform>(processor?: parser.SyncProcessor<Transform> | parser.AsyncProcessor<Transform>, options?: Partial<parser.Options>): parser.Processor<Transform>;
 
 /*~ If you want to expose types from your module as well, you can
  *~ place them in this block. Often you will want to describe the

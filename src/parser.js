@@ -105,6 +105,14 @@ function indexesOf(array, item) {
   return indexes;
 }
 
+function isEscaped(word, index) {
+  let escapeStart = index;
+  while (word[escapeStart - 1] === "\\") {
+    escapeStart--;
+  }
+  return (index - escapeStart) % 2 === 1;
+}
+
 function uniqs() {
   // A Set keeps the first-occurrence order the previous filter/indexOf pass
   // produced, without its quadratic cost on long index lists.
@@ -1053,8 +1061,8 @@ export default class Parser {
     // Allow escaped dot within class name
     const hasClass = isKeyframesPercent
       ? []
-      : indexesOf(word, ".").filter((i) => word[i - 1] !== "\\");
-    let hasId = indexesOf(word, "#").filter((i) => word[i - 1] !== "\\");
+      : indexesOf(word, ".").filter((i) => !isEscaped(word, i));
+    let hasId = indexesOf(word, "#").filter((i) => !isEscaped(word, i));
     // Eliminate Sass interpolations from the list of id indexes
     const interpolations = indexesOf(word, "#{");
     if (interpolations.length) {

@@ -12,6 +12,32 @@ test("escaped semicolon in id", "#\\;", (t, tree) => {
   t.deepEqual(tree.nodes[0].nodes[0].type, "id");
 });
 
+for (const [delimiter, type] of [
+  [".", "class"],
+  ["#", "id"],
+]) {
+  test(`escaped backslash before the ${type} delimiter`, `.foo\\\\${delimiter}bar`, (t, tree) => {
+    t.deepEqual(
+      tree.first.nodes.map(({ type, value }) => [type, value]),
+      [
+        ["class", "foo\\"],
+        [type, "bar"],
+      ],
+    );
+  });
+
+  test(
+    `escaped ${type} delimiter after an escaped backslash`,
+    `.foo\\\\\\${delimiter}bar`,
+    (t, tree) => {
+      t.deepEqual(
+        tree.first.nodes.map(({ type, value }) => [type, value]),
+        [["class", `foo\\${delimiter}bar`]],
+      );
+    },
+  );
+}
+
 // This is a side-effect of allowing media queries to be parsed. Not sure it shouldn't just be an error.
 test("bare parens capture contents as a string", "(h1)", (t, tree) => {
   t.deepEqual(tree.nodes[0].nodes[0].value, "(h1)");

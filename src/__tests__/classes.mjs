@@ -1,4 +1,6 @@
 import { test } from "./util/helpers.mjs";
+import apiTest from "./util/runner.mjs";
+import parser from "../../dist/index.js";
 
 test("class name", ".one", (t, tree) => {
   t.deepEqual(tree.nodes[0].nodes[0].value, "one");
@@ -273,4 +275,80 @@ test("class selector with escaping (36)", ".not-pseudo\\:\\:focus", (t, tree) =>
   t.deepEqual(tree.nodes[0].nodes[0].value, "not-pseudo::focus");
   t.deepEqual(tree.nodes[0].nodes[0].type, "class");
   t.deepEqual(tree.nodes[0].nodes[0].raws.value, "not-pseudo\\:\\:focus");
+});
+
+for (const [value, escaped] of [
+  ["hover:bg-blue", "hover\\:bg-blue"],
+  ["1abc", "\\31 abc"],
+  ["foo.bar", "foo\\.bar"],
+  ["foo\\bar", "foo\\\\bar"],
+  ["♥", "\\2665"],
+]) {
+  apiTest(`ClassName constructor escapes ${value}`, (t) => {
+    const className = parser.className({ value });
+    t.is(className.value, value);
+    t.is(className.toString(), `.${escaped}`, "constructor must escape the semantic value");
+    t.is(parser().astSync(className.toString()).first.first.value, value);
+  });
+}
+
+apiTest("ClassName constructor preserves explicit raw spelling in either option order", (t) => {
+  for (const opts of [
+    { value: "hover:bg-blue", raws: { value: "hover\\3A bg-blue" } },
+    { raws: { value: "hover\\3A bg-blue" }, value: "hover:bg-blue" },
+  ]) {
+    const className = parser.className(opts);
+    t.is(className.value, "hover:bg-blue");
+    t.is(className.toString(), ".hover\\3A bg-blue");
+  }
+});
+
+apiTest("ClassName constructor without a value still supports later assignment", (t) => {
+  const className = parser.className();
+  t.is(className.value, undefined);
+  className.value = "hover:bg-blue";
+  t.is(className.toString(), ".hover\\:bg-blue");
+});
+
+apiTest("ClassName constructor leaves a plain identifier and other raw properties intact", (t) => {
+  const plain = parser.className({ value: "button" });
+  t.is(plain.toString(), ".button");
+  t.is(plain.raws, undefined);
+  const className = parser.className({
+    value: "hover:bg-blue",
+    raws: { spaces: { before: "/* before */" } },
+  });
+  t.is(
+    className.toString(),
+    "/* before */.hover\\:bg-blue",
+    "other raw fields must not suppress escaping",
+  );
+});
+
+apiTest(
+  "ClassName clones preserve raw spelling and escape replacement values independently",
+  (t) => {
+    const original = parser.className({
+      value: "hover:bg-blue",
+      raws: { value: "hover\\3A bg-blue" },
+    });
+    const clone = original.clone();
+    t.is(clone.toString(), original.toString());
+    t.not(clone.raws, original.raws);
+    const replaced = original.clone({ value: "focus:bg-red" });
+    t.is(replaced.toString(), ".focus\\:bg-red");
+    t.is(original.toString(), ".hover\\3A bg-blue");
+  },
+);
+
+apiTest("Parsed classes keep their original raw state when cloned", (t) => {
+  for (const input of [".button", ".♥", ".foo@{bar}", ".hover\\3A bg-blue"]) {
+    const original = parser().astSync(input).first.first;
+    const clone = original.clone();
+    t.is(clone.toString(), input);
+    t.deepEqual(clone.raws, original.raws);
+    if (!input.includes("\\")) {
+      t.is(original.raws, undefined);
+    }
+  }
 });

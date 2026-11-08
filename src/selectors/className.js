@@ -8,6 +8,10 @@ export default class ClassName extends Node {
     super(opts);
     this.type = CLASS;
     this._constructed = true;
+    const value = this.value;
+    if (typeof value === "string" && (!this.raws || this.raws.value === undefined)) {
+      this.value = value;
+    }
   }
 
   set value(v) {

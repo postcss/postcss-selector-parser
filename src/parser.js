@@ -843,6 +843,8 @@ export default class Parser {
         prev[TOKEN.TYPE] === tokens.ampersand)
         ? this.content(prev)
         : true;
+    // The node starts at its prefix, or at the `|` when there is none.
+    const start = before === true ? this.currToken : prev;
     if (!this.nextToken) {
       // A trailing `|` with nothing after it. `unexpectedPipe` reports against
       // `currToken`, which is the pipe itself and always present here.
@@ -850,10 +852,10 @@ export default class Parser {
     }
     if (this.nextToken[TOKEN.TYPE] === tokens.word) {
       this.position++;
-      return this.word(before);
+      return this.word(before, start);
     } else if (this.nextToken[TOKEN.TYPE] === tokens.asterisk) {
       this.position++;
-      return this.universal(before);
+      return this.universal(before, start);
     }
 
     this.unexpectedPipe();
@@ -1069,7 +1071,12 @@ export default class Parser {
     this.position++;
   }
 
-  universal(namespace) {
+  /**
+   * @param {string | true} [namespace]
+   * @param {Array} [start] the token the node starts at when it has a
+   *   namespace, which is its prefix or the `|`
+   */
+  universal(namespace, start) {
     const nextToken = this.nextToken;
     if (nextToken && this.content(nextToken) === "|") {
       this.position++;
@@ -1079,15 +1086,21 @@ export default class Parser {
     this.newNode(
       new Universal({
         value: this.content(),
-        source: getTokenSource(current),
-        sourceIndex: current[TOKEN.START_POS],
+        source: getTokenSourceSpan(start || current, current),
+        sourceIndex: (start || current)[TOKEN.START_POS],
       }),
       namespace,
     );
     this.position++;
   }
 
-  splitWord(namespace, firstCallback) {
+  /**
+   * @param {string | true | false | null} [namespace]
+   * @param {Function} [firstCallback]
+   * @param {Array} [start] the token the first node starts at when it has a
+   *   namespace, which is its prefix or the `|`
+   */
+  splitWord(namespace, firstCallback, start) {
     let nextToken = this.nextToken;
     let word = this.content();
     while (
@@ -1135,8 +1148,12 @@ export default class Parser {
       }
       let node;
       const current = this.currToken;
-      const sourceIndex = current[TOKEN.START_POS] + indices[i];
-      const source = getSource(current[1], current[2] + ind, current[3], current[2] + (index - 1));
+      let sourceIndex = current[TOKEN.START_POS] + indices[i];
+      let source = getSource(current[1], current[2] + ind, current[3], current[2] + (index - 1));
+      if (i === 0 && start) {
+        sourceIndex = start[TOKEN.START_POS];
+        source.start = { line: start[TOKEN.START_LINE], column: start[TOKEN.START_COL] };
+      }
       if (classIndexes.has(ind)) {
         let classNameOpts = {
           value: value.slice(1),
@@ -1172,13 +1189,13 @@ export default class Parser {
     this.position++;
   }
 
-  word(namespace) {
+  word(namespace, start) {
     const nextToken = this.nextToken;
     if (nextToken && this.content(nextToken) === "|") {
       this.position++;
       return this.namespace();
     }
-    return this.splitWord(namespace);
+    return this.splitWord(namespace, undefined, start);
   }
 
   loop() {

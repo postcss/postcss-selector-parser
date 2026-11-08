@@ -304,6 +304,18 @@ original might have had.
 const cloned = node.clone();
 ```
 
+`opts` is an optional object whose properties are assigned onto the copy once it
+has been made, which saves a second statement when cloning a node with one
+value changed:
+
+```js
+const renamed = classNode.clone({ value: "other" });
+```
+
+Those assignments go through the node's own setters, so a property that escapes
+on assignment escapes here too. `parser.className({ value: "foo" }).clone({
+value: "a.b" })` stringifies as `.a\.b`.
+
 ### `node.isAtPosition(line, column)`
 
 Return a `boolean` indicating whether this node includes the character at the
@@ -375,6 +387,77 @@ Within the following CSS, the `.baz` class node will have a `sourceIndex` of `12
 ```css
 .foo, .bar, .baz {}
 ```
+
+## Values and raw values
+
+A node keeps two views of each property: the value you read and write, and the
+raw text used when serializing. `node.raws[name]` holds that raw text when it
+differs from the value, and the stringifier prefers it when it is there.
+
+This is what lets a selector round-trip unchanged while its value stays
+readable. Parsing `.foo\.bar` gives a `className` whose `value` is `foo.bar`
+and whose `raws.value` is `foo\.bar`.
+
+The methods below exist for non-standard syntax, where the escaped form cannot
+be derived from the value by CSS escaping rules: SCSS and Less interpolation,
+placeholders, template-language output. For ordinary values, assigning to
+`value` is enough.
+
+### `node.stringifyProperty(name)`
+
+Returns the raw text of a property when there is one, and the value otherwise.
+This is what the stringifier reads.
+
+```js
+const node = parser().astSync(".foo\\.bar").first.first;
+node.value; // => "foo.bar"
+node.stringifyProperty("value"); // => "foo\\.bar"
+```
+
+### `node.valueToString()`
+
+Returns the value portion of the node as it will be serialized, including the
+marker the node type adds: a `.` for a class, a `#` for an id, the namespace
+prefix for an attribute or a tag. For the whole node, including its surrounding
+whitespace, use `node.toString()`.
+
+```js
+parser().astSync(".foo\\.bar").first.first.valueToString(); // => ".foo\\.bar"
+parser().astSync("#foo").first.first.valueToString(); // => "#foo"
+```
+
+### `node.setPropertyAndEscape(name, value, valueEscaped)`
+
+Sets a property and the exact text to serialize for it.
+
+```js
+const node = parser.className({ value: "foo" });
+node.setPropertyAndEscape("value", "#{$name}", "#{$name}");
+String(node); // => ".#{$name}"
+```
+
+### `node.appendToPropertyAndEscape(name, value, valueEscaped)`
+
+Appends to a property and to its raw text in one step, keeping the two in step.
+When the property had no raw text and the appended value needs no escaping, no
+raw text is created.
+
+### `node.setPropertyWithoutEscape(name, value)`
+
+Sets a property and deletes its raw text, so the value reaches the output
+verbatim. This is the escape hatch for a value that is already escaped, or that
+must not be escaped at all.
+
+```js
+const a = parser.className({ value: "foo" });
+a.value = "a.b"; // escaped:  ".a\\.b"
+
+const b = parser.className({ value: "foo" });
+b.setPropertyWithoutEscape("value", "a.b"); // verbatim: ".a.b"
+```
+
+The second form can produce a selector that does not parse back to the same
+AST. That is what it is for, and checking the output is up to you.
 
 ## Container types
 
@@ -788,6 +871,46 @@ Example: `[ /*before*/ href /* after-attr */ = /* after-operator */ te/*inside-v
   }
 }
 ```
+
+## Type guards
+
+Every node type has a guard on the `parser` object. Each returns a boolean, and
+each narrows the node's type in TypeScript, which is usually why you want them
+over comparing `node.type` by hand.
+
+```js
+const parser = require("postcss-selector-parser");
+
+parser().astSync(".foo[href]").walk((node) => {
+  if (parser.isClassName(node)) {
+    // node is a ClassName here, in TypeScript too
+  }
+});
+```
+
+| guard | true for |
+| --- | --- |
+| `parser.isNode(node)` | any node this parser produces |
+| `parser.isAttribute(node)` | `[href]` |
+| `parser.isClassName(node)` | `.foo` |
+| `parser.isCombinator(node)` | `>`, `+`, `~`, and a descendant space |
+| `parser.isComment(node)` | `/* a */` |
+| `parser.isIdentifier(node)` | `#foo` |
+| `parser.isNesting(node)` | `&` |
+| `parser.isPseudo(node)` | any `:` or `::` node |
+| `parser.isPseudoClass(node)` | `:hover`, and any pseudo that is not an element |
+| `parser.isPseudoElement(node)` | `::before`, plus the legacy `:before`, `:after`, `:first-letter` and `:first-line` |
+| `parser.isRoot(node)` | the root of a parsed selector list |
+| `parser.isSelector(node)` | one selector within that list |
+| `parser.isString(node)` | a quoted string inside a pseudo |
+| `parser.isTag(node)` | `div` |
+| `parser.isUniversal(node)` | `*` |
+| `parser.isContainer(node)` | a node with children: a root, a selector or a pseudo |
+| `parser.isNamespace(node)` | a node that can carry a namespace: an attribute or a tag |
+
+Two names are worth knowing in advance. The guard for an id selector is
+`isIdentifier`, not `isId`. And `isPseudoClass` is defined as a pseudo that is
+not a pseudo-element, so it is true for an unknown `:whatever`.
 
 ## `Processor`
 

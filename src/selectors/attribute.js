@@ -244,6 +244,10 @@ export default class Attribute extends Namespace {
     return this.insensitive ? "i" : "";
   }
 
+  get sensitiveFlag() {
+    return this.sensitive ? "s" : "";
+  }
+
   get value() {
     return this._value;
   }
@@ -257,20 +261,56 @@ export default class Attribute extends Namespace {
    * If the case insensitive flag changes, the raw (escaped) value at `attr.raws.insensitiveFlag`
    * of the attribute is updated accordingly.
    *
+   * The two case sensitivity flags are mutually exclusive, so setting this flag
+   * clears `attr.sensitive` and any `s`/`S` in `attr.raws.sensitiveFlag`.
+   *
    * @param {true | false} insensitive true if the attribute should match case-insensitively.
    */
   set insensitive(insensitive) {
-    if (!insensitive) {
-      this._insensitive = false;
-
+    if (insensitive) {
+      // `[attr=value i s]` is not a thing, so adopting the case-insensitive flag
+      // drops the explicit case-sensitive flag and its original notation.
+      this.sensitive = false;
+    } else if (
+      this.raws &&
+      (this.raws.insensitiveFlag === "I" || this.raws.insensitiveFlag === "i")
+    ) {
       // "i" and "I" can be used in "this.raws.insensitiveFlag" to store the original notation.
       // When setting `attr.insensitive = false` both should be erased to ensure correct serialization.
-      if (this.raws && (this.raws.insensitiveFlag === "I" || this.raws.insensitiveFlag === "i")) {
-        this.raws.insensitiveFlag = undefined;
-      }
+      this.raws.insensitiveFlag = undefined;
     }
 
     this._insensitive = insensitive;
+  }
+
+  get sensitive() {
+    return this._sensitive;
+  }
+
+  /**
+   * Set the explicit case sensitive flag (Selectors Level 4 `s`).
+   * If the case sensitive flag changes, the raw (escaped) value at `attr.raws.sensitiveFlag`
+   * of the attribute is updated accordingly.
+   *
+   * The two case sensitivity flags are mutually exclusive, so setting this flag
+   * clears `attr.insensitive` and any `i`/`I` in `attr.raws.insensitiveFlag`.
+   *
+   * @param {true | false} sensitive true if the attribute should match case-sensitively.
+   */
+  set sensitive(sensitive) {
+    if (sensitive) {
+      // `[attr=value s i]` is not a thing, so adopting the case-sensitive flag
+      // drops the case-insensitive flag and its original notation. Only the
+      // standard "i"/"I" notations are erased, so a non-standard flag kept in
+      // "this.raws.insensitiveFlag" survives and can still be round-tripped.
+      this.insensitive = false;
+    } else if (this.raws && (this.raws.sensitiveFlag === "S" || this.raws.sensitiveFlag === "s")) {
+      // "s" and "S" can be used in "this.raws.sensitiveFlag" to store the original notation.
+      // When setting `attr.sensitive = false` both should be erased to ensure correct serialization.
+      this.raws.sensitiveFlag = undefined;
+    }
+
+    this._sensitive = sensitive;
   }
 
   /**
@@ -345,6 +385,7 @@ export default class Attribute extends Namespace {
    * * "operator" - the match operator of the attribute
    * * "value" - The value (string or identifier)
    * * "insensitive" - the case insensitivity flag;
+   * * "sensitive" - the explicit case sensitivity flag;
    * @param part One of the possible values inside an attribute.
    * @returns -1 if the name is invalid or the value doesn't exist in this attribute.
    */
@@ -387,10 +428,16 @@ export default class Attribute extends Namespace {
 
     count += value.length;
     count += valueSpaces.after.length;
+    // Both case sensitivity flags occupy the same slot after the value, so they
+    // share the "insensitive" spaces. Each name only resolves when its own flag
+    // is the one actually present.
     let insensitiveSpaces = this._spacesFor("insensitive");
     count += insensitiveSpaces.before.length;
     if (name === "insensitive") {
       return this.insensitive ? count : -1;
+    }
+    if (name === "sensitive") {
+      return this.sensitive ? count : -1;
     }
     return -1;
   }
@@ -403,8 +450,13 @@ export default class Attribute extends Namespace {
     if (this.operator && (this.value || this.value === "")) {
       selector.push(this._stringFor("operator"));
       selector.push(this._stringFor("value"));
+      // The case-sensitivity flag occupies a single slot after the value.
+      // Prefer the explicit case-sensitive flag ("s"/"S") when present,
+      // otherwise fall back to the case-insensitive flag ("i"/"I") or any
+      // non-standard flag preserved in `raws.insensitiveFlag`.
+      let flagProperty = this.sensitive ? "sensitiveFlag" : "insensitiveFlag";
       selector.push(
-        this._stringFor("insensitiveFlag", "insensitive", (attrValue, attrSpaces) => {
+        this._stringFor(flagProperty, "insensitive", (attrValue, attrSpaces) => {
           if (
             attrValue.length > 0 &&
             !this.quoted &&

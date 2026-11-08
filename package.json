@@ -44,7 +44,6 @@
     "release": "npx npmpub"
   },
   "dependencies": {
-    "cssesc": "^3.0.0",
     "util-deprecate": "^1.0.2"
   },
   "license": "MIT",

@@ -119,6 +119,9 @@ export default class Parser {
         this.position = 0;
         this.nestingDepth = 0;
         this.maxNestingDepth = resolveMaxNestingDepth(this.options.maxNestingDepth);
+        // Length of the comment-only prefix already checked, per container. See
+        // currentHasOnlyComments().
+        this.commentPrefixes = new WeakMap();
 
         this.css = typeof this.rule === 'string' ? this.rule : this.rule.selector;
 
@@ -739,15 +742,32 @@ export default class Parser {
             let parenStart = this.currToken;
             let parenValue = "(";
             let parenEnd;
-            while (this.position < this.tokens.length && unbalanced) {
-                if (this.currToken[TOKEN.TYPE] === tokens.openParenthesis) {
-                    unbalanced ++;
+            for (;;) {
+                while (this.position < this.tokens.length && unbalanced) {
+                    if (this.currToken[TOKEN.TYPE] === tokens.openParenthesis) {
+                        unbalanced ++;
+                    }
+                    if (this.currToken[TOKEN.TYPE] === tokens.closeParenthesis) {
+                        unbalanced --;
+                    }
+                    parenEnd = this.currToken;
+                    parenValue += this.parseParenthesisToken(this.currToken);
+                    this.position ++;
                 }
-                if (this.currToken[TOKEN.TYPE] === tokens.closeParenthesis) {
-                    unbalanced --;
+                // Gather consecutive groups such as `a()()()` into one value that is
+                // appended once. Appending them one by one re-assigned the growing
+                // value through the node's setter, which escapes it in full, so the
+                // cost grew quadratically with the number of groups.
+                if (
+                    unbalanced ||
+                    !last ||
+                    !this.currToken ||
+                    this.currToken[TOKEN.TYPE] !== tokens.openParenthesis
+                ) {
+                    break;
                 }
-                parenEnd = this.currToken;
-                parenValue += this.parseParenthesisToken(this.currToken);
+                parenValue += "(";
+                unbalanced = 1;
                 this.position ++;
             }
             if (last) {
@@ -803,6 +823,24 @@ export default class Parser {
         }
     }
 
+    /**
+     * Whether every node of the current container is a comment.
+     *
+     * Nodes are only ever appended while parsing, never removed or inserted
+     * earlier, so the comment-only prefix already checked is cached per
+     * container and only the nodes added since are inspected. Rescanning the
+     * whole list for every space token made comment-only selectors quadratic.
+     */
+    currentHasOnlyComments () {
+        const nodes = this.current.nodes;
+        let checked = this.commentPrefixes.get(this.current) || 0;
+        while (checked < nodes.length && nodes[checked].type === types.COMMENT) {
+            checked++;
+        }
+        this.commentPrefixes.set(this.current, checked);
+        return checked === nodes.length;
+    }
+
     space () {
         const content = this.content();
         // Handle space before and after the selector
@@ -810,7 +848,7 @@ export default class Parser {
             this.position === 0 ||
             this.prevToken[TOKEN.TYPE] === tokens.comma ||
             this.prevToken[TOKEN.TYPE] === tokens.openParenthesis ||
-            (this.current.nodes.every((node) => node.type === 'comment'))
+            this.currentHasOnlyComments()
         ) {
             this.spaces = this.optionalSpace(content);
             this.position ++;
@@ -870,13 +908,14 @@ export default class Parser {
             }
             nextToken = this.nextToken;
         }
-        const hasClass = indexesOf(word, '.').filter(i => {
-            // Allow escaped dot within class name
-            const escapedDot = word[i - 1] === '\\';
-            // Allow decimal numbers percent in @keyframes
-            const isKeyframesPercent = /^\d+\.\d+%$/.test(word);
-            return !escapedDot && !isKeyframesPercent;
-        });
+        // Allow decimal numbers percent in @keyframes. The test spans the whole
+        // word, so it runs once here: evaluating it for every `.` index made a
+        // digit-prefixed word such as `111...1.a.a.a` quadratic.
+        const isKeyframesPercent = /^\d+\.\d+%$/.test(word);
+        // Allow escaped dot within class name
+        const hasClass = isKeyframesPercent
+            ? []
+            : indexesOf(word, '.').filter(i => word[i - 1] !== '\\');
         let hasId = indexesOf(word, '#').filter(i => word[i - 1] !== '\\');
         // Eliminate Sass interpolations from the list of id indexes
         const interpolations = indexesOf(word, '#{');

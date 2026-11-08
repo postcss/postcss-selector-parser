@@ -12,7 +12,10 @@ export default class Root extends Container {
       memo.push(this._stringifyChild(selector, options, depth, max));
       return memo;
     }, []).join(",");
-    return this.trailingComma ? str + "," : str;
+    if (this.trailingComma) {
+      str += ",";
+    }
+    return [this.rawSpaceBefore, str, this.rawSpaceAfter].join("");
   }
 
   error(message, options) {

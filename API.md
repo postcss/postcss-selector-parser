@@ -68,11 +68,6 @@ Arguments:
 
 * `props (object)`: The new node's properties.
 
-Notes:
-* Assigning to `value` escapes characters that aren't valid in an identifier
-  (`node.value = 'foo.bar'` stringifies as `.foo\.bar`). To assign a
-  pre-escaped value, use `node.setPropertyWithoutEscape('value', v)` instead.
-
 ### `parser.combinator([props])`
 
 Creates a new selector combinator.
@@ -127,12 +122,6 @@ parser.id({value: 'search'});
 Arguments:
 
 * `props (object)`: The new node's properties.
-
-Notes:
-* Assigning to `value` escapes characters that aren't valid in an identifier
-  (`node.value = 'foo.bar'` stringifies as `#foo\.bar`), matching
-  `parser.className`. To assign a pre-escaped value, use
-  `node.setPropertyWithoutEscape('value', v)` instead.
 
 ### `parser.nesting([props])`
 

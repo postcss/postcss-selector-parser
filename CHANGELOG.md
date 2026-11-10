@@ -1,5 +1,12 @@
 # Changelog of `postcss-selector-parser`
 
+## 7.2.1 - 2026-11-10
+
+- revert: the class constructor writes `value` as given again, as it did through 7.1.8. 7.2.0 escaped it, so the names CSS Modules builds (postcss-modules-scope with css-loader) were escaped a second time and their selectors stopped matching ([#362](https://github.com/postcss/postcss-selector-parser/issues/362), reported by [@denniskigen](https://github.com/denniskigen))
+- revert: assigning to an id's `value` writes it as given again, as it did through 7.1.8, for the same reason. Both changes are parked for the next major ([#357](https://github.com/postcss/postcss-selector-parser/issues/357))
+- fix(types): spell `Selector` without a self-referencing type alias, which TypeScript 7.1 previews reject with TS5115, while its children still exclude `Selector` ([#348](https://github.com/postcss/postcss-selector-parser/issues/348), [#350](https://github.com/postcss/postcss-selector-parser/pull/350) by [@firefoxic](https://github.com/firefoxic))
+- docs: state the 7.x contract for `className` and `id` values in `API.md`
+
 ## 7.2.0 - 2026-11-08
 
 - feat: add the opt-in `maxInputLength` option, which rejects a selector longer than the limit before parsing it
@@ -17,7 +24,7 @@
 
 ### Behaviour notes
 
-- `className` and `id` values are escaped when passed to a constructor or assigned through `value`, so an already-escaped value is now escaped twice. `setPropertyWithoutEscape()` is the escape hatch.
+- `className` and `id` values are escaped when passed to a constructor or assigned through `value`, so an already-escaped value is now escaped twice. `setPropertyWithoutEscape()` is the escape hatch. Reverted in 7.2.1.
 - `[a=b s]` sets `sensitive: true` rather than filing the flag in `raws.insensitiveFlag`. Serialization is byte-identical for `i`, `I`, `s`, `S` and non-standard flags.
 - `Selector` and `Root` emit their own `rawSpaceBefore` and `rawSpaceAfter`, which changes serialization for ASTs that set them.
 - An attribute selector with no attribute name raises the parser's own error rather than throwing a raw `TypeError` or serializing the text `undefined`: `[ns|*]` and `[ * ]` are affected. A trailing `*`, `$`, `^`, `~` or `|` after a valid name is dropped, as `[href=]` already was.

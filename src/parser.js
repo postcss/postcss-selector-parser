@@ -285,6 +285,9 @@ export default class Parser {
           }
           break;
         case tokens.asterisk:
+          if (node.attribute && !node.operator && !(next && next[TOKEN.TYPE] === tokens.equals)) {
+            return this.expected("attribute operator", token[TOKEN.START_POS]);
+          }
           if (next && next[TOKEN.TYPE] === tokens.equals) {
             node.operator = content;
             lastAdded = "operator";
@@ -342,10 +345,20 @@ export default class Parser {
           if (next && next[TOKEN.TYPE] === tokens.equals) {
             node.operator = content;
             lastAdded = "operator";
+          } else if (node.attribute && !node.operator) {
+            return this.expected("attribute operator", token[TOKEN.START_POS]);
           }
           spaceAfterMeaningfulToken = false;
           break;
         case tokens.combinator:
+          if (
+            node.attribute &&
+            !node.operator &&
+            (content === "~" || content === "|") &&
+            !(next && next[TOKEN.TYPE] === tokens.equals)
+          ) {
+            return this.expected("attribute operator", token[TOKEN.START_POS]);
+          }
           if (content === "~" && next && next[TOKEN.TYPE] === tokens.equals) {
             node.operator = content;
             lastAdded = "operator";
@@ -515,6 +528,9 @@ export default class Parser {
       // instead. Points at the opening bracket, which is where the author
       // needs to look.
       return this.expected("attribute", startingToken[TOKEN.START_POS]);
+    }
+    if (node.operator && node.value === undefined) {
+      return this.expected("attribute value", this.currToken[TOKEN.START_POS]);
     }
     unescapeProp(node, "attribute");
     unescapeProp(node, "namespace");

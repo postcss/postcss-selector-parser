@@ -1,5 +1,9 @@
 # Changelog of `postcss-selector-parser`
 
+## Unreleased
+
+- fix: reject attribute operators without a value and incomplete trailing matchers (`*`, `$`, `^`, `~` or `|`) instead of silently dropping them; quoted empty values and attribute namespaces remain supported ([#352](https://github.com/postcss/postcss-selector-parser/pull/352))
+
 ## 7.2.0 - 2026-11-08
 
 - feat: add the opt-in `maxInputLength` option, which rejects a selector longer than the limit before parsing it

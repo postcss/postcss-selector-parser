@@ -864,15 +864,26 @@ export default class Parser {
       // `currToken`, which is the pipe itself and always present here.
       return this.unexpectedPipe();
     }
-    if (this.nextToken[TOKEN.TYPE] === tokens.word) {
-      this.position++;
-      return this.word(before);
-    } else if (this.nextToken[TOKEN.TYPE] === tokens.asterisk) {
-      this.position++;
-      return this.universal(before);
+    const type = this.nextToken[TOKEN.TYPE];
+    if (type !== tokens.word && type !== tokens.asterisk) {
+      return this.unexpectedPipe();
     }
-
-    this.unexpectedPipe();
+    // The node starts at its prefix, or at the `|` when there is none, but
+    // `word()` and `universal()` only see the name after the `|`.
+    const start = before === true ? this.currToken : prev;
+    const nodes = this.current.nodes;
+    const index = nodes.length;
+    this.position++;
+    if (type === tokens.word) {
+      this.word(before);
+    } else {
+      this.universal(before);
+    }
+    const node = nodes[index];
+    if (node) {
+      node.sourceIndex = start[TOKEN.START_POS];
+      node.source.start = { line: start[TOKEN.START_LINE], column: start[TOKEN.START_COL] };
+    }
   }
 
   nesting() {

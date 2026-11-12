@@ -41,6 +41,7 @@ function tokenStart(token) {
   return {
     line: token[TOKEN.START_LINE],
     column: token[TOKEN.START_COL],
+    offset: token[TOKEN.START_POS],
   };
 }
 
@@ -48,18 +49,21 @@ function tokenEnd(token) {
   return {
     line: token[TOKEN.END_LINE],
     column: token[TOKEN.END_COL],
+    offset: token[TOKEN.END_POS] - 1,
   };
 }
 
-function getSource(startLine, startColumn, endLine, endColumn) {
+function getSource(startLine, startColumn, endLine, endColumn, startOffset, endOffset) {
   return {
     start: {
       line: startLine,
       column: startColumn,
+      offset: startOffset,
     },
     end: {
       line: endLine,
       column: endColumn,
+      offset: endOffset,
     },
   };
 }
@@ -70,6 +74,8 @@ function getTokenSource(token) {
     token[TOKEN.START_COL],
     token[TOKEN.END_LINE],
     token[TOKEN.END_COL],
+    token[TOKEN.START_POS],
+    token[TOKEN.END_POS] - 1,
   );
 }
 
@@ -82,6 +88,8 @@ function getTokenSourceSpan(startToken, endToken) {
     startToken[TOKEN.START_COL],
     endToken[TOKEN.END_LINE],
     endToken[TOKEN.END_COL],
+    startToken[TOKEN.START_POS],
+    endToken[TOKEN.END_POS] - 1,
   );
 }
 
@@ -170,7 +178,7 @@ export default class Parser {
     this.root.errorGenerator = this._errorGenerator();
 
     const selector = new Selector({
-      source: { start: { line: 1, column: 1 } },
+      source: { start: { line: 1, column: 1, offset: 0 } },
       sourceIndex: 0,
     });
     this.root.append(selector);
@@ -228,7 +236,7 @@ export default class Parser {
 
     const len = attr.length;
     const node = {
-      source: getSource(startingToken[1], startingToken[2], this.currToken[3], this.currToken[4]),
+      source: getTokenSourceSpan(startingToken, this.currToken),
       sourceIndex: startingToken[TOKEN.START_POS],
     };
 
@@ -572,12 +580,7 @@ export default class Parser {
         nodes.push(
           new Str({
             value: "",
-            source: getSource(
-              firstToken[TOKEN.START_LINE],
-              firstToken[TOKEN.START_COL],
-              lastToken[TOKEN.END_LINE],
-              lastToken[TOKEN.END_COL],
-            ),
+            source: getTokenSourceSpan(firstToken, lastToken),
             sourceIndex: firstToken[TOKEN.START_POS],
             spaces: { before: space, after: "" },
           }),
@@ -631,12 +634,7 @@ export default class Parser {
       }
       let node = new Combinator({
         value: `/${name}/`,
-        source: getSource(
-          this.currToken[TOKEN.START_LINE],
-          this.currToken[TOKEN.START_COL],
-          this.tokens[this.position + 2][TOKEN.END_LINE],
-          this.tokens[this.position + 2][TOKEN.END_COL],
-        ),
+        source: getTokenSourceSpan(this.currToken, this.tokens[this.position + 2]),
         sourceIndex: this.currToken[TOKEN.START_POS],
         raws,
       });
@@ -964,12 +962,7 @@ export default class Parser {
         this.newNode(
           new Str({
             value: parenValue,
-            source: getSource(
-              parenStart[TOKEN.START_LINE],
-              parenStart[TOKEN.START_COL],
-              parenEnd[TOKEN.END_LINE],
-              parenEnd[TOKEN.END_COL],
-            ),
+            source: getTokenSourceSpan(parenStart, parenEnd),
             sourceIndex: parenStart[TOKEN.START_POS],
           }),
         );
@@ -1088,6 +1081,7 @@ export default class Parser {
   }
 
   splitWord(namespace, firstCallback) {
+    const firstToken = this.currToken;
     let nextToken = this.nextToken;
     let word = this.content();
     while (
@@ -1135,8 +1129,15 @@ export default class Parser {
       }
       let node;
       const current = this.currToken;
-      const sourceIndex = current[TOKEN.START_POS] + indices[i];
-      const source = getSource(current[1], current[2] + ind, current[3], current[2] + (index - 1));
+      const sourceIndex = firstToken[TOKEN.START_POS] + indices[i];
+      const source = getSource(
+        current[TOKEN.START_LINE],
+        current[TOKEN.START_COL] + ind,
+        current[TOKEN.END_LINE],
+        current[TOKEN.START_COL] + index - 1,
+        sourceIndex,
+        firstToken[TOKEN.START_POS] + index - 1,
+      );
       if (classIndexes.has(ind)) {
         let classNameOpts = {
           value: value.slice(1),

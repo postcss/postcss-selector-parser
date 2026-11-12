@@ -843,22 +843,31 @@ export default class Parser {
         prev[TOKEN.TYPE] === tokens.ampersand)
         ? this.content(prev)
         : true;
-    // The node starts at its prefix, or at the `|` when there is none.
-    const start = before === true ? this.currToken : prev;
     if (!this.nextToken) {
       // A trailing `|` with nothing after it. `unexpectedPipe` reports against
       // `currToken`, which is the pipe itself and always present here.
       return this.unexpectedPipe();
     }
-    if (this.nextToken[TOKEN.TYPE] === tokens.word) {
-      this.position++;
-      return this.word(before, start);
-    } else if (this.nextToken[TOKEN.TYPE] === tokens.asterisk) {
-      this.position++;
-      return this.universal(before, start);
+    const type = this.nextToken[TOKEN.TYPE];
+    if (type !== tokens.word && type !== tokens.asterisk) {
+      return this.unexpectedPipe();
     }
-
-    this.unexpectedPipe();
+    // The node starts at its prefix, or at the `|` when there is none, but
+    // `word()` and `universal()` only see the name after the `|`.
+    const start = before === true ? this.currToken : prev;
+    const nodes = this.current.nodes;
+    const index = nodes.length;
+    this.position++;
+    if (type === tokens.word) {
+      this.word(before);
+    } else {
+      this.universal(before);
+    }
+    const node = nodes[index];
+    if (node) {
+      node.sourceIndex = start[TOKEN.START_POS];
+      node.source.start = { line: start[TOKEN.START_LINE], column: start[TOKEN.START_COL] };
+    }
   }
 
   nesting() {
@@ -1071,12 +1080,7 @@ export default class Parser {
     this.position++;
   }
 
-  /**
-   * @param {string | true} [namespace]
-   * @param {Array} [start] the token the node starts at when it has a
-   *   namespace, which is its prefix or the `|`
-   */
-  universal(namespace, start) {
+  universal(namespace) {
     const nextToken = this.nextToken;
     if (nextToken && this.content(nextToken) === "|") {
       this.position++;
@@ -1086,21 +1090,15 @@ export default class Parser {
     this.newNode(
       new Universal({
         value: this.content(),
-        source: getTokenSourceSpan(start || current, current),
-        sourceIndex: (start || current)[TOKEN.START_POS],
+        source: getTokenSource(current),
+        sourceIndex: current[TOKEN.START_POS],
       }),
       namespace,
     );
     this.position++;
   }
 
-  /**
-   * @param {string | true | false | null} [namespace]
-   * @param {Function} [firstCallback]
-   * @param {Array} [start] the token the first node starts at when it has a
-   *   namespace, which is its prefix or the `|`
-   */
-  splitWord(namespace, firstCallback, start) {
+  splitWord(namespace, firstCallback) {
     let nextToken = this.nextToken;
     let word = this.content();
     while (
@@ -1148,12 +1146,8 @@ export default class Parser {
       }
       let node;
       const current = this.currToken;
-      let sourceIndex = current[TOKEN.START_POS] + indices[i];
-      let source = getSource(current[1], current[2] + ind, current[3], current[2] + (index - 1));
-      if (i === 0 && start) {
-        sourceIndex = start[TOKEN.START_POS];
-        source.start = { line: start[TOKEN.START_LINE], column: start[TOKEN.START_COL] };
-      }
+      const sourceIndex = current[TOKEN.START_POS] + indices[i];
+      const source = getSource(current[1], current[2] + ind, current[3], current[2] + (index - 1));
       if (classIndexes.has(ind)) {
         let classNameOpts = {
           value: value.slice(1),
@@ -1189,13 +1183,13 @@ export default class Parser {
     this.position++;
   }
 
-  word(namespace, start) {
+  word(namespace) {
     const nextToken = this.nextToken;
     if (nextToken && this.content(nextToken) === "|") {
       this.position++;
       return this.namespace();
     }
-    return this.splitWord(namespace, undefined, start);
+    return this.splitWord(namespace);
   }
 
   loop() {

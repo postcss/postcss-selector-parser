@@ -81,9 +81,13 @@ function consumeEscape(css, start) {
       hexDigits++;
       code = css.charCodeAt(next + 1);
     } while (hex[code] && hexDigits < 6);
-    // if fewer than 6 hex chars, a trailing space ends the escape
-    if (hexDigits < 6 && code === t.space) {
+    // One CSS whitespace character can terminate an escape of any length.
+    // CRLF represents a single newline, without changing the original text.
+    if (code === t.space || unescapable[code]) {
       next++;
+      if (code === t.cr && css.charCodeAt(next + 1) === t.newline) {
+        next++;
+      }
     }
   } else {
     // the next char is part of the current word
@@ -264,7 +268,15 @@ export default function tokenize(input) {
           next = consumeWord(css, start);
           tokenType = t.word;
           endLine = line;
-          endColumn = next - offset;
+          // An escape can now keep a newline inside a word token.
+          for (let pos = start; pos <= next; pos++) {
+            if (css.charCodeAt(pos) === t.newline) {
+              endLine++;
+              nextOffset = pos;
+            }
+          }
+          endColumn =
+            next - (nextOffset === undefined || nextOffset === null ? offset : nextOffset);
         }
 
         end = next + 1;
@@ -281,6 +293,10 @@ export default function tokenize(input) {
       start, // [5] Start position / Source index
       end, // [6] End position
     ]);
+
+    if (tokenType === t.word) {
+      line = endLine;
+    }
 
     // Reset offset for the next token
     if (nextOffset) {

@@ -1104,6 +1104,7 @@ export default class Parser {
   }
 
   splitWord(namespace, firstCallback) {
+    const current = this.currToken;
     let nextToken = this.nextToken;
     let word = this.content();
     while (
@@ -1111,9 +1112,9 @@ export default class Parser {
       ~[tokens.dollar, tokens.caret, tokens.equals, tokens.word].indexOf(nextToken[TOKEN.TYPE])
     ) {
       this.position++;
-      let current = this.content();
-      word += current;
-      if (current.lastIndexOf("\\") === current.length - 1) {
+      let content = this.content();
+      word += content;
+      if (content.lastIndexOf("\\") === content.length - 1) {
         let next = this.nextToken;
         if (next && next[TOKEN.TYPE] === tokens.space) {
           word += this.requiredSpace(this.content(next));
@@ -1143,6 +1144,21 @@ export default class Parser {
     const classIndexes = new Set(hasClass);
     const idIndexes = new Set(hasId);
     let indices = sortAsc(uniqs([0, ...hasClass, ...hasId]));
+    const multiline = word.includes("\n");
+    let sourceLine = current[TOKEN.START_LINE];
+    let sourceColumn = current[TOKEN.START_COL];
+    let sourceOffset = 0;
+    const positionAt = (index) => {
+      while (sourceOffset < index) {
+        if (word[sourceOffset++] === "\n") {
+          sourceLine++;
+          sourceColumn = 1;
+        } else {
+          sourceColumn++;
+        }
+      }
+      return { line: sourceLine, column: sourceColumn };
+    };
     indices.forEach((ind, i) => {
       const index = indices[i + 1] || word.length;
       const value = word.slice(ind, index);
@@ -1150,9 +1166,10 @@ export default class Parser {
         return firstCallback.call(this, value, indices.length);
       }
       let node;
-      const current = this.currToken;
       const sourceIndex = current[TOKEN.START_POS] + indices[i];
-      const source = getSource(current[1], current[2] + ind, current[3], current[2] + (index - 1));
+      const source = multiline
+        ? { start: positionAt(ind), end: positionAt(index - 1) }
+        : getSource(current[1], current[2] + ind, current[3], current[2] + (index - 1));
       if (classIndexes.has(ind)) {
         let classNameOpts = {
           value: value.slice(1),

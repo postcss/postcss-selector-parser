@@ -69,3 +69,69 @@ for (const [value, expected] of [
     t.is(tree.first.first.value, expected);
   });
 }
+
+for (const hex of ["61", "000061"]) {
+  for (const whitespace of [" ", "\t", "\n", "\r", "\f", "\r\n"]) {
+    for (const [prefix, suffix, type] of [
+      [".", "", "class"],
+      ["#", "", "id"],
+      ["", "", "tag"],
+      ["[x=", "]", "attribute"],
+    ]) {
+      test(
+        `${type} hex escape ${hex} terminated by ${JSON.stringify(whitespace)}`,
+        `${prefix}\\${hex}${whitespace}b${suffix}`,
+        (t, tree) => {
+          t.is(tree.first.nodes.length, 1);
+          t.is(tree.first.first.type, type);
+          t.is(tree.first.first.value, "ab");
+        },
+      );
+    }
+  }
+}
+
+for (const whitespace of [" ", "\t", "\n", "\r", "\f", "\r\n"]) {
+  test(
+    `only one whitespace terminates a hex escape: ${JSON.stringify(whitespace)}`,
+    `.\\000061${whitespace} b`,
+    (t, tree) => {
+      t.deepEqual(
+        tree.first.nodes.map(({ type, value }) => [type, value]),
+        [
+          ["class", "a"],
+          ["combinator", " "],
+          ["tag", "b"],
+        ],
+      );
+    },
+  );
+}
+
+for (const newline of ["\n", "\r\n"]) {
+  test(
+    `source positions after an escaped ${JSON.stringify(newline)}`,
+    `.\\61${newline}b.next > c`,
+    (t, tree) => {
+      const [first, second, combinator, last] = tree.first.nodes;
+      t.deepEqual(first.source, { start: { line: 1, column: 1 }, end: { line: 2, column: 1 } });
+      t.deepEqual(second.source, { start: { line: 2, column: 2 }, end: { line: 2, column: 6 } });
+      t.deepEqual(last.source, { start: { line: 2, column: 10 }, end: { line: 2, column: 10 } });
+      t.is(combinator.source.start.line, 2);
+      t.is(second.sourceIndex, 5 + newline.length);
+    },
+  );
+  test(
+    `source positions after an escaped ${JSON.stringify(newline)} and interpolation`,
+    `.\\61${newline}b#{$foo}.next > a`,
+    (t, tree) => {
+      const [first, second, , last] = tree.first.nodes;
+      t.is(first.value, "ab#{$foo}");
+      t.is(first.sourceIndex, 0);
+      t.deepEqual(first.source, { start: { line: 1, column: 1 }, end: { line: 2, column: 8 } });
+      t.is(second.sourceIndex, 12 + newline.length);
+      t.deepEqual(second.source, { start: { line: 2, column: 9 }, end: { line: 2, column: 13 } });
+      t.deepEqual(last.source, { start: { line: 2, column: 17 }, end: { line: 2, column: 17 } });
+    },
+  );
+}

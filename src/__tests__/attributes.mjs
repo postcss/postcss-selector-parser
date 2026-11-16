@@ -661,6 +661,49 @@ testDeprecation("smart quotes", "[data-foo=bar]", (t, tree) => {
   t.deepEqual(attr.toString(), "[data-foo='smart with \"double quotes\"']");
 });
 
+// An empty string and a lone hyphen escape to themselves as identifiers, but
+// neither is a valid identifier, so leaving them unquoted wrote `[data-foo=]`
+// (a syntax error for this parser) and `[data-foo=-]` (rejected by browsers).
+for (const [value, quoteMark, expected] of [
+  ["", undefined, '[data-foo=""]'],
+  ["", "'", "[data-foo='']"],
+  ["", null, '[data-foo=""]'],
+  ["-", undefined, '[data-foo="-"]'],
+  ["-", "'", "[data-foo='-']"],
+  ["-", null, '[data-foo="-"]'],
+]) {
+  test(
+    `smart quotes quote ${JSON.stringify(value)} with quoteMark ${quoteMark}`,
+    "[data-foo=bar]",
+    (t, tree) => {
+      let attr = tree.nodes[0].nodes[0];
+      attr.setValue(value, { smart: true, quoteMark });
+      t.deepEqual(attr.toString(), expected);
+      t.deepEqual(attr.quoteMark, expected.charAt(10));
+      t.deepEqual(attr.getQuotedValue({ smart: true, quoteMark }), expected.slice(10, -1));
+      t.deepEqual(parser().astSync(tree.toString()).nodes[0].nodes[0].value, value);
+    },
+  );
+}
+
+test(
+  "smart quotes keep the current quote mark of an empty value",
+  "[data-foo='bar']",
+  (t, tree) => {
+    let attr = tree.nodes[0].nodes[0];
+    attr.setValue("", { smart: true, preferCurrentQuoteMark: true, quoteMark: null });
+    t.deepEqual(attr.toString(), "[data-foo='']");
+  },
+);
+
+test("smart quotes still leave identifiers unquoted", "[data-foo='bar']", (t, tree) => {
+  let attr = tree.nodes[0].nodes[0];
+  for (const value of ["a", "-a", "--", "_", "é"]) {
+    attr.setValue(value, { smart: true });
+    t.deepEqual(attr.quoteMark, null, value);
+  }
+});
+
 testDeprecation("set Attribute#quoteMark", "[data-foo=bar]", (t, tree) => {
   let attr = tree.nodes[0].nodes[0];
   attr.quoteMark = '"';

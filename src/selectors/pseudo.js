@@ -8,7 +8,7 @@ export default class Pseudo extends Container {
   }
 
   _stringify(options, depth, max) {
-    if (depth >= max) {
+    if (this.length && depth >= max) {
       throw new Error(`Cannot serialize selector: nesting depth exceeds the maximum of ${max}.`);
     }
     let params = this.length

@@ -69,6 +69,9 @@ export default class Container extends Node {
       node.parent = undefined;
     }
     this.nodes = [];
+    for (let id in this.indexes) {
+      this.indexes[id] = -1;
+    }
     return this;
   }
 

@@ -390,7 +390,7 @@ export default class Attribute extends Namespace {
    * @returns -1 if the name is invalid or the value doesn't exist in this attribute.
    */
   offsetOf(name) {
-    let count = 1;
+    let count = this.rawSpaceBefore.length + 1;
     let attributeSpaces = this._spacesFor("attribute");
     count += attributeSpaces.before.length;
     if (name === "namespace" || name === "ns") {
@@ -416,6 +416,9 @@ export default class Attribute extends Namespace {
     if (name === "operator") {
       return operator ? count : -1;
     }
+    if (!operator) {
+      return -1;
+    }
 
     count += operator.length;
     count += operatorSpaces.after.length;
@@ -425,6 +428,9 @@ export default class Attribute extends Namespace {
     if (name === "value") {
       return value ? count : -1;
     }
+    if (value === undefined) {
+      return -1;
+    }
 
     count += value.length;
     count += valueSpaces.after.length;
@@ -432,6 +438,15 @@ export default class Attribute extends Namespace {
     // share the "insensitive" spaces. Each name only resolves when its own flag
     // is the one actually present.
     let insensitiveSpaces = this._spacesFor("insensitive");
+    const flagProperty = this.sensitive ? "sensitiveFlag" : "insensitiveFlag";
+    if (
+      this.stringifyProperty(flagProperty).length > 0 &&
+      !this.quoted &&
+      insensitiveSpaces.before.length === 0 &&
+      !(this.spaces.value && this.spaces.value.after)
+    ) {
+      insensitiveSpaces.before = " ";
+    }
     count += insensitiveSpaces.before.length;
     if (name === "insensitive") {
       return this.insensitive ? count : -1;

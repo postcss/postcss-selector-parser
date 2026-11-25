@@ -62,11 +62,11 @@ export default class Node {
   }
 
   next() {
-    return this.parent.at(this.parent.index(this) + 1);
+    return this.parent ? this.parent.at(this.parent.index(this) + 1) : undefined;
   }
 
   prev() {
-    return this.parent.at(this.parent.index(this) - 1);
+    return this.parent ? this.parent.at(this.parent.index(this) - 1) : undefined;
   }
 
   clone(overrides = {}) {

@@ -92,9 +92,10 @@ export default class Node {
     }
     let originalValue = this[name];
     let originalEscaped = this.raws[name];
+    let hasEscaped = originalEscaped !== undefined && originalEscaped !== null;
     this[name] = originalValue + value; // this may trigger a setter that updates raws, so it has to be set first.
-    if (originalEscaped || valueEscaped !== value) {
-      this.raws[name] = (originalEscaped || originalValue) + valueEscaped;
+    if (hasEscaped || valueEscaped !== value) {
+      this.raws[name] = (hasEscaped ? originalEscaped : originalValue) + valueEscaped;
     } else {
       delete this.raws[name]; // delete any escaped value that was created by the setter.
     }
@@ -155,7 +156,8 @@ export default class Node {
   }
 
   stringifyProperty(name) {
-    return (this.raws && this.raws[name]) || this[name];
+    let rawValue = this.raws && this.raws[name];
+    return rawValue === undefined || rawValue === null ? this[name] : rawValue;
   }
 
   get rawSpaceBefore() {

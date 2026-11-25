@@ -24,6 +24,13 @@ test("sass escapes", ".#{$classname}", (t, tree) => {
   t.deepEqual(tree.nodes[0].nodes[0].value, "#{$classname}");
 });
 
+test("sass interpolation source positions", ".#{$classname}", (t, tree) => {
+  const node = tree.nodes[0].nodes[0];
+  t.deepEqual(node.sourceIndex, 0);
+  t.deepEqual(node.source.start.column, 1);
+  t.deepEqual(node.source.end.column, 14);
+});
+
 test("sass escapes (2)", "[lang=#{$locale}]", (t, tree) => {
   t.deepEqual(tree.nodes[0].nodes[0].type, "attribute");
   t.deepEqual(tree.nodes[0].nodes[0].attribute, "lang");

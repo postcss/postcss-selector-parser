@@ -85,6 +85,41 @@ function getTokenSourceSpan(startToken, endToken) {
   );
 }
 
+function positionInToken(token, offset, css) {
+  const startLine = token[TOKEN.START_LINE];
+  const startColumn = token[TOKEN.START_COL];
+  if (token[TOKEN.END_LINE] === startLine) {
+    return { line: startLine, column: startColumn + offset };
+  }
+
+  let line = startLine;
+  let lineStart = 0;
+  const tokenStart = token[TOKEN.START_POS];
+  for (let i = 0; i < offset; i++) {
+    if (css[tokenStart + i] === "\n") {
+      line++;
+      lineStart = i + 1;
+    }
+  }
+
+  return {
+    line,
+    column: line === startLine ? startColumn + offset : offset - lineStart + 1,
+  };
+}
+
+function positionInTokens(tokenList, css, offset) {
+  let remaining = offset;
+  for (const token of tokenList) {
+    const length = token[TOKEN.END_POS] - token[TOKEN.START_POS];
+    if (remaining < length) {
+      return positionInToken(token, remaining, css);
+    }
+    remaining -= length;
+  }
+  return tokenEnd(tokenList[tokenList.length - 1]);
+}
+
 function unescapeProp(node, prop) {
   let value = node[prop];
   if (typeof value !== "string") {
@@ -1105,12 +1140,15 @@ export default class Parser {
 
   splitWord(namespace, firstCallback) {
     let nextToken = this.nextToken;
+    const firstToken = this.currToken;
+    const wordTokens = [firstToken];
     let word = this.content();
     while (
       nextToken &&
       ~[tokens.dollar, tokens.caret, tokens.equals, tokens.word].indexOf(nextToken[TOKEN.TYPE])
     ) {
       this.position++;
+      wordTokens.push(this.currToken);
       let current = this.content();
       word += current;
       if (current.lastIndexOf("\\") === current.length - 1) {
@@ -1118,6 +1156,7 @@ export default class Parser {
         if (next && next[TOKEN.TYPE] === tokens.space) {
           word += this.requiredSpace(this.content(next));
           this.position++;
+          wordTokens.push(this.currToken);
         }
       }
       nextToken = this.nextToken;
@@ -1150,9 +1189,16 @@ export default class Parser {
         return firstCallback.call(this, value, indices.length);
       }
       let node;
-      const current = this.currToken;
+      const current = firstToken;
       const sourceIndex = current[TOKEN.START_POS] + indices[i];
-      const source = getSource(current[1], current[2] + ind, current[3], current[2] + (index - 1));
+      let source;
+      if (wordTokens.length === 1) {
+        source = getSource(current[1], current[2] + ind, current[3], current[2] + (index - 1));
+      } else {
+        const start = positionInTokens(wordTokens, this.css, ind);
+        const end = positionInTokens(wordTokens, this.css, index - 1);
+        source = getSource(start.line, start.column, end.line, end.column);
+      }
       if (classIndexes.has(ind)) {
         let classNameOpts = {
           value: value.slice(1),

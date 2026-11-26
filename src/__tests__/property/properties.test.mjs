@@ -1,8 +1,9 @@
 // Property tests: generated selectors and values checked against invariants
-// that should hold for any input. They are slower than the example tests and
-// run on their own, with `npm run test:property`.
+// that should hold for any input. They run as part of `npm test` with the
+// defaults below, and alone with `npm run test:property`, where the variables
+// below change the volume or the seed.
 //
-//   PROPERTY_RUNS  inputs per property (default 2000)
+//   PROPERTY_RUNS  inputs per property (default 10000)
 //   PROPERTY_SEED  seed for the generators (default 1)
 //
 // A failure prints the offending inputs, so it can be turned into an example
@@ -14,7 +15,7 @@ import parser from "../../../dist/index.js";
 import { random, grammarSelector, fragmentSelector, anyValue } from "./generate.mjs";
 import { KNOWN } from "./known.mjs";
 
-const RUNS = Number(process.env.PROPERTY_RUNS || 2000);
+const RUNS = Number(process.env.PROPERTY_RUNS || 10000);
 const SEED = Number(process.env.PROPERTY_SEED || 1);
 
 const parse = (input, options) => parser().processSync(input, options);

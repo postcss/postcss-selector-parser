@@ -29,6 +29,8 @@
     "format:check": "oxfmt --check src",
     "pretests": "npm run build",
     "tests": "node --test src/__tests__/*.mjs",
+    "pretest:property": "npm run build",
+    "test:property": "node --test src/__tests__/property/*.test.mjs",
     "precoverage": "npm run build",
     "coverage": "node --enable-source-maps --test --experimental-test-coverage --test-coverage-exclude=\"**/__tests__/**\" --test-coverage-lines=94 --test-coverage-branches=94 --test-coverage-functions=96 --test-reporter=spec src/__tests__/*.mjs",
     "test": "npm run lint && npm run typecheck && npm run coverage",

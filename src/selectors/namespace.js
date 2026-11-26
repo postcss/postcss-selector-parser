@@ -7,7 +7,7 @@ export default class Namespace extends Node {
     return this._namespace;
   }
   set namespace(namespace) {
-    if (namespace === true || namespace === "*" || namespace === "&") {
+    if (namespace === undefined || namespace === true || namespace === "*" || namespace === "&") {
       this._namespace = namespace;
       if (this.raws) {
         delete this.raws.namespace;

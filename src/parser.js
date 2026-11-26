@@ -359,6 +359,17 @@ export default class Parser {
           ) {
             return this.expected("attribute operator", token[TOKEN.START_POS]);
           }
+          if (
+            node.operator &&
+            content === "~" &&
+            !(next && next[TOKEN.TYPE] === tokens.equals)
+          ) {
+            // A bare `~` after the operator, such as in `[class=~'x']`,
+            // cannot form an operator and must not be silently dropped.
+            return this.error('Unexpected "~" found; an operator was already defined.', {
+              index: token[TOKEN.START_POS],
+            });
+          }
           if (content === "~" && next && next[TOKEN.TYPE] === tokens.equals) {
             node.operator = content;
             lastAdded = "operator";
@@ -469,6 +480,14 @@ export default class Parser {
                 index: token[TOKEN.START_POS],
               },
             );
+          }
+          if (node.value !== undefined) {
+            // A quoted value must not silently overwrite an unquoted value
+            // that was already read, such as the `XXX` in
+            // `[class=XXX'@{foo}-']`.
+            return this.error('Unexpected string found; an attribute value was already defined.', {
+              index: token[TOKEN.START_POS],
+            });
           }
           let { unescaped, quoteMark } = unescapeValue(content);
           node.value = unescaped;

@@ -93,3 +93,17 @@ throws(
   ".foo !optional",
   "Unexpected '!'. Escaping special characters with \\ may help.",
 );
+
+// Content between an attribute operator and a quoted value used to be
+// silently dropped: `[class=XXX'@{foo}-']` parsed as `[class='@{foo}-']`
+// and `[class=~'@{foo}-']` parsed as `[class='@{foo}-']`.
+throws(
+  "unquoted value before a quoted value",
+  "[class=XXX'@{foo}-']",
+  "Unexpected string found; an attribute value was already defined.",
+);
+throws(
+  "bare tilde before a quoted value",
+  "[class=~'@{foo}-']",
+  'Unexpected "~" found; an operator was already defined.',
+);

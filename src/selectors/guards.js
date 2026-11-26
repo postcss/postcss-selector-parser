@@ -29,7 +29,7 @@ const IS_TYPE = {
 };
 
 export function isNode(node) {
-  return typeof node === "object" && IS_TYPE[node.type];
+  return typeof node === "object" && node !== null && IS_TYPE[node.type] === true;
 }
 
 function isNodeType(type, node) {

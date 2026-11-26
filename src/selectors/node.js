@@ -189,7 +189,9 @@ export default class Node {
   }
 
   toString() {
-    return [this.rawSpaceBefore, this.valueToString(), this.rawSpaceAfter].join("");
+    // All three parts are strings, so plain concatenation gives the same result
+    // as the array `join` without allocating an array per node.
+    return this.rawSpaceBefore + this.valueToString() + this.rawSpaceAfter;
   }
 
   // Internal recursion entry point used by Container serialization. Leaf

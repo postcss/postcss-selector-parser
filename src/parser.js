@@ -1154,6 +1154,9 @@ export default class Parser {
       const sourceIndex = current[TOKEN.START_POS] + indices[i];
       const source = getSource(current[1], current[2] + ind, current[3], current[2] + (index - 1));
       if (classIndexes.has(ind)) {
+        if (value.length === 1) {
+          return this.expected("class name", sourceIndex);
+        }
         let classNameOpts = {
           value: value.slice(1),
           source,
@@ -1161,6 +1164,9 @@ export default class Parser {
         };
         node = new ClassName(unescapeProp(classNameOpts, "value"));
       } else if (idIndexes.has(ind)) {
+        if (value.length === 1) {
+          return this.expected("id", sourceIndex);
+        }
         let idOpts = {
           value: value.slice(1),
           source,

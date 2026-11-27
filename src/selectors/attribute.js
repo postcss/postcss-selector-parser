@@ -145,7 +145,10 @@ export default class Attribute extends Namespace {
     let numDoubleQuotes = v.replace(/[^"]/g, "").length;
     if (numSingleQuotes + numDoubleQuotes === 0) {
       let escaped = cssesc(v, { isIdentifier: true });
-      if (escaped === v) {
+      // An empty string and a lone hyphen come back from cssesc unchanged, but
+      // neither is an identifier, so they can only be written as a string.
+      let needsString = v === "" || v === "-";
+      if (escaped === v && !needsString) {
         return Attribute.NO_QUOTE;
       } else {
         let pref = this.preferredQuoteMark(options);
@@ -154,7 +157,7 @@ export default class Attribute extends Namespace {
           let quote = this.quoteMark || options.quoteMark || Attribute.DOUBLE_QUOTE;
           let opts = CSSESC_QUOTE_OPTIONS[quote];
           let quoteValue = cssesc(v, opts);
-          if (quoteValue.length < escaped.length) {
+          if (needsString || quoteValue.length < escaped.length) {
             return quote;
           }
         }

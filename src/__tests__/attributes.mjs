@@ -661,6 +661,49 @@ testDeprecation("smart quotes", "[data-foo=bar]", (t, tree) => {
   t.deepEqual(attr.toString(), "[data-foo='smart with \"double quotes\"']");
 });
 
+// An empty string and a lone hyphen escape to themselves as identifiers, but
+// neither is a valid identifier, so leaving them unquoted wrote `[data-foo=]`
+// (a syntax error for this parser) and `[data-foo=-]` (rejected by browsers).
+for (const [value, quoteMark, expected] of [
+  ["", undefined, '[data-foo=""]'],
+  ["", "'", "[data-foo='']"],
+  ["", null, '[data-foo=""]'],
+  ["-", undefined, '[data-foo="-"]'],
+  ["-", "'", "[data-foo='-']"],
+  ["-", null, '[data-foo="-"]'],
+]) {
+  test(
+    `smart quotes quote ${JSON.stringify(value)} with quoteMark ${quoteMark}`,
+    "[data-foo=bar]",
+    (t, tree) => {
+      let attr = tree.nodes[0].nodes[0];
+      attr.setValue(value, { smart: true, quoteMark });
+      t.deepEqual(attr.toString(), expected);
+      t.deepEqual(attr.quoteMark, expected.charAt(10));
+      t.deepEqual(attr.getQuotedValue({ smart: true, quoteMark }), expected.slice(10, -1));
+      t.deepEqual(parser().astSync(tree.toString()).nodes[0].nodes[0].value, value);
+    },
+  );
+}
+
+test(
+  "smart quotes keep the current quote mark of an empty value",
+  "[data-foo='bar']",
+  (t, tree) => {
+    let attr = tree.nodes[0].nodes[0];
+    attr.setValue("", { smart: true, preferCurrentQuoteMark: true, quoteMark: null });
+    t.deepEqual(attr.toString(), "[data-foo='']");
+  },
+);
+
+test("smart quotes still leave identifiers unquoted", "[data-foo='bar']", (t, tree) => {
+  let attr = tree.nodes[0].nodes[0];
+  for (const value of ["a", "-a", "--", "_", "é"]) {
+    attr.setValue(value, { smart: true });
+    t.deepEqual(attr.quoteMark, null, value);
+  }
+});
+
 testDeprecation("set Attribute#quoteMark", "[data-foo=bar]", (t, tree) => {
   let attr = tree.nodes[0].nodes[0];
   attr.quoteMark = '"';
@@ -677,17 +720,13 @@ testDeprecation("set Attribute#quoteMark", "[data-foo=bar]", (t, tree) => {
 
 // A trailing `* $ ^ ~ |` immediately before the closing bracket used to look
 // ahead past the end of the token stream and throw a raw TypeError. None of
-// them is a valid operator without a following `=`, so the token is dropped,
-// which matches how `[href=]` already drops an operator that has no value.
-// Asserted with `ava` rather than `test` because the output is intentionally
-// not a round-trip, and pinning it with `test` would assert the lossy form is
-// correct.
+// them is a valid operator without a following `=`, so report a syntax error
+// rather than dropping the token and silently changing the selector.
 for (const trailing of ["*", "$", "^", "~", "|"]) {
   ava(`attribute name followed by a trailing ${trailing}`, (t) => {
-    const tree = parser().astSync(`[href${trailing}]`);
-    const attr = tree.nodes[0].nodes[0];
-    t.deepEqual(attr.attribute, "href");
-    t.deepEqual(attr.operator, undefined);
-    t.deepEqual(tree.toString(), "[href]");
+    const error = t.throws(() => parser().astSync(`[href${trailing}]`), {
+      message: "Expected an attribute operator.",
+    });
+    t.is(error.name, "Error");
   });
 }

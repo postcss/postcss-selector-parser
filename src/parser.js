@@ -684,7 +684,10 @@ export default class Parser {
 
   combinator() {
     if (this.content() === "|") {
-      return this.namespace();
+      // A word or `*` right before this `|` was already consumed by whatever
+      // came before, such as the name of a pseudo in `:hover|a`, so it cannot be
+      // the prefix. Only a skipped `&` can still be one.
+      return this.namespace(false);
     }
     // We need to decide between a space that's a descendant combinator and meaningless whitespace at the end of a selector.
     let nextSigTokenPos = this.locateNextMeaningfulToken(this.position);
@@ -866,15 +869,18 @@ export default class Parser {
     return this.error(`Unexpected '|'.`, this.currToken[TOKEN.START_POS]);
   }
 
-  namespace() {
+  /**
+   * @param {boolean} [prefixed] whether the token before the `|` is still
+   *   unconsumed, as it is when `word()` or `universal()` sees the `|` next.
+   */
+  namespace(prefixed = true) {
     const prev = this.prevToken;
     // Only treat the previous token as a namespace prefix when it can actually
     // be one (a type/word or the universal `*`). A comment, comma, combinator
     // or whitespace before `|` means an empty namespace, not a prefix.
     const before =
       prev &&
-      (prev[TOKEN.TYPE] === tokens.word ||
-        prev[TOKEN.TYPE] === tokens.asterisk ||
+      ((prefixed && (prev[TOKEN.TYPE] === tokens.word || prev[TOKEN.TYPE] === tokens.asterisk)) ||
         prev[TOKEN.TYPE] === tokens.ampersand)
         ? this.content(prev)
         : true;
@@ -929,6 +935,10 @@ export default class Parser {
     let unbalanced = 1;
     let openingToken = this.currToken;
     this.position++;
+    if (!this.currToken) {
+      // Nothing follows the `(`, so there is no token to start a node at.
+      return this.expected("closing parenthesis", openingToken[TOKEN.START_POS]);
+    }
     if (last && last.type === types.PSEUDO) {
       const selector = new Selector({
         source: { start: tokenStart(this.tokens[this.position]) },

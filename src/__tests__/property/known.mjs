@@ -45,10 +45,4 @@ export const KNOWN = [
     note: "an attribute namespace of `&` prints as `[&|x]`, which does not parse",
     match: (f) => f.case === "attribute namespace setter" && f.value === "&",
   },
-  {
-    property: "invalid input throws a parser error",
-    tracking: "not filed yet",
-    note: "an unclosed `(` at the start or after a pseudo throws a TypeError",
-    match: (f) => f.error.startsWith("TypeError") && f.input.includes("("),
-  },
 ];

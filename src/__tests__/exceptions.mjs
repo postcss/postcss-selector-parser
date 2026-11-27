@@ -7,6 +7,13 @@ throws("unclosed pseudo element", "button::");
 throws("unclosed pseudo class", "a:");
 throws("unclosed attribute selector", '[name="james"][href');
 
+for (const selector of [".", "a.", ".a..b", "#a.", ":not(.)", "a > ."]) {
+  throws(`empty class name in ${selector}`, selector, "Expected a class name.");
+}
+for (const selector of ["#", "a#", "#a#", ".a#", ":is(#)", "a, #"]) {
+  throws(`empty ID in ${selector}`, selector, "Expected an id.");
+}
+
 // Constructs left open at end of input. These threw a raw TypeError before
 // `attribute`, `namespace` and `parentheses` guarded against running out of
 // tokens. Asserted by message rather than by type: the default
@@ -85,4 +92,18 @@ throws(
   "bang in selector",
   ".foo !optional",
   "Unexpected '!'. Escaping special characters with \\ may help.",
+);
+
+// Content between an attribute operator and a quoted value used to be
+// silently dropped: `[class=XXX'@{foo}-']` parsed as `[class='@{foo}-']`
+// and `[class=~'@{foo}-']` parsed as `[class='@{foo}-']`.
+throws(
+  "unquoted value before a quoted value",
+  "[class=XXX'@{foo}-']",
+  "Unexpected string found; an attribute value was already defined.",
+);
+throws(
+  "bare tilde before a quoted value",
+  "[class=~'@{foo}-']",
+  'Unexpected "~" found; an operator was already defined.',
 );

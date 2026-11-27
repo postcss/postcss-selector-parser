@@ -285,6 +285,9 @@ export default class Parser {
           }
           break;
         case tokens.asterisk:
+          if (node.attribute && !node.operator && !(next && next[TOKEN.TYPE] === tokens.equals)) {
+            return this.expected("attribute operator", token[TOKEN.START_POS]);
+          }
           if (next && next[TOKEN.TYPE] === tokens.equals) {
             node.operator = content;
             lastAdded = "operator";
@@ -342,10 +345,31 @@ export default class Parser {
           if (next && next[TOKEN.TYPE] === tokens.equals) {
             node.operator = content;
             lastAdded = "operator";
+          } else if (node.attribute && !node.operator) {
+            return this.expected("attribute operator", token[TOKEN.START_POS]);
           }
           spaceAfterMeaningfulToken = false;
           break;
         case tokens.combinator:
+          if (
+            node.attribute &&
+            !node.operator &&
+            (content === "~" || content === "|") &&
+            !(next && next[TOKEN.TYPE] === tokens.equals)
+          ) {
+            return this.expected("attribute operator", token[TOKEN.START_POS]);
+          }
+          if (
+            node.operator &&
+            content === "~" &&
+            !(next && next[TOKEN.TYPE] === tokens.equals)
+          ) {
+            // A bare `~` after the operator, such as in `[class=~'x']`,
+            // cannot form an operator and must not be silently dropped.
+            return this.error('Unexpected "~" found; an operator was already defined.', {
+              index: token[TOKEN.START_POS],
+            });
+          }
           if (content === "~" && next && next[TOKEN.TYPE] === tokens.equals) {
             node.operator = content;
             lastAdded = "operator";
@@ -457,6 +481,14 @@ export default class Parser {
               },
             );
           }
+          if (node.value !== undefined) {
+            // A quoted value must not silently overwrite an unquoted value
+            // that was already read, such as the `XXX` in
+            // `[class=XXX'@{foo}-']`.
+            return this.error('Unexpected string found; an attribute value was already defined.', {
+              index: token[TOKEN.START_POS],
+            });
+          }
           let { unescaped, quoteMark } = unescapeValue(content);
           node.value = unescaped;
           node.quoteMark = quoteMark;
@@ -515,6 +547,9 @@ export default class Parser {
       // instead. Points at the opening bracket, which is where the author
       // needs to look.
       return this.expected("attribute", startingToken[TOKEN.START_POS]);
+    }
+    if (node.operator && node.value === undefined) {
+      return this.expected("attribute value", this.currToken[TOKEN.START_POS]);
     }
     unescapeProp(node, "attribute");
     unescapeProp(node, "namespace");
@@ -1144,18 +1179,19 @@ export default class Parser {
       const sourceIndex = current[TOKEN.START_POS] + indices[i];
       const source = getSource(current[1], current[2] + ind, current[3], current[2] + (index - 1));
       if (classIndexes.has(ind)) {
+        if (value.length === 1) {
+          return this.expected("class name", sourceIndex);
+        }
         let classNameOpts = {
           value: value.slice(1),
           source,
           sourceIndex,
         };
         node = new ClassName(unescapeProp(classNameOpts, "value"));
-        // Preserve the parsed spelling, including non-standard syntax, rather
-        // than the automatic escaping used for API-created class names.
-        if (!classNameOpts.raws) {
-          delete node.raws;
-        }
       } else if (idIndexes.has(ind)) {
+        if (value.length === 1) {
+          return this.expected("id", sourceIndex);
+        }
         let idOpts = {
           value: value.slice(1),
           source,

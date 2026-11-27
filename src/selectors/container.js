@@ -339,8 +339,17 @@ export default class Container extends Node {
   }
 
   _stringify(options, depth, max) {
-    const str = this.map((child) => this._stringifyChild(child, options, depth, max)).join("");
-    return [this.rawSpaceBefore, str, this.rawSpaceAfter].join("");
+    // Build the string in one pass instead of mapping to an array and joining.
+    // `join` turned a null or undefined part into "", so that is kept here.
+    const nodes = this.nodes;
+    let str = "";
+    for (let i = 0; i < nodes.length; i++) {
+      const part = this._stringifyChild(nodes[i], options, depth, max);
+      if (part !== undefined && part !== null) {
+        str += part;
+      }
+    }
+    return this.rawSpaceBefore + str + this.rawSpaceAfter;
   }
 
   // Serialize a child node. Historically `toString` used `this.map(String)`,

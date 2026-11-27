@@ -83,7 +83,8 @@ export default class Processor {
       throw new Error("Selector processor returned a promise to a synchronous call.");
     }
     let string = undefined;
-    if (options.updateSelector && typeof rule !== "string") {
+    const merged = Object.assign({}, this.options, options);
+    if (merged.updateSelector && typeof rule !== "string") {
       string = root.toString(this._stringifyOptions(options));
       rule.selector = string;
     }

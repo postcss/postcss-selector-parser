@@ -353,10 +353,10 @@ declare namespace parser {
     function root(opts: ContainerOptions): Root;
     function isRoot(node: any): node is Root;
 
-    interface _Selector<S> extends Container<string, Diff<Node, S>> {
+    interface Selector extends Container<string, Node> {
         type: "selector";
+        nodes: Array<Diff<Node, Selector>>;
     }
-    type Selector = _Selector<Selector>;
     function selector(opts: ContainerOptions): Selector;
     function isSelector(node: any): node is Selector;
 

@@ -69,9 +69,14 @@ Arguments:
 * `props (object)`: The new node's properties.
 
 Notes:
-* Assigning to `value` escapes characters that aren't valid in an identifier
-  (`node.value = 'foo.bar'` stringifies as `.foo\.bar`). To assign a
-  pre-escaped value, use `node.setPropertyWithoutEscape('value', v)` instead.
+* The constructor writes `value` as given, so pass the escaped spelling:
+  `parser.className({value: 'foo\\.bar'})` stringifies as `.foo\.bar`. Code
+  that builds names with an escaping function (CSS Modules, for one) relies on
+  this.
+* Assigning to `value` after construction escapes characters that aren't valid
+  in an identifier (`node.value = 'foo.bar'` stringifies as `.foo\.bar`). To
+  assign a pre-escaped value, use `node.setPropertyWithoutEscape('value', v)`
+  instead.
 
 ### `parser.combinator([props])`
 
@@ -129,10 +134,12 @@ Arguments:
 * `props (object)`: The new node's properties.
 
 Notes:
-* Assigning to `value` escapes characters that aren't valid in an identifier
-  (`node.value = 'foo.bar'` stringifies as `#foo\.bar`), matching
-  `parser.className`. To assign a pre-escaped value, use
-  `node.setPropertyWithoutEscape('value', v)` instead.
+* `value` is written as given, both from the constructor and when assigned, so
+  pass the escaped spelling. Unlike `parser.className`, assigning to `value`
+  does not escape.
+* On an id parsed with an escape, assigning to `value` has no visible effect,
+  because the original spelling in `raws.value` keeps being printed. Use
+  `node.setPropertyWithoutEscape('value', v)` to replace it.
 
 ### `parser.nesting([props])`
 

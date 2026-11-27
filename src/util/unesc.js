@@ -44,7 +44,7 @@ function gobbleHex(str) {
 
 const CONTAINS_ESCAPE = /\\/;
 
-export default function unesc(str) {
+export default function unesc(str, inString = false) {
   let needToProcess = CONTAINS_ESCAPE.test(str);
   if (!needToProcess) {
     return str;
@@ -53,6 +53,12 @@ export default function unesc(str) {
 
   for (let i = 0; i < str.length; i++) {
     if (str[i] === "\\") {
+      const next = str[i + 1];
+      if (inString && (next === "\n" || next === "\r" || next === "\f")) {
+        // CSS string continuations contribute no character; CRLF is one newline.
+        i += next === "\r" && str[i + 2] === "\n" ? 2 : 1;
+        continue;
+      }
       const gobbled = gobbleHex(str.slice(i + 1, i + 9));
       if (gobbled !== undefined) {
         ret += gobbled[0];

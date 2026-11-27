@@ -333,3 +333,33 @@ test("pseudo with arguments spanning multiple lines", "h1:not(\n\t.one,\n\t.two\
   t.deepEqual(tree.nodes[0].nodes[1].nodes[1].nodes[0].source.end.column, 5, ".two end column");
   t.deepEqual(tree.nodes[0].nodes[1].nodes[1].nodes[0].sourceIndex, 16, ".two sourceIndex");
 });
+
+test("namespaced tag starts at its namespace", "a ns|b", (t, tree) => {
+  const node = tree.nodes[0].nodes[2];
+  t.deepEqual(node.sourceIndex, 2);
+  t.deepEqual(node.source.start.column, 3);
+  t.deepEqual(node.source.end.column, 6);
+});
+
+test("namespaced universal starts at its namespace", "*|*", (t, tree) => {
+  const node = tree.nodes[0].nodes[0];
+  t.deepEqual(node.sourceIndex, 0);
+  t.deepEqual(node.source.start.column, 1);
+  t.deepEqual(node.source.end.column, 3);
+});
+
+test("tag with an empty namespace starts at the pipe", "|b.c", (t, tree) => {
+  const [tag, cls] = tree.nodes[0].nodes;
+  t.deepEqual(tag.sourceIndex, 0);
+  t.deepEqual(tag.source.start.column, 1);
+  t.deepEqual(tag.source.end.column, 2);
+  t.deepEqual(cls.sourceIndex, 2);
+  t.deepEqual(cls.source.start.column, 3);
+});
+
+test("namespaced tag on a later line starts at its namespace", "a,\n  ns|b", (t, tree) => {
+  const node = tree.nodes[1].nodes[0];
+  t.deepEqual(node.sourceIndex, 5);
+  t.deepEqual(node.source.start.line, 2);
+  t.deepEqual(node.source.start.column, 3);
+});

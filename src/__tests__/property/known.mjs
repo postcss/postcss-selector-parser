@@ -2,16 +2,9 @@
 // tracks it and matches only the failures it explains, so anything new still
 // fails the run. Remove an entry when its fix lands; a stale entry is harmless
 // but hides nothing either, since it no longer matches.
-const PR = "https://github.com/postcss/postcss-selector-parser/pull/";
 const ISSUE = "https://github.com/postcss/postcss-selector-parser/issues/";
 
 export const KNOWN = [
-  {
-    property: "sourceIndex points at the node",
-    tracking: `${PR}359`,
-    note: "a namespaced tag or universal starts at its name instead of its namespace",
-    match: (f) => (f.type === "tag" || f.type === "universal") && f.text.includes("|"),
-  },
   {
     property: "sourceIndex points at the node",
     tracking: `${ISSUE}357`,

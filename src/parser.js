@@ -760,7 +760,7 @@ export default class Parser {
       } else if (space[0] === " " && rawSpace[0] === " ") {
         spaces.after = space.slice(1);
         raws.spaces.after = rawSpace.slice(1);
-      } else {
+      } else if (rawSpace) {
         raws.value = rawSpace;
       }
       node = new Combinator({

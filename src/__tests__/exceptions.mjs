@@ -35,6 +35,15 @@ throws(
   "a(",
   "Expected a closing parenthesis.",
 );
+// A `(` with nothing after it, at the start or right after a pseudo, still
+// threw a raw TypeError: there was no token to start the new node at.
+for (const selector of ["(", ":not(", "a:hover(", "a, ("]) {
+  throws(
+    `unclosed parenthesis with nothing after it in ${selector}`,
+    selector,
+    "Expected a closing parenthesis.",
+  );
+}
 
 // An attribute selector whose last token before `]` is one of `* $ ^ ~ |`.
 // The `attribute` token loop looked ahead to `next` without checking it

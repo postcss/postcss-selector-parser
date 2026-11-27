@@ -918,6 +918,10 @@ export default class Parser {
     let unbalanced = 1;
     let openingToken = this.currToken;
     this.position++;
+    if (!this.currToken) {
+      // Nothing follows the `(`, so there is no token to start a node at.
+      return this.expected("closing parenthesis", openingToken[TOKEN.START_POS]);
+    }
     if (last && last.type === types.PSEUDO) {
       const selector = new Selector({
         source: { start: tokenStart(this.tokens[this.position]) },

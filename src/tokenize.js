@@ -137,6 +137,7 @@ export default function tokenize(input) {
 
   while (start < length) {
     code = css.charCodeAt(start);
+    const startLine = line;
 
     if (code === t.newline) {
       offset = start;
@@ -226,9 +227,14 @@ export default function tokenize(input) {
         } while (escaped);
 
         tokenType = t.str;
-        endLine = line;
-        endColumn = start - offset;
         end = next + 1;
+        content = css.slice(start, end);
+        lines = content.split("\n");
+        last = lines.length - 1;
+        nextOffset = last > 0 ? next - lines[last].length : offset;
+        line += last;
+        endLine = line;
+        endColumn = next - nextOffset;
         break;
 
       default:
@@ -274,7 +280,7 @@ export default function tokenize(input) {
     // Ensure that the token structure remains consistent
     tokens.push([
       tokenType, // [0] Token type
-      line, // [1] Starting line
+      tokenType === t.comment || tokenType === t.str ? startLine : line, // [1] Starting line
       start - offset, // [2] Starting column
       endLine, // [3] Ending line
       endColumn, // [4] Ending column

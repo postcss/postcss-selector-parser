@@ -333,3 +333,70 @@ test("pseudo with arguments spanning multiple lines", "h1:not(\n\t.one,\n\t.two\
   t.deepEqual(tree.nodes[0].nodes[1].nodes[1].nodes[0].source.end.column, 5, ".two end column");
   t.deepEqual(tree.nodes[0].nodes[1].nodes[1].nodes[0].sourceIndex, 16, ".two sourceIndex");
 });
+
+test(
+  "source offsets for multiline and nested selectors",
+  "h1:not(\n\t.one,\n\t.two\n)",
+  (t, tree) => {
+    const [selector] = tree.nodes;
+    const [, pseudo] = selector.nodes;
+    t.deepEqual([tree.source.start.offset, tree.source.end.offset], [0, 21]);
+    t.deepEqual([selector.source.start.offset, selector.source.end.offset], [0, 21]);
+    t.deepEqual([pseudo.source.start.offset, pseudo.source.end.offset], [2, 21]);
+    t.deepEqual([pseudo.nodes[0].source.start.offset, pseudo.nodes[0].source.end.offset], [7, 12]);
+    t.deepEqual(
+      [pseudo.nodes[0].nodes[0].source.start.offset, pseudo.nodes[0].nodes[0].source.end.offset],
+      [9, 12],
+    );
+    t.deepEqual([pseudo.nodes[1].source.start.offset, pseudo.nodes[1].source.end.offset], [14, 21]);
+    t.deepEqual(
+      [pseudo.nodes[1].nodes[0].source.start.offset, pseudo.nodes[1].nodes[0].source.end.offset],
+      [16, 19],
+    );
+  },
+);
+
+test("source offsets for CRLF and split words", "#one,\r\n#two,\r\ndiv#id.class", (t, tree) => {
+  t.deepEqual(
+    tree.nodes.map((node) => node.source.end.offset),
+    [3, 10, 25],
+  );
+  t.deepEqual(
+    tree.nodes.map((node) => node.nodes[0].source.start.offset),
+    [0, 7, 14],
+  );
+  t.deepEqual(
+    tree.nodes[2].nodes.map((node) => [node.source.start.offset, node.source.end.offset]),
+    [
+      [14, 16],
+      [17, 19],
+      [20, 25],
+    ],
+  );
+});
+
+test(
+  "source offsets for attributes, named combinators, and empty pseudos",
+  "[foo=bar] /deep/ :not()",
+  (t, tree) => {
+    const [attr, comb, pseudo] = tree.nodes[0].nodes;
+    t.deepEqual([attr.source.start.offset, attr.source.end.offset], [0, 8]);
+    t.deepEqual([comb.source.start.offset, comb.source.end.offset], [10, 15]);
+    t.deepEqual([pseudo.source.start.offset, pseudo.source.end.offset], [17, 22]);
+    t.deepEqual([pseudo.nodes[0].source.start.offset, pseudo.nodes[0].source.end.offset], [22, 22]);
+  },
+);
+
+test("source offsets span words joined from multiple tokens", "a=b.class", (t, tree) => {
+  t.deepEqual(
+    tree.nodes[0].nodes.map((node) => [node.source.start.offset, node.source.end.offset]),
+    [
+      [0, 2],
+      [3, 8],
+    ],
+  );
+  t.deepEqual(
+    tree.nodes[0].nodes.map((node) => node.sourceIndex),
+    [0, 3],
+  );
+});
